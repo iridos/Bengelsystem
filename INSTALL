@@ -16,6 +16,7 @@ cd ..
 wget https://github.com/DHTMLX/scheduler/archive/refs/tags/v6.0.5.tar.gz
 tar -xvf v6.0.5.tar.gz
 ln -s  scheduler-6.0.5 scheduler
+rm v6.0.5.tar.gz
 
 Example for debian: 
 webserver:
