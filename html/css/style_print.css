@@ -1,0 +1,19 @@
+@import "style_common.css";
+
+html, body {
+  font-size: 12;
+}
+
+
+button { 
+  font-size: 0px; 
+  }
+
+table, th, td {
+  border: 0px;
+
+}
+
+nav, footer {
+  display: none;
+}
