@@ -6,6 +6,17 @@ Install a "LAMP" server via your distribution:
 * sql database (mariadb)
 * email server/ability to send emails (optional)
 
+You also need: 
+ * jquery
+ * dhtmlxscheduler
+
+cd html/js
+wget https://code.jquery.com/jquery-3.7.1.min.js
+cd ..
+wget https://github.com/DHTMLX/scheduler/archive/refs/tags/v6.0.5.tar.gz
+tar -xvf v6.0.5.tar.gz
+ln -s  scheduler-6.0.5 scheduler
+
 Example for debian: 
 webserver:
  apt-get install apache2 openssl python3-certbot-apache php-mysql php-json
@@ -22,11 +33,4 @@ TODO
 edit konfiguration.php and adapt to your installation
 
 login with admin user: admin@admin.de pw: 4024ae463a4ef9ff455705afe54f83c3
-
-
-
-
-
-
-
 

@@ -4,9 +4,9 @@
   <title> Helferdienste  </title>
   <meta charset="utf-8">
   <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
-  <script src="../scheduler/codebase/dhtmlxscheduler.js"></script>
-  <!-- link href="../scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
-  <link href="../scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8">
+  <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
+  <!-- link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
+  <link href="scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8">
   <link rel="stylesheet" href="../scheduler/samples/common/controls_styles.css">
     <style>
 
