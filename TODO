@@ -4,12 +4,9 @@
 * css und ein js Verzeichnis
 * id=customers muss zu einer tabellenklasse werden
 * <!doctype html> <meta charset="utf-8"> auf jeder Seite, evtl <html lang="de">
-* html encoding umlaute?
+* html encoding umlaute? oder entfernen und alles utf-8
 * Seiten-Titel statt "Drop am See" Veranstaltungsname in konfiguration.php
-* Info.php: weiterleiten-url in konfiguration.php oder eigene Seite erstellen. Info.php existiert weiter, hat aber nur einen redirect. 
-* Passwort und user etc nicht direkt in konfiguration.php im html zweig sondern über require ausserhalb des html Zweigs
 * banner-text in konfiguration.php
-* 
 
 
 Langfristig
