@@ -15,127 +15,117 @@
 
 SESSION_START();
 
-require_once ('konfiguration.php');
+require_once('konfiguration.php');
 //require_once ('SQL.php');
 include 'SQL.php';
 
 
 
-$db_link = mysqli_connect (
-                     MYSQL_HOST, 
-                     MYSQL_BENUTZER, 
-                     MYSQL_KENNWORT, 
-                     MYSQL_DATENBANK
-                    );
+$db_link = mysqli_connect(
+    MYSQL_HOST,
+    MYSQL_BENUTZER,
+    MYSQL_KENNWORT,
+    MYSQL_DATENBANK
+);
 
-                    
-                  
+
+
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-if(isset($_POST['CloseInfo']))
-{
-	UNSET($InfoMeineSchichtID);
-	UNSET($InfoAlleSchichtID);
+if(isset($_POST['CloseInfo'])) {
+    unset($InfoMeineSchichtID);
+    unset($InfoAlleSchichtID);
 }
-if(isset($_POST['InfoMeineSchichtID']))
-{
-	$InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
-	UNSET($InfoAlleSchichtID);
-	//echo "<b>". $SchichtID . "</b><br>";
-	
-    $zeile = DetailSchicht($db_link,$InfoMeineSchichtID);
+if(isset($_POST['InfoMeineSchichtID'])) {
+    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
+    unset($InfoAlleSchichtID);
+    //echo "<b>". $SchichtID . "</b><br>";
 
-	$Was = $zeile['Was'];
-	$Wo = $zeile['Wo'];
+    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+
+    $Was = $zeile['Was'];
+    $Wo = $zeile['Wo'];
     $Dauer = $zeile['Dauer'];
     $Leiter = $zeile['Name'];
-	$LeiterHandy =  $zeile['Handy'];
-	$LeiterEmail =  $zeile['Email'];
-	$Info = $zeile['Info'];
+    $LeiterHandy =  $zeile['Handy'];
+    $LeiterEmail =  $zeile['Email'];
+    $Info = $zeile['Info'];
 
 }
 
 
-if(isset($_GET['InfoAlleSchichtID']))
-{
-	$InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
-	UNSET($InfoMeineSchichtID);
-	//echo "<b>". $SchichtID . "</b><br>";
-	
-    $zeile = DetailSchicht($db_link,$InfoAlleSchichtID);
-	
-    $Was = $zeile['Was'];
-	$Wo = $zeile['Wo'];
-    $Dauer=$zeile['Dauer'];
-	$Leiter = $zeile['Name'];
-	$LeiterHandy =  $zeile['Handy'];
-	$LeiterEmail =  $zeile['Email'];
-	$Info = $zeile['Info'];
-		
-	
-	
-	// Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link,$InfoAlleSchichtID);
+if(isset($_GET['InfoAlleSchichtID'])) {
+    $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
+    unset($InfoMeineSchichtID);
+    //echo "<b>". $SchichtID . "</b><br>";
 
-	
-	$x=0;
-	
-	while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-	{
-		$MitHelferID[$x] = $zeile['HelferID'];
-		$MitHelfer[$x] = $zeile['Name'];
-		$MitHelferHandy[$x]= $zeile['Handy'];
-		$x++;
-	}
-	
-	
+    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+
+    $Was = $zeile['Was'];
+    $Wo = $zeile['Wo'];
+    $Dauer = $zeile['Dauer'];
+    $Leiter = $zeile['Name'];
+    $LeiterHandy =  $zeile['Handy'];
+    $LeiterEmail =  $zeile['Email'];
+    $Info = $zeile['Info'];
+
+
+
+    // Beteiligte Helfer Holen
+    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+
+
+    $x = 0;
+
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $MitHelferID[$x] = $zeile['HelferID'];
+        $MitHelfer[$x] = $zeile['Name'];
+        $MitHelferHandy[$x] = $zeile['Handy'];
+        $x++;
+    }
+
+
 }
 
 
 /// Logout
 ////////////////////////////////////////////////////////
-if(isset($_POST['logout']))
-{
-		unset($_SESSION["HelferID"]);
-		//$_POST['login'] = 1;
-} 
+if(isset($_POST['logout'])) {
+    unset($_SESSION["HelferID"]);
+    //$_POST['login'] = 1;
+}
 
 /// Login
 ////////////////////////////////////////////////////////
-if(isset($_POST['login'])) 
-{
-	$messages = [];
-	// Eingaben überprüfen:
-	//if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-	//  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-	//}
-	
-	$HelferName = $_POST['helfer-name'];
-	$HelferEmail = $_POST['helfer-email'];
-	$HelferPasswort = $_POST['helfer-passwort']; 
+if(isset($_POST['login'])) {
+    $messages = [];
+    // Eingaben überprüfen:
+    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+    //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+    //}
 
-	if(empty($messages)) 
-	{
-		HelferLogin($db_link,$HelferEmail,$HelferPasswort, 0 );
-	} 
-	else 
-	{
-		// Fehlermeldungen ausgeben:
-		echo '<div class="error"><ul>';
-		foreach($messages as $message) {
-		echo '<li>'.htmlspecialchars($message).'</li>';
-		}
-		echo '</ul></div>';
-	}
-	
+    $HelferName = $_POST['helfer-name'];
+    $HelferEmail = $_POST['helfer-email'];
+    $HelferPasswort = $_POST['helfer-passwort'];
+
+    if(empty($messages)) {
+        HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+    } else {
+        // Fehlermeldungen ausgeben:
+        echo '<div class="error"><ul>';
+        foreach($messages as $message) {
+            echo '<li>'.htmlspecialchars($message).'</li>';
+        }
+        echo '</ul></div>';
+    }
+
 }
 
 
 
-if(!isset($_SESSION["HelferID"]))
-{
+if(!isset($_SESSION["HelferID"])) {
 
-?>
+    ?>
 <form method="post" action="#Info">
 
   <fieldset>
@@ -144,12 +134,12 @@ if(!isset($_SESSION["HelferID"]))
     <table border="0" style="border: 0px solid black;">
             <tr> 	
               <td style="border: 0px solid black;">Email</td></tr><tr><td style="border: 0px solid black;">
-              <input name="helfer-email" type="text" value="<?=htmlspecialchars($HelferEmail??'')?>" required>
+              <input name="helfer-email" type="text" value="<?=htmlspecialchars($HelferEmail ?? '')?>" required>
               </td>
             <tr>
             <tr> 	
               <td style="border: 0px solid black;">Passwort</td></tr><tr><td style="border: 0px solid black;">
-              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferHandy??'')?>" required>
+              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferHandy ?? '')?>" required>
               </td>
             <tr>
 	</table>
@@ -162,7 +152,7 @@ if(!isset($_SESSION["HelferID"]))
 
  </form> 
 <?php
- exit;	
+     exit;
 }
 
 
@@ -170,13 +160,12 @@ if(!isset($_SESSION["HelferID"]))
 $HelferID = $_SESSION["HelferID"];
 $AdminID = $_SESSION["AdminID"];
 
-if(isset($_POST['HelferID']))
-{
-	$HelferID = $_POST['HelferID'];
+if(isset($_POST['HelferID'])) {
+    $HelferID = $_POST['HelferID'];
 }
- if(isset($_POST['ShowHelfer'])) {
-	 $HelferID=$_POST['HelperSearch'];
- }
+if(isset($_POST['ShowHelfer'])) {
+    $HelferID = $_POST['HelperSearch'];
+}
 
 $_SESSION["HelferID"] = $HelferID;
 
@@ -195,35 +184,35 @@ $_SESSION["HelferID"] = $HelferID;
 
 /// Schicht Löschen
 ////////////////////////////////////////////////////////
- 
- if(isset($_POST['Del'])) {
-	
-  $messages = [];
-	
-  $EinzelSchichtID = $_POST['Del'];	
 
-  
-  // Eingaben überprüfen:
+if(isset($_POST['Del'])) {
 
-  //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-  //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-  //}
-  
-  
+    $messages = [];
 
-  if(empty($messages)) {
+    $EinzelSchichtID = $_POST['Del'];
 
-    $db_erg = HelferVonSchichtLoeschen($db_link,$HelferID,$EinzelSchichtID);
 
-  } else {
-    // Fehlermeldungen ausgeben:
-    echo '<div class="error"><ul>';
-    foreach($messages as $message) {
-      echo '<li>'.htmlspecialchars($message).'</li>';
+    // Eingaben überprüfen:
+
+    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+    //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+    //}
+
+
+
+    if(empty($messages)) {
+
+        $db_erg = HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID);
+
+    } else {
+        // Fehlermeldungen ausgeben:
+        echo '<div class="error"><ul>';
+        foreach($messages as $message) {
+            echo '<li>'.htmlspecialchars($message).'</li>';
+        }
+        echo '</ul></div>';
     }
-    echo '</ul></div>';
-  }
-   
+
 }
 
 
@@ -243,40 +232,36 @@ $_SESSION["HelferID"] = $HelferID;
 // Neu Schicht fuer Helfer Eintragen
 ///////////////////////////////////////////////////////////
 if(isset($_POST['sent'])) {
-	
-	$messages = [];
-	$SchichtId = $_POST['sent'];
-  
-	// Eingaben überprüfen:
 
-	//  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-	//    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-	//  }
+    $messages = [];
+    $SchichtId = $_POST['sent'];
+
+    // Eingaben überprüfen:
+
+    //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+    //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+    //  }
 
 
-	if(empty($messages)) 
-	{
-		// Helfer Schicht zuweisen
-		$db_erg = HelferSchichtZuweisen($db_link,$HelferID,$SchichtId);
+    if(empty($messages)) {
+        // Helfer Schicht zuweisen
+        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
 
-		// Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-		$HelferName = '';
-		$HelferEmail = '';
-		$HelferHandy = '';
-		//die('<div class="Helfer wurde angelegt.</div>');
-	} 
-	else 
-	{
-		// Fehlermeldungen ausgeben:
-		echo '<div class="error"><ul>';
-		foreach($messages as $message) 
-		{
-			echo '<li>'.htmlspecialchars($message).'</li>';
-		}
-    echo '</ul></div>';
-	}
-   
- 
+        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
+        $HelferName = '';
+        $HelferEmail = '';
+        $HelferHandy = '';
+        //die('<div class="Helfer wurde angelegt.</div>');
+    } else {
+        // Fehlermeldungen ausgeben:
+        echo '<div class="error"><ul>';
+        foreach($messages as $message) {
+            echo '<li>'.htmlspecialchars($message).'</li>';
+        }
+        echo '</ul></div>';
+    }
+
+
 }
 
 /// Ausgabe auf Deutsch umstellen
@@ -287,45 +272,43 @@ if(isset($_POST['sent'])) {
 /// Alle Schichten Des Helfers Anzeigen
 ////////////////////////////////////////////////////////
 
-	
-$db_erg = AlleSchichtenEinesHelfers($db_link,$HelferID);
 
-if ( ! $db_erg )
-{
-  echo "AlleSchichten des Helfes ungültige Abfrage";	
-  die('Ungültige Abfrage: ' . mysqli_error());
+$db_erg = AlleSchichtenEinesHelfers($db_link, $HelferID);
+
+if (! $db_erg) {
+    echo "AlleSchichten des Helfes ungültige Abfrage";
+    die('Ungültige Abfrage: ' . mysqli_error());
 }
 
-  $iSQLCount = mysqli_num_rows($db_erg);
-  //$iSQLCount = 3;
+$iSQLCount = mysqli_num_rows($db_erg);
+//$iSQLCount = 3;
 
 echo '<table id="customers">';
 
-  echo "<thead>";  
-  echo "<tr>";
-  echo "<th colspan=4>". "Meine Schichten (".$iSQLCount." Schichten)</th>";
-  echo "</tr><tr>";
-  echo "<th></th>"; 
-  echo "<th style='width:180px'>". "Von" . "</th>";
-  echo "<th style='width:180px'>". "Bis" . "</th>";
-  echo "<th style='width:90px'>". "Del" . "</th>";
-  echo "</tr>";
-  echo "</thead>";
+echo "<thead>";
+echo "<tr>";
+echo "<th colspan=4>". "Meine Schichten (".$iSQLCount." Schichten)</th>";
+echo "</tr><tr>";
+echo "<th></th>";
+echo "<th style='width:180px'>". "Von" . "</th>";
+echo "<th style='width:180px'>". "Bis" . "</th>";
+echo "<th style='width:90px'>". "Del" . "</th>";
+echo "</tr>";
+echo "</thead>";
 
 
 
-while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-{
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
-  //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
-  echo '<tr title="Details anzeigen" onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
+    //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
+    echo '<tr title="Details anzeigen" onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
     echo "<td>". $zeile['Was'] . "</td>";
     echo "<td>". $zeile['Ab'] . "</td>";
     echo "<td>". $zeile['Bis'] . "</td>";
     echo "<td>". "<button title='Schicht entfernen' name='Del' value='". $zeile['EinzelSchichtID'] ."'>-</button>" . "</td>";
-  echo "</tr>";
+    echo "</tr>";
 
-}  
+}
 echo "</table>";
 
 echo "<br><br>";
@@ -334,13 +317,13 @@ $iAlleSchichtenCount = AlleSchichtenCount($db_link);
 $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
 
 echo '<table id="customers" onclick="window.location.href=\'AlleSchichten.php\'">';
-    echo "<tr>";
-        echo "<th>".'<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">'. " Alle Schichten der Con (".$iBelegteSchichtenCount."/".$iAlleSchichtenCount.")</th>";
-    echo "</tr>";
+echo "<tr>";
+echo "<th>".'<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">'. " Alle Schichten der Con (".$iBelegteSchichtenCount."/".$iAlleSchichtenCount.")</th>";
+echo "</tr>";
 echo "</table>";
 
 
-mysqli_free_result( $db_erg );
+mysqli_free_result($db_erg);
 
 
 ?>

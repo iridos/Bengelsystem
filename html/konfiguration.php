@@ -2,7 +2,7 @@
 <?php
 // datenbank-defines extern
 require_once('/etc/helferdb_konfiguration.php');
-// die folgenden Zeilen ohne Kommentarzeichen nach /etc/helferdb_konfiguration.php 
+// die folgenden Zeilen ohne Kommentarzeichen nach /etc/helferdb_konfiguration.php
 // kopieren und an die eigene Datenbank anpassen
 #define( 'MYSQL_HOST', 'localhost' );
 #define( 'MYSQL_BENUTZER', 'benutzername_der_datenbank' );
@@ -15,7 +15,7 @@ require_once('/etc/helferdb_konfiguration.php');
 date_default_timezone_set('Europe/Berlin');
 setlocale(LC_TIME, "de_DE.UTF-8");
 $start_date = new DateTimeImmutable("2023-05-18");
-define ('TAGE_DAUER', 4);
+define('TAGE_DAUER', 4);
 
 // Geheimer Schlüssel für die Verschlüsselung von Tokens
 // das ist das Passwort, mit dem sich aus den Tokens auch wieder der Username/Email extrahieren lässt
@@ -35,10 +35,10 @@ define ('TAGE_DAUER', 4);
 
 // muss nicht angepasst werden // no changes needed
 // Zeitbereich: -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
-$ZeitBereichWerte=range(-1,TAGE_DAUER);
-array_push($ZeitBereichWerte,1000); 
-define('ZEITBEREICHWERTE', $ZeitBereichWerte); 
-$TageNamenDeutsch=array("So","Mo","Di","Mi","Do","Fr","Sa");
+$ZeitBereichWerte = range(-1, TAGE_DAUER);
+array_push($ZeitBereichWerte, 1000);
+define('ZEITBEREICHWERTE', $ZeitBereichWerte);
+$TageNamenDeutsch = array("So","Mo","Di","Mi","Do","Fr","Sa");
 
 //Kalender-Konfiguration
 $dsn = "mysql:host=localhost;dbname=".MYSQL_DATENBANK; # dsn fuer Kalender

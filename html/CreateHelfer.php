@@ -15,91 +15,87 @@
 SESSION_START();
 //$HelferID = $_SESSION["HelferId"];
 
-require_once ('konfiguration.php');
+require_once('konfiguration.php');
 include 'SQL.php';
 
-$db_link = mysqli_connect (
-                     MYSQL_HOST, 
-                     MYSQL_BENUTZER, 
-                     MYSQL_KENNWORT, 
-                     MYSQL_DATENBANK
-                    );
+$db_link = mysqli_connect(
+    MYSQL_HOST,
+    MYSQL_BENUTZER,
+    MYSQL_KENNWORT,
+    MYSQL_DATENBANK
+);
 
 if(isset($_POST['sent'])) {
-	
-  $messages = [];
 
-  $HelferName = $_POST['helfer-name'];
-  $HelferEmail = $_POST['helfer-email'];
-  $HelferHandy = $_POST['helfer-handy'];
-  $HelferLevel = $_POST['helfer-level'];
-  $HelferPasswort = $_POST['helfer-passwort'];;
-  $HelferPasswort2 = $_POST['helfer-passwort2'];;  
+    $messages = [];
 
-  //echo $HelferName;
-  //echo $HelferEmail;
-  //echo $HelferHandy;
-  
-  // Eingaben überprüfen:
+    $HelferName = $_POST['helfer-name'];
+    $HelferEmail = $_POST['helfer-email'];
+    $HelferHandy = $_POST['helfer-handy'];
+    $HelferLevel = $_POST['helfer-level'];
+    $HelferPasswort = $_POST['helfer-passwort'];
+    ;
+    $HelferPasswort2 = $_POST['helfer-passwort2'];
+    ;
 
-  //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-   // $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-  //}
-  
-  if(!filter_var($HelferEmail, FILTER_VALIDATE_EMAIL)) {
-    $messages[] = 'Bitte prüfen Sie die eingegebene E-Mail-Adresse.';
-  }  
-  
-  //if(!filter_var($HelferHandy, FILTER_VALIDATE_INT)) {
-  //  $messages[] = 'Bitte prüfen Sie die eingegebene Handynummer';
-  //}
-  
-  if($HelferPasswort!=$HelferPasswort2) 
-  {
-    $messages[] = 'Passwörter stimmen nicht überein';
-    $HelferPasswort ="";
-    $HelferPasswort2 = "";
-  }  
-  if(strlen($HelferPasswort)<8) 
-  {
-    $messages[] = 'Passwörter zu kurz';
-    $HelferPasswort ="";
-    $HelferPasswort2 = "";
-  } 
-  
-  
-  if(empty($messages)) 
-  {
-    $db_erg = CreateHelfer($db_link,$HelferName,$HelferEmail, $HelferHandy,$HelferPasswort,$HelferLevel);
-    if ( $db_erg )
-    {
-		//$insertID = mysql_insert_id();
-		//echo "InserId = ".$insertID;
+    //echo $HelferName;
+    //echo $HelferEmail;
+    //echo $HelferHandy;
 
-		// Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-		echo "Helfer mit Emailadresse ".$HelferEmail." Angelegt.<br><br>";
-		$HelferName = '';
-		$HelferEmail = '';
-		$HelferHandy = '';
-		$HelferPasswort = '';
-		$HelferPasswort2 = '';
-		
-    //die('<div class="Helfer wurde angelegt.</div>');
-	}
-	else
-	{
-		echo "Helfer konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse ".$HelferEmail." bereits.<br><br>";
-	}
-  } else {
-    // Fehlermeldungen ausgeben:
-    echo '<div class="error"><ul>';
-    foreach($messages as $message) {
-      echo '<li>'.htmlspecialchars($message).'</li>';
+    // Eingaben überprüfen:
+
+    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+    // $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+    //}
+
+    if(!filter_var($HelferEmail, FILTER_VALIDATE_EMAIL)) {
+        $messages[] = 'Bitte prüfen Sie die eingegebene E-Mail-Adresse.';
     }
-    echo '</ul></div>';
-  }
-   
- 
+
+    //if(!filter_var($HelferHandy, FILTER_VALIDATE_INT)) {
+    //  $messages[] = 'Bitte prüfen Sie die eingegebene Handynummer';
+    //}
+
+    if($HelferPasswort != $HelferPasswort2) {
+        $messages[] = 'Passwörter stimmen nicht überein';
+        $HelferPasswort = "";
+        $HelferPasswort2 = "";
+    }
+    if(strlen($HelferPasswort) < 8) {
+        $messages[] = 'Passwörter zu kurz';
+        $HelferPasswort = "";
+        $HelferPasswort2 = "";
+    }
+
+
+    if(empty($messages)) {
+        $db_erg = CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
+        if ($db_erg) {
+            //$insertID = mysql_insert_id();
+            //echo "InserId = ".$insertID;
+
+            // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
+            echo "Helfer mit Emailadresse ".$HelferEmail." Angelegt.<br><br>";
+            $HelferName = '';
+            $HelferEmail = '';
+            $HelferHandy = '';
+            $HelferPasswort = '';
+            $HelferPasswort2 = '';
+
+            //die('<div class="Helfer wurde angelegt.</div>');
+        } else {
+            echo "Helfer konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse ".$HelferEmail." bereits.<br><br>";
+        }
+    } else {
+        // Fehlermeldungen ausgeben:
+        echo '<div class="error"><ul>';
+        foreach($messages as $message) {
+            echo '<li>'.htmlspecialchars($message).'</li>';
+        }
+        echo '</ul></div>';
+    }
+
+
 }
 
 
@@ -116,44 +112,46 @@ if(isset($_POST['sent'])) {
               <td>Name</td>
 	    </tr>
 	    <tr><td>
-              <input name="helfer-name" type="text" value="<?=htmlspecialchars($HelferName??'')?>" required>
+              <input name="helfer-name" type="text" value="<?=htmlspecialchars($HelferName ?? '')?>" required>
             </td></tr>
             <tr>
 	      <td>Email</td>
            </tr>
            <tr><td> 	
-              <input name="helfer-email" type="email " value="<?=htmlspecialchars($HelferEmail??'')?>" required>
+              <input name="helfer-email" type="email " value="<?=htmlspecialchars($HelferEmail ?? '')?>" required>
               </td></tr>
             <tr>
 		  <td>Handy</td>
            </tr>
            <tr><td> 	
-              <input name="helfer-handy" type="tel" value="<?=htmlspecialchars($HelferHandy??'')?>" >
+              <input name="helfer-handy" type="tel" value="<?=htmlspecialchars($HelferHandy ?? '')?>" >
               </td>
             </tr>
             <tr>
 			  <td>Passwort</td></tr>
               <tr><td> 	
-              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferPasswort??'')?>" required>
+              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferPasswort ?? '')?>" required>
               </td>
             </tr>
              <tr><td>Passwort wiederholen </td></tr>
  	      <tr><td>	
-              <input name="helfer-passwort2" type="password" value="<?=htmlspecialchars($HelferPasswort2??'')?>" required>
+              <input name="helfer-passwort2" type="password" value="<?=htmlspecialchars($HelferPasswort2 ?? '')?>" required>
               </td>
             </tr>
               <tr><td>Helferlevel </td></tr>
  	      <tr><td>	
               <select name="helfer-level">
-<?php 
+<?php
 $db_erg = HelferLevel($db_link);
-$selected="";
-while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC)) {
-   $HelferLevel = $zeile['HelferLevel'];
-   $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
-   if($HelferLevel==1){ $selected = " selected " ;};
-   echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
-   $selected="";
+$selected = "";
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $HelferLevel = $zeile['HelferLevel'];
+    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
+    if($HelferLevel == 1) {
+        $selected = " selected " ;
+    };
+    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
+    $selected = "";
 }
 ?>
               </select>
@@ -171,7 +169,7 @@ while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC)) {
   
 <?php
 
-mysqli_free_result( $db_erg );
+mysqli_free_result($db_erg);
 ?>
   
  </body>

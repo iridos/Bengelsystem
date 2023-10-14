@@ -1,9 +1,11 @@
 <?php
+
 require_once("../konfiguration.php");
-$options=[];
+$options = [];
 $db = new PDO($dsn, MYSQL_BENUTZER, MYSQL_KENNWORT, $options);
 
-function read($db, $requestParams){
+function read($db, $requestParams)
+{
     $queryParams = [];
     $queryText = "
     select Schicht.SchichtID as id,
@@ -27,14 +29,14 @@ function read($db, $requestParams){
            INNER JOIN Dienst  ON Dienst.DienstID=Schicht.DienstID 
            INNER JOIN SchichtUebersicht ON Dienst.DienstID=SchichtUebersicht.DienstID AND SchichtUebersicht.SchichtID=Schicht.SchichtID 
            GROUP BY Schicht.SchichtID;";
-  
+
     //error_log(date('Y-m-d H:i ') . $queryText,3,"/tmp/sql.log");
     // handle dynamic loading
     if (isset($requestParams["from"]) && isset($requestParams["to"])) {
-         //error_log("timespan given. from: ".$requestParams["from"]." to: ".$requestParams["to"]);
-         $queryText .= " WHERE `Schicht.Bis`>=? AND `Schicht.Von` < ?;";
-         $queryParams = [filter_var($requestParams["from"],FILTER_SANITIZE_NUMBER_FLOAT), filter_var($requestParams["to"],FILTER_SANITIZE_NUMBER_FLOAT)];      
-    }  
+        //error_log("timespan given. from: ".$requestParams["from"]." to: ".$requestParams["to"]);
+        $queryText .= " WHERE `Schicht.Bis`>=? AND `Schicht.Von` < ?;";
+        $queryParams = [filter_var($requestParams["from"], FILTER_SANITIZE_NUMBER_FLOAT), filter_var($requestParams["to"], FILTER_SANITIZE_NUMBER_FLOAT)];
+    }
     $query = $db->prepare($queryText);
     $query->execute($queryParams);
     $events = $query->fetchAll();
@@ -47,11 +49,10 @@ switch ($_SERVER["REQUEST_METHOD"]) {
         break;
     case "POST":
         // only if changes will be allowed
-    break;
-    default: 
-        throw new Exception("Unexpected Method"); 
-    break;
+        break;
+    default:
+        throw new Exception("Unexpected Method");
+        break;
 }
 header("Content-Type: application/json");
 echo json_encode($result);
-?>

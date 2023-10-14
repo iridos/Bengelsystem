@@ -13,15 +13,15 @@
 <?php
 SESSION_START();
 
-require_once ('konfiguration.php');
+require_once('konfiguration.php');
 include 'SQL.php';
 
-$db_link = mysqli_connect (
-                     MYSQL_HOST, 
-                     MYSQL_BENUTZER, 
-                     MYSQL_KENNWORT, 
-                     MYSQL_DATENBANK
-                    );
+$db_link = mysqli_connect(
+    MYSQL_HOST,
+    MYSQL_BENUTZER,
+    MYSQL_KENNWORT,
+    MYSQL_DATENBANK
+);
 
 DatenbankAufDeutsch($db_link);
 
@@ -32,7 +32,7 @@ include '_login.php';
 //$db_erg = Helferdaten($db_link,$HelferID);
 //while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
 //{
-//    $HelferName=$zeile['Name']; 
+//    $HelferName=$zeile['Name'];
 //    $HelferIsAdmin=$zeile['Admin'];
 //}
 
@@ -48,12 +48,9 @@ include '_login.php';
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 
     <b>
 <?php
-        if($HelferIsAdmin)
-        {
+        if($HelferIsAdmin) {
             echo "Admin ";
-        }
-        else
-        {
+        } else {
             echo "Helfer ";
         }
         echo $HelferName;
@@ -65,26 +62,25 @@ include '_login.php';
         <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Nächste Helferschichten:</b>
 
                 <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">  
-<?php      
+<?php
                     //<li>Fr 08:00 Leitung Halle</li>
                     //<li>So 12:00 Abbau</li>
 /// Die 3 nächsten Schichten Des Helfers Anzeigen
 ////////////////////////////////////////////////////////
 //$HelferID=72;
-	
-$db_erg = AlleSchichtenEinesHelfersVonJetzt($db_link,$HelferID);
+
+$db_erg = AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID);
 
 
-  $iSQLCount = mysqli_num_rows($db_erg);
-  //$iSQLCount = 3;
+$iSQLCount = mysqli_num_rows($db_erg);
+//$iSQLCount = 3;
 
 
-$iCount=0;
-while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC) and $iCount<3)
-{
+$iCount = 0;
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC) and $iCount < 3) {
     echo "<li>". $zeile['Ab'] . " ". $zeile['Was'] . "</li>";
     $iCount++;
-}  
+}
 
 
 ?>
@@ -140,16 +136,15 @@ while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC) and $iCount<3)
 
   </tr>
   <?php
-  if ($HelferIsAdmin)
-  {
-  ?>    
+  if ($HelferIsAdmin) {
+      ?>    
   <tr onclick="window.location.href='Admin.php';">
     <td><img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"><b> Admin</b></td>
 
   </tr>
   <?php
   }
-  ?>  
+?>  
 
   </tr>
   <tr onclick="window.location.href='index.php?logout=1';">
