@@ -48,74 +48,76 @@ echo "Alias=$AliasHelferID<br>";
 
 
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html>
- <head>
-  <title>Drop am See Helferdaten ändern</title>
-
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
-
-<?php
-
-
-/// Helferdaten Aendern
-////////////////////////////////////////////////////////
-
-if(isset($_POST['change'])) {
-    $messages = [];
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Drop am See Helferdaten ändern</title>
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+</head>
+<body>
+    <?php
 
 
-    // Eingaben überprüfen:
+    /// Helferdaten Aendern
+    ////////////////////////////////////////////////////////
+
+    if(isset($_POST['change'])) {
+        $messages = [];
 
 
-    if(strlen($_POST['helfer-newpasswort']) < 8 and $_POST['helfer-newpasswort'] != "") {
-        $messages[] = 'Neues Passwort zu kurz';
-    }
-    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //}
-    $HelferName = $_POST['helfer-name'];
-    $HelferEmail = $_POST['helfer-email'];
-    $HelferHandy = $_POST['helfer-handy'];
-    $HelferNewPasswort  = $_POST['helfer-newpasswort'];
-    if ($_POST['IsAdmin']) {
-        $HelferIsAdmin = 1;
-        //echo "is Admin<br>";
-    } else {
-        $HelferIsAdmin = 0;
-    }
-    if(empty($messages)) {
-        // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
+        // Eingaben überprüfen:
 
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach($messages as $message) {
-            echo '<li>'.htmlspecialchars($message).'</li>';
+
+        if(strlen($_POST['helfer-newpasswort']) < 8 and $_POST['helfer-newpasswort'] != "") {
+            $messages[] = 'Neues Passwort zu kurz';
         }
-        echo '</ul></div>';
+        //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+        //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+        //}
+        $HelferName = $_POST['helfer-name'];
+        $HelferEmail = $_POST['helfer-email'];
+        $HelferHandy = $_POST['helfer-handy'];
+        $HelferNewPasswort  = $_POST['helfer-newpasswort'];
+        if ($_POST['IsAdmin']) {
+            $HelferIsAdmin = 1;
+            //echo "is Admin<br>";
+        } else {
+            $HelferIsAdmin = 0;
+        }
+        if(empty($messages)) {
+            // Helferdaten Ändern
+            HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
+
+        } else {
+            // Fehlermeldungen ausgeben:
+            echo '<div class="error"><ul>';
+            foreach($messages as $message) {
+                echo '<li>'.htmlspecialchars($message).'</li>';
+            }
+            echo '</ul></div>';
+        }
     }
-}
 
 
-///////////////////////////////////////////////////////////////
-// Helfer Loeschen
-///////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
+    // Helfer Loeschen
+    ///////////////////////////////////////////////////////////////
 
-if(isset($_POST['del'])) {
-    HelferLoeschen($db_link, $AliasHelferID, $AdminID);
-}
+    if(isset($_POST['del'])) {
+        HelferLoeschen($db_link, $AliasHelferID, $AdminID);
+    }
 
-////////////////////////////////////////////////////////////////
-// Helferdate holen
-///////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
+    // Helferdate holen
+    ///////////////////////////////////////////////////////////////
 
-$db_erg = Helferdaten($db_link, $AliasHelferID);
+    $db_erg = Helferdaten($db_link, $AliasHelferID);
 
 
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -127,55 +129,66 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 }
 
 ?>
-
-
-
-    
-		  <table id="customers">
-            <tr>
-                <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> Helferdaten</th>
-            </tr>
-<form method="post">
-            <tr> 	
-              <td>Name</td></tr><tr><td>
-              <input name="helfer-name" type="text" value="<?=htmlspecialchars($HelferName ?? '')?>" required>
-              </td>
-            </tr>
-            <tr>
-			  <td>Email</td></tr><tr><td> 	
-              <input name="helfer-email" type="email " value="<?=htmlspecialchars($HelferEmail ?? '')?>" required>
-              </td>
-            </tr>
-            <tr>
-			  <td>Handy</td></tr><tr><td> 	
-              <input name="helfer-handy" type="tel" value="<?=htmlspecialchars($HelferHandy ?? '')?>" >
-              </td>
-            </tr>
-            <tr>
-			  <td>Admin  Passwort</td></tr><tr><td> 	
-              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferPasswort ?? '')?>" >
-              </td>
-            </tr>
-            <tr>
-			  <td>Neues Helfer Passwort</td></tr><tr><td> 	
-              <input name="helfer-newpasswort" type="text" value="<?=htmlspecialchars($HelferPasswort ?? '')?>" >
-              </td>
-            </tr>
-         	
-          </table>
-		
-	  <table id="customers">
-	  <col style="width:20px">
-	  <tr>
-	  <td><input type="checkbox" name="IsAdmin" value=1 align="right" <?php if($HelferIsAdmin == 1) {
-	      echo" checked";
-	  }?>></td>
-		<td>ist Admin</td>
-	  </tr>
-	  </table>
-          <p><button name="change" style="width:150px !important" value="1">&Auml;ndern</button></p>
-          <p><button name="del" style="width:150px !important" value="1">Helfer L&ouml;schen</button></p> 
- </form> 
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>
- </body>
+    <form method="post"></form>
+    <table id="customers">
+        <tr>
+            <th><button name="BackHelferdaten" value="1" onclick=
+            "window.location.href = 'Admin.php';"><b>↩</b></button>
+            Helferdaten</th>
+        </tr>
+        <tr>
+            <td>Name</td>
+        </tr>
+        <tr>
+            <td><input name="helfer-name" type="text" value=
+            "&lt;?=htmlspecialchars($HelferName ?? '')?&gt;"
+            required=""></td>
+        </tr>
+        <tr>
+            <td>Email</td>
+        </tr>
+        <tr>
+            <td><input name="helfer-email" type="email" value=
+            "&lt;?=htmlspecialchars($HelferEmail ?? '')?&gt;"
+            required=""></td>
+        </tr>
+        <tr>
+            <td>Handy</td>
+        </tr>
+        <tr>
+            <td><input name="helfer-handy" type="tel" value=
+            "&lt;?=htmlspecialchars($HelferHandy ?? '')?&gt;"></td>
+        </tr>
+        <tr>
+            <td>Admin Passwort</td>
+        </tr>
+        <tr>
+            <td><input name="helfer-passwort" type="password"
+            value="&lt;?=htmlspecialchars($HelferPasswort ?? '')?&gt;"></td>
+        </tr>
+        <tr>
+            <td>Neues Helfer Passwort</td>
+        </tr>
+        <tr>
+            <td><input name="helfer-newpasswort" type="text" value=
+            "&lt;?=htmlspecialchars($HelferPasswort ?? '')?&gt;"></td>
+        </tr>
+    </table>
+    <table id="customers">
+        <col style="width:20px">
+        <tr>
+            <td><input type="checkbox" name="IsAdmin" value="1"
+            align="right" <?php if($HelferIsAdmin == 1) {
+                echo" checked";
+            }?>></td>
+            <td>ist Admin</td>
+        </tr>
+    </table>
+    <p><button name="change" style="width:150px !important" value=
+    "1">Ändern</button></p>
+    <p><button name="del" style="width:150px !important" value=
+    "1">Helfer Löschen</button></p><button name="BackHelferdaten"
+    value="1" onclick=
+    "window.location.href = 'Admin.php';"><b>↩</b></button>
+</body>
 </html>

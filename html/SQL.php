@@ -1,4 +1,3 @@
-
 <?php
 
 require_once('konfiguration.php');
@@ -861,4 +860,13 @@ function DebugAusgabeDbErgebnis($db_erg)
 
 
 ?>
-
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title></title>
+</head>
+<body>
+</body>
+</html>

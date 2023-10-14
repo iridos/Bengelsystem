@@ -1,4 +1,3 @@
- 
 <?php
 // datenbank-defines extern
 require_once('/etc/helferdb_konfiguration.php');
@@ -50,3 +49,13 @@ $options = array(
 
 
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title></title>
+</head>
+<body>
+</body>
+</html>

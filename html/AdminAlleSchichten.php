@@ -12,111 +12,116 @@ if($AdminStatus != 1) {
     exit;
 }
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html>
- <head>
-  <title>Helfer Drop am See Alle Schichten</title>
-  
-  
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
-  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script> 
-  <script src="js/helferdb.js" type="text/javascript"></script> 
-  <script> collapse_table_rows();
- </script>
- </head>
- <body>
- <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>   
-<div style="width: 100%;">
-<?php
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Helfer Drop am See Alle Schichten</title>
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+    <script src="js/jquery-3.7.1.min.js" type=
+    "text/javascript"></script>
+    <script src="js/helferdb.js" type="text/javascript"></script>
+    <script>
+    collapse_table_rows();
+    </script>
+</head>
+<body>
+    <button name="BackHelferdaten" value="1" onclick=
+    "window.location.href = 'Admin.php';"><b>↩</b></button>
+    <div style="width: 100%;">
+        <?php
 
-/// Detailinformation zu ausgewaehlten Schicht Holen
-////////////////////////////////////////////////////////
-if(isset($_POST['CloseInfo'])) {
-    unset($InfoMeineSchichtID);
-    unset($InfoAlleSchichtID);
-}
-if(isset($_POST['InfoMeineSchichtID'])) {
-    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
-    unset($InfoAlleSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
-
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
-
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-
-}
-
-
-if(isset($_GET['InfoAlleSchichtID'])) {
-    $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
-    unset($InfoMeineSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
-
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
-
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-
-
-
-    // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
-
-
-    $x = 0;
-
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $MitHelferID[$x] = $zeile['HelferID'];
-        $MitHelfer[$x] = $zeile['Name'];
-        $MitHelferHandy[$x] = $zeile['Handy'];
-        $x++;
-    }
-
-
-}
-
-if(isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 1;
-}
-
-function HelferAuswahlButton($db_link, $AliasHelferID)
-{
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($AliasHelferID != $zeile['HelferID']) {
-            echo "<option value='".$zeile['HelferID']."'>".$zeile['Name']."</optionen>";
-        } else {
-            echo "<option value='".$zeile['HelferID']."' selected='selected'>".$zeile['Name']."</optionen>";
+        /// Detailinformation zu ausgewaehlten Schicht Holen
+        ////////////////////////////////////////////////////////
+        if(isset($_POST['CloseInfo'])) {
+            unset($InfoMeineSchichtID);
+            unset($InfoAlleSchichtID);
         }
-    }
-    echo '</select></form>';
-}
+        if(isset($_POST['InfoMeineSchichtID'])) {
+            $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
+            unset($InfoAlleSchichtID);
+            //echo "<b>". $SchichtID . "</b><br>";
 
-if(isset($_POST['AliasHelfer'])) {
-    $AliasHelferID = $_POST['AliasHelfer'];
-} elseif(isset($_SESSION["AliasHelferID"])) {
-    $AliasHelferID = $_SESSION["AliasHelferID"];
-} else {
-    HelferAuswahlButton($db_link, $AliasHelferID);
-    exit;
-}
-HelferAuswahlButton($db_link, $AliasHelferID);
+            $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+
+            $Was = $zeile['Was'];
+            $Wo = $zeile['Wo'];
+            $Dauer = $zeile['Dauer'];
+            $Leiter = $zeile['Name'];
+            $LeiterHandy =  $zeile['Handy'];
+            $LeiterEmail =  $zeile['Email'];
+            $Info = $zeile['Info'];
+
+        }
+
+
+        if(isset($_GET['InfoAlleSchichtID'])) {
+            $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
+            unset($InfoMeineSchichtID);
+            //echo "<b>". $SchichtID . "</b><br>";
+
+            $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+
+            $Was = $zeile['Was'];
+            $Wo = $zeile['Wo'];
+            $Dauer = $zeile['Dauer'];
+            $Leiter = $zeile['Name'];
+            $LeiterHandy =  $zeile['Handy'];
+            $LeiterEmail =  $zeile['Email'];
+            $Info = $zeile['Info'];
+
+
+
+            // Beteiligte Helfer Holen
+            $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+
+
+            $x = 0;
+
+            while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+                $MitHelferID[$x] = $zeile['HelferID'];
+                $MitHelfer[$x] = $zeile['Name'];
+                $MitHelferHandy[$x] = $zeile['Handy'];
+                $x++;
+            }
+
+
+        }
+
+        if(isset($_GET['ZeitBereich'])) {
+            $ZeitBereich = $_GET['ZeitBereich'];
+        } else {
+            $ZeitBereich = 1;
+        }
+
+        function HelferAuswahlButton($db_link, $AliasHelferID)
+        {
+            echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
+            $db_erg = HelferListe($db_link);
+            while($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+                if ($AliasHelferID != $zeile['HelferID']) {
+                    echo "<option value='".$zeile['HelferID']."'>".$zeile['Name']."</optionen>";
+                } else {
+                    echo "<option value='".$zeile['HelferID']."' selected='selected'>".$zeile['Name']."</optionen>";
+                }
+            }
+            echo '</select></form>';
+        }
+
+        if(isset($_POST['AliasHelfer'])) {
+            $AliasHelferID = $_POST['AliasHelfer'];
+        } elseif(isset($_SESSION["AliasHelferID"])) {
+            $AliasHelferID = $_SESSION["AliasHelferID"];
+        } else {
+            HelferAuswahlButton($db_link, $AliasHelferID);
+            exit;
+        }
+        HelferAuswahlButton($db_link, $AliasHelferID);
 
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
@@ -130,75 +135,71 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 ////////////////////////////////////////////////////////
 
 ?>
+        <form method="post" action="AdminAlleSchichten.php#Info">
+            <?php
 
 
 
+    // Neu Schicht fuer Helfer Eintragen
+    ///////////////////////////////////////////////////////////
+    if(isset($_POST['plusschicht'])) {
 
-<form method="post" action="AdminAlleSchichten.php#Info">  
-<?php
+        $messages = [];
+        $SchichtId = $_POST['plusschicht'];
 
+        // Eingaben überprüfen:
 
-
-// Neu Schicht fuer Helfer Eintragen
-///////////////////////////////////////////////////////////
-if(isset($_POST['plusschicht'])) {
-
-    $messages = [];
-    $SchichtId = $_POST['plusschicht'];
-
-    // Eingaben überprüfen:
-
-    //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //  }
+        //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+        //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+        //  }
 
 
-    if(empty($messages)) {
-        // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtId, $AdminID);
+        if(empty($messages)) {
+            // Helfer Schicht zuweisen
+            $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtId, $AdminID);
 
-        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-        $HelferName = '';
-        $HelferEmail = '';
-        $HelferHandy = '';
-        //die('<div class="Helfer wurde angelegt.</div>');
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach($messages as $message) {
-            echo '<li>'.htmlspecialchars($message).'</li>';
+            // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
+            $HelferName = '';
+            $HelferEmail = '';
+            $HelferHandy = '';
+            //die('<div class="Helfer wurde angelegt.</div>');
+        } else {
+            // Fehlermeldungen ausgeben:
+            echo '<div class="error"><ul>';
+            foreach($messages as $message) {
+                echo '<li>'.htmlspecialchars($message).'</li>';
+            }
+            echo '</ul></div>';
         }
-        echo '</ul></div>';
+
+
     }
 
+    if(isset($_POST['minusschicht'])) {
+        // Mich aus Schicht entfernen
+        $messages = [];
 
-}
+        $SchichtID = $_POST['minusschicht'];
 
-if(isset($_POST['minusschicht'])) {
-    // Mich aus Schicht entfernen
-    $messages = [];
+        if(empty($messages)) {
+            // Helfer aus Schicht entfernen
+            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $AliasHelferID, $SchichtID, $AdminID);
 
-    $SchichtID = $_POST['minusschicht'];
-
-    if(empty($messages)) {
-        // Helfer aus Schicht entfernen
-        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $AliasHelferID, $SchichtID, $AdminID);
-
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach($messages as $message) {
-            echo '<li>'.htmlspecialchars($message).'</li>';
+        } else {
+            // Fehlermeldungen ausgeben:
+            echo '<div class="error"><ul>';
+            foreach($messages as $message) {
+                echo '<li>'.htmlspecialchars($message).'</li>';
+            }
+            echo '</ul></div>';
         }
-        echo '</ul></div>';
+
+
+
     }
 
-
-
-}
-
-/// Ausgabe auf Deutsch umstellen
-/////////////////////////////////////////////////////////////////////////
+    /// Ausgabe auf Deutsch umstellen
+    /////////////////////////////////////////////////////////////////////////
 
     DatenbankAufDeutsch($db_link);
 
@@ -284,11 +285,11 @@ if($addschicht != '0') {
     /*
     if ($dienstsort=='1')
     {
-        echo "<th>". "Dienst" . "</th>";
+    echo "<th>". "Dienst" . "</th>";
     }
     else
     {
-        echo "<th>". "Von" . "</th>";
+    echo "<th>". "Von" . "</th>";
     }
     */
     if ($ZeitBereich == 1) {
@@ -431,9 +432,7 @@ mysqli_free_result($db_erg);
 
 
 ?>
- 
- </form> 
- </div>
- 
- </body>
+        </form>
+    </div>
+</body>
 </html>

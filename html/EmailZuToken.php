@@ -82,123 +82,125 @@ if(isset($_POST['sendmail'])) {
 
 
 ?>
-<!doctype html>
- <head>
-  <title>Helfer Drop am See: Email Tokens generieren</title>
-  
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Helfer Drop am See: Email Tokens generieren</title>
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+</head>
+<body>
+    <?php
 
-<?php
+?><button name="BackHelferdaten" value="1" onclick=
+    "window.location.href = 'Admin.php';"><b>↩</b></button>
+    <div style="width: 100%;">
+        <h2>Emails mit Login-Link zur HelferDB
+        generieren</h2>Generiert Tokens (bzw URLs mit Token) aus
+        einer Liste von Email-Addressen.<br>
+        Bei Klick auf den generierten Link wird sofort ein Account
+        zur Email angelegt.<br>
+        Als Passwort wird das Token gesetzt. Man kann sich mit dem
+        Link danach wieder in den selben Account einloggen.
+        <p>!! Emails werden erst verschickt, wenn die Checkbox
+        unten angeklickt ist</p>
+        <form method="post" action="EmailZuToken.php">
+            <p><label for="helfer-status">Status des Accounts, den
+            der Link erstellt:</label> <select style="width:260px"
+            id="helfer-status" name="helfer-status">
+                <!-- TODO: aus DB abfragen -->
+                <option value="2" <?php if($level == 2) {
+                    echo "selected";
+                }?>>
+                    Teilnehmer
+                </option>
+                <option value="1" <?php if($level == 1) {
+                    echo "selected";
+                }?>>
+                    Dauerhelfer
+                </option>
+            </select></p>
+            <p>Subject der Email:<br>
+            <input id="email-subject" name="email-subject" type=
+            "textbox" value=
+            "&lt;?=htmlspecialchars($email_subject ?? '');?&gt;"></p>
+            <p>CC (Kopie) der Email geht an:<br>
+            <input id="email-cc" name="email-cc" type="textbox"
+            value="drophelfer@gmail.com"></p>
+            <p>Emailtext (XXtokenXX an die Stelle schreiben, an der
+            der Link im Emailtext stehen soll):</p>
+            <p>
+            <textarea id="email-text" name="email-text" rows="20"
+            cols="80"><?=htmlspecialchars($email_text ?? '');?>
 
-?>
+</textarea></p>
+            <p>Liste von Emails, an die Anschreiben verschickt wird
+            (Eine Email pro Zeile, nur die Email xxx@yyy.zz, keine
+            Leerzeichen):<br>
+            <textarea id="helfer-email-liste" name=
+            "helfer-email-liste" rows="20" cols=
+            "80"></textarea><br></p>
+            <div>
+                <input type="checkbox" id="sendmail" name=
+                "sendmail" value="1" style=
+                "align:left;width:40px;!important"> <label for=
+                "sendmail">Emails verschicken</label>
+            </div><br>
+            <button name="email-liste" value="1">Token
+            generieren</button>
+        </form><?php
 
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>
-<div style="width: 100%;">
-<p>
-<h2> Emails mit Login-Link zur HelferDB generieren </h2>
-Generiert  Tokens (bzw URLs mit Token) aus einer Liste von Email-Addressen. <br>
-Bei Klick auf den generierten Link wird sofort ein Account zur Email angelegt. <br>
-Als Passwort wird das Token gesetzt. Man kann sich mit dem Link danach wieder in den selben Account einloggen.
-</p>
-<p>
-!! Emails werden erst verschickt, wenn die Checkbox unten angeklickt ist
-</p>
+        if(isset($_POST['email-liste'])) {
+            // TODO: check if email-text contains tokentext to substitute
+            // TODO: check if subject is set
+            // get email addresses from textarea
+            $email_list = $_POST['helfer-email-liste'];
+            // Aufteilen der Textbox in einzelne Emails
 
-<form method="POST" action="EmailZuToken.php">
-<p>
-<label for="helfer-status">Status des Accounts, den der Link erstellt:</label>
-<select style="width:260px" id="helfer-status" name="helfer-status">
-<!-- TODO: aus DB abfragen -->
-  <option value="2"<?php if($level == 2) {
-      echo "selected";
-  }?>>Teilnehmer</option>
-  <option value="1" <?php if($level == 1) {
-      echo "selected";
-  }?>>Dauerhelfer</option>
-</select>
-</p><p>
-  Subject der Email: <br>
-  <input id="email-subject" name="email-subject" type="textbox" value="<?=htmlspecialchars($email_subject ?? '');?>">
-</p><p>
-  CC (Kopie) der Email geht an: <br>
-  <input id="email-cc" name="email-cc" type="textbox" value="drophelfer@gmail.com">
-</p><p>
-  Emailtext (XXtokenXX an die Stelle schreiben, an der der Link im Emailtext stehen soll): 
-</p><p>
-  <textarea id="email-text" name="email-text" rows="20" cols="80">
-<?=htmlspecialchars($email_text ?? '');?>
-</textarea>
-</p>
-<p>
-Liste von Emails, an die Anschreiben verschickt wird (Eine Email pro Zeile, nur die Email xxx@yyy.zz, keine Leerzeichen):<br>
-<textarea id="helfer-email-liste" name="helfer-email-liste" rows="20" cols="80"></textarea> <br>
-</p>
-<div>
-<input type="checkbox" id="sendmail" name="sendmail" value="1" style="align:left;width:40px;!important">
-<label for="sendmail">Emails verschicken</label>
-</div>
-<br>
-<button name="email-liste" value="1">Token generieren</button>
-</form>
-</p>
-<?php
+            //mit explode: jede Email in einer Zeile, andere Leerzeichen koennen zur Email werden
+            // $emails = explode("\n", $email_list);
 
-if(isset($_POST['email-liste'])) {
-    // TODO: check if email-text contains tokentext to substitute
-    // TODO: check if subject is set
-    // get email addresses from textarea
-    $email_list = $_POST['helfer-email-liste'];
-    // Aufteilen der Textbox in einzelne Emails
-
-    //mit explode: jede Email in einer Zeile, andere Leerzeichen koennen zur Email werden
-    // $emails = explode("\n", $email_list);
-
-    //preg_split, um bei allen Leerzeichen zu trennen
-    $email_array = preg_split('/\s+/', $email_list); // Trennzeichen: 1 oder mehr Whitespace-Zeichen
-    foreach ($email_array as $email) {
-        $email = trim($email);
-        $encrypted_data = encode_string($secret_key, $email, $level, $secret_verification);
-        $token_url = "$urlprefix?token=$encrypted_data";
-        // Ausgabe des verschluesselten Textes in der URL
-        $decrypted_data = decode_string($secret_key, urldecode($encrypted_data), $secret_verification);
-        $email_subst_text = str_replace('XXtokenXX', $token_url, $email_text);
-        if($sendmail != 1) {
-            // keine Emails verschicken, wir gebeben die Inhalte unten als Text aus
-            echo "Verschicken nicht ausgew&auml;hlt. Zeige Emails an:<br>";
-            echo $sendmail ."<br>";
-            echo "=======================================<br>";
-            echo "To: ".$decrypted_data['email']." (level: ".$decrypted_data['level']."):<br>";
-            echo "CC: ".$email_cc."<br>";
-            echo "<pre>".$email_subst_text."</pre><br>";
-            echo "$email: <a href='$token_url'> $token_url</a> (check: ".$decrypted_data['email'].", lv: ".$decrypted_data['level'].")<br>";
-        } else {
-            // Email verschicken - send mail
-            $to = $decrypted_data['email'];
-            $from = "root";
-            $headers = 'From: ' . $from. "\r\n";
-            $headers .= 'CC: ' . $email_cc . "\r\n";
-            if (mail($to, $email_subject, $email_subst_text, $headers)) {
-                echo "Die E-Mail an $to wurde erfolgreich versendet.";
-                error_log(date('Y-m-d H:i') . "(AdminID:$AdminID) Name: $HelferName (HelferID:$HelferID) hat Email mit Link verschickt an: $to mit CC an: $email_cc\n", 3, LOGFILE);
-            } else {
-                echo "Beim Versenden der E-Mail an $to ist ein Fehler aufgetreten.";
+            //preg_split, um bei allen Leerzeichen zu trennen
+            $email_array = preg_split('/\s+/', $email_list); // Trennzeichen: 1 oder mehr Whitespace-Zeichen
+            foreach ($email_array as $email) {
+                $email = trim($email);
+                $encrypted_data = encode_string($secret_key, $email, $level, $secret_verification);
+                $token_url = "$urlprefix?token=$encrypted_data";
+                // Ausgabe des verschluesselten Textes in der URL
+                $decrypted_data = decode_string($secret_key, urldecode($encrypted_data), $secret_verification);
+                $email_subst_text = str_replace('XXtokenXX', $token_url, $email_text);
+                if($sendmail != 1) {
+                    // keine Emails verschicken, wir gebeben die Inhalte unten als Text aus
+                    echo "Verschicken nicht ausgew&auml;hlt. Zeige Emails an:<br>";
+                    echo $sendmail ."<br>";
+                    echo "=======================================<br>";
+                    echo "To: ".$decrypted_data['email']." (level: ".$decrypted_data['level']."):<br>";
+                    echo "CC: ".$email_cc."<br>";
+                    echo "<pre>".$email_subst_text."</pre><br>";
+                    echo "$email: <a href='$token_url'> $token_url</a> (check: ".$decrypted_data['email'].", lv: ".$decrypted_data['level'].")<br>";
+                } else {
+                    // Email verschicken - send mail
+                    $to = $decrypted_data['email'];
+                    $from = "root";
+                    $headers = 'From: ' . $from. "\r\n";
+                    $headers .= 'CC: ' . $email_cc . "\r\n";
+                    if (mail($to, $email_subject, $email_subst_text, $headers)) {
+                        echo "Die E-Mail an $to wurde erfolgreich versendet.";
+                        error_log(date('Y-m-d H:i') . "(AdminID:$AdminID) Name: $HelferName (HelferID:$HelferID) hat Email mit Link verschickt an: $to mit CC an: $email_cc\n", 3, LOGFILE);
+                    } else {
+                        echo "Beim Versenden der E-Mail an $to ist ein Fehler aufgetreten.";
+                    }
+                }
             }
         }
-    }
-}
 
 
-?>
-
-</body>
-</html>
-
-
-<!--Einzelne Email
+?><!--Einzelne Email
 <p>
 <form method="GET">
     <input id="helfer-email" name="helfer-email" type="textbox" value="<?=htmlspecialchars($HelferEmail ?? '')?>">
@@ -206,8 +208,7 @@ if(isset($_POST['email-liste'])) {
 </form>
 </p>
 -->
-
-<?php
+        <?php
 //single email
 #if(isset($_GET['helfer-email'])) {
 #    $email = $_GET['helfer-email'];
@@ -221,3 +222,6 @@ if(isset($_POST['email-liste'])) {
 #}
 
 ?>
+    </div>
+</body>
+</html>

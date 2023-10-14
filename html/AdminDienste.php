@@ -12,22 +12,24 @@ if($AdminStatus != 1) {
     exit;
 }
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html>
- <head>
-  <title>Admin Drop am See</title>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Admin Drop am See</title>
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+</head>
+<body>
+    <div style="width: 100%;">
+        <?php
 
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
 
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
-<div style="width: 100%;">
-<?php
-
-
-DatenbankAufDeutsch($db_link);
+        DatenbankAufDeutsch($db_link);
 
 $DienstID = $_SESSION["DienstID"];
 $SchichtID = $_SESSION["SchichtID"];
@@ -136,15 +138,19 @@ if(isset($_POST['DienstSearch'])) {
 // Dienste Anzeigen
 ////////////////////////////////////////////////////////
 
-?>
-<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
-<form method="post">
-    <table border="0" id='customers'>    
-    <tr><th>  Dienst</th><th><select name="DienstSearch" id="DienstSearch"  onchange="submit()">
-<?php
+?><button class="back" name="BackHelferdaten" value="1"
+        onclick=
+        "window.location.href = 'Admin.php';"><b>↩</b></button>
+        <form method="post">
+            <table border="0" id='customers'>
+                <tr>
+                    <th>Dienst</th>
+                    <th><select name="DienstSearch" id=
+                    "DienstSearch" onchange="submit()">
+                        <?php
 
 
-$db_erg = GetDienste($db_link);
+                $db_erg = GetDienste($db_link);
 
 $Was = "";
 $Wo = "";
@@ -179,32 +185,9 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 ////////////////////////////////////////////////////////
 
 ?>
-
-
-
-
-		  <table border="0" id="customers">
-            <tr> 	
-              <td style="border: 0px solid black;">Was</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Dienst-Was" type="text" value="<?=htmlspecialchars($Was ?? '')?>">
-              </td>
-            </tr>
-            <tr>
-			  <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;"> 	
-              <input name="Dienst-Wo" type="text " value="<?=htmlspecialchars($Wo ?? '')?>">
-              </td>
-            </tr>
-            </tr>
-			  <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;"> 	
-              <input name="Dienst-Info" type="text" value="<?=htmlspecialchars($Info ?? '')?>" >
-              </td>
-            </tr>
-            <tr>
-			  <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;"> 	
-                
-               <!--  <input name="Dienst-Leiter" type="text" value="<?=htmlspecialchars($Leiter ?? '')?>" > -->
-                <?php
-                    echo "<select name='Dienst-Leiter'>";
+                        <!--  <input name="Dienst-Leiter" type="text" value="<?=htmlspecialchars($Leiter ?? '')?>" > -->
+                        <?php
+echo "<select name='Dienst-Leiter'>";
 $db_erg = HelferListe($db_link);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     if ($zeile['HelferID'] != $Leiter) {
@@ -216,15 +199,9 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     }
 }
 echo "</select>";
-?>
-                </td>  
-              </tr>
-              <tr>
-			    <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;"> 	
-                
-                <?php
-    //echo "#####".$Gruppe."#####";
-    echo "<select name='Dienst-Gruppe'>";
+?><?php
+//echo "#####".$Gruppe."#####";
+echo "<select name='Dienst-Gruppe'>";
 $db_erg = GetDiensteChilds($db_link, 0);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
@@ -238,39 +215,36 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 }
 echo "</select>";
 ?>
-                </td>
-                </td>                
-            </tr>
-            <tr><td style="border: 0px solid black;">HelferLevel</td></tr>
-            <tr><td style="border: 0px solid black;"> 
-            	<select name="HelferLevel">
-                   <option value="1" <?php if($HelferLevel == 1) {
-                       echo "selected";
-                   };?> >Dauerhelfer</option>
-                   <option value="2" <?php if($HelferLevel == 2) {
-                       echo "selected";
-                   };?> >Teilnehmer</option>
-                   <?php //todo: Name aus HelferLevel-Tabelle erhalten?>
-                </select>
-             </td></tr>
-          </table>
-          
-          <p><button name="ChangeDienst" value="1">Ändern</button><button name="NewDienst" value="1">Neue</button><button name='DeleteDienst' value='1'>Löschen</button></p>
-
-</form>
-
-
-
-
-<form method="post">
-    <table border="0" id='customers'">    
-    <tr><th>Schicht</th><th><select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
-    
-    
-<?php
+                        <option value=
+                        "1" <?php if($HelferLevel == 1) {
+                            echo "selected";
+                        };?>>
+                            Dauerhelfer
+                        </option>
+                        <option value=
+                        "2" <?php if($HelferLevel == 2) {
+                            echo "selected";
+                        };?>>
+                            Teilnehmer
+                        </option><?php //todo: Name aus HelferLevel-Tabelle erhalten?>
+                    </select></th>
+                </tr>
+            </table>
+            <p><button name="ChangeDienst" value=
+            "1">Ändern</button><button name="NewDienst" value=
+            "1">Neue</button><button name='DeleteDienst' value=
+            '1'>Löschen</button></p>
+        </form>
+        <form method="post">
+            <table border="0" id='customers'>
+                <tr>
+                    <th>Schicht</th>
+                    <th><select name="SchichtSearch" id=
+                    "SchichtSearch" onchange="submit()">
+                        <?php
 
 
-$Soll = 1;
+                        $Soll = 1;
 $db_erg = GetSchichtenEinesDienstes($db_link, $DienstID);
 
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -294,37 +268,8 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
 //echo "<button name='DeleteSchicht' value='1'>Schicht löschen</button>";
 
 ?>
-
- 
-		<!--  <table border="0" style="border: 0px solid black;">  -->
-        <table border="0" id='customers'"> 
-            <tr> 	
-              <td style="border: 0px solid black;">Von</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Von" type="datetime-local" value="<?=htmlspecialchars($Von ?? '')?>" required>
-              </td>
-            <tr>
-            </tr>
-			  <td style="border: 0px solid black;">Bis</td></tr><tr><td style="border: 0px solid black;"> 	
-              <input name="Schicht-Bis" type="datetime-local" value="<?=htmlspecialchars($Bis ?? '')?>" required>
-              </td>
-            <tr>
-            </tr>
-			  <td style="border: 0px solid black;">Soll</td></tr><tr><td style="border: 0px solid black;"> 	
-              <input name="Schicht-Soll" type="number" min=1 value="<?=htmlspecialchars((int)$Soll ?? '')?>"  required>
-              </td>
-            <tr>
-            </tr>
-
-          </table>
-          <p><button name="ChangeSchicht" value="1">Ändern</button><button name="NewSchicht" value="1">Neue</button><button name='DeleteSchicht' value='1'>Löschen</button></p>
-
-
- </form>
- 
-<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b><b>&larrhk;</b></b></button> 
-
-
-<?php
+                        <!--  <table border="0" style="border: 0px solid black;">  -->
+                        <?php
 
 
 mysqli_free_result($db_erg);
@@ -335,9 +280,10 @@ $_SESSION["SchichtID"] = $SchichtID;
 
 
 ?>
- 
-
- </div>
- 
- </body>
+                    </select></th>
+                </tr>
+            </table>
+        </form>
+    </div>
+</body>
 </html>

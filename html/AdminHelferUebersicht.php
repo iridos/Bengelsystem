@@ -12,27 +12,31 @@ if($AdminStatus != 1) {
     exit;
 }
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html>
- <head>
-  <title>Admin Drop am See</title>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Admin Drop am See</title>
+    <link rel="stylesheet" href="css/style_common.css">
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+    <script src="js/jquery-3.7.1.min.js" type=
+    "text/javascript"></script>
+    <script src="js/helferdb.js" type="text/javascript"></script>
+    <script>
+    collapse_table_rows();
+    </script>
+</head>
+<body>
+    <div style="width: 100%;">
+        <?php
 
-  <link rel="stylesheet" href="css/style_common.css"/>
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
-  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script> 
-  <script src="js/helferdb.js" type="text/javascript"></script> 
-  <script>
-   collapse_table_rows();
- </script>
- </head>
- <body>
-<div style="width: 100%;">
-<?php
 
-
-DatenbankAufDeutsch($db_link);
+        DatenbankAufDeutsch($db_link);
 
 //$DienstID =$_SESSION["DienstID"];
 //$SchichtID =$_SESSION["SchichtID"];
@@ -67,13 +71,18 @@ if(isset($_POST['DienstSearch'])) {
 
 echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
-  <tr class="header">
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten</b></th>
-  </tr>
-</table>
-<table class="commontable">
-<?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
+        <table>
+            <tr class="header">
+                <th><button name="BackHelferdaten" value="1"
+                onclick=
+                "window.location.href = 'Admin.php';"><b>↩</b></button>
+                &nbsp; <b>Übersicht Helfer und Ihre
+                Schichten</b></th>
+            </tr>
+        </table>
+        <table class="commontable">
+            <?php
+    $db_erg = AlleHelferSchichtenUebersicht($db_link);
 $dauer = 0;
 $i = 0;
 $OldHelferName = "";
@@ -114,9 +123,7 @@ echo "$EinzelDienstStunden";
 echo "</table>";
 
 ?>
-         
-
- </div>
- 
- </body>
+        </table>
+    </div>
+</body>
 </html>

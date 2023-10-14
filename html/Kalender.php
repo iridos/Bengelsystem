@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title> Helferdienste  </title>
-  <meta charset="utf-8">
-  <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
-  <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
-  <!-- link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
-  <link href="scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8">
-  <link rel="stylesheet" href="../scheduler/samples/common/controls_styles.css">
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Helferdienste</title>
+    <meta charset="utf-8">
+    <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
+
+    <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
+    <!-- link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
+    <link href="scheduler/codebase/dhtmlxscheduler.css" rel=
+    "stylesheet" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href=
+    "../scheduler/samples/common/controls_styles.css">
     <style>
 
         html, body{
@@ -18,8 +23,7 @@
         }
 
 
-    </style> 
-    <!-- darkstyle
+    </style><!-- darkstyle
     style type="text/css" >
             .filters_wrapper {
                     background-color: black;
@@ -39,57 +43,64 @@
                     padding-right: 15px;
             }
     </style-->
-
-</head> 
-<body> 
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button><br>
-<div class="filters_wrapper" id="filters_wrapper">
-&nbsp;
-  Mehrtagesdienste anzeigen: <input id="multidaycheck" class="sch_radio" type="checkbox" checked onchange="toggleMultiday(this)"> 
-  Einfärben: <input type="text" id="colorize"> <!--onchange="markEntries(this.value);" onpaste    = "this.onchange();" onsubmit="markEntries(this.value);"-->
-  Filtern: <input type="text" id="filterWrap">
-  <br/>
-  Achtung: Ende Nachtdienste wird falsch angezeigt (immer Mitternacht) - Popup-Fenster zeigt richtige Zeiten
-</div>
-
-<div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'> 
-        <div class="dhx_cal_navline"> 
-            <div class="dhx_cal_prev_button">&nbsp;</div> 
-            <div class="dhx_cal_next_button">&nbsp;</div> 
-            <div class="dhx_cal_today_button"></div> 
-            <div class="dhx_cal_date"></div> 
-            <div class="dhx_cal_tab" name="day_tab"></div> 
-            <div class="dhx_cal_tab" name="week_tab"></div> 
+</head>
+<body>
+    <button name="BackHelferdaten" value="1" onclick=
+    "window.location.href = 'index.php';"><b>↩</b></button><br>
+    <div class="filters_wrapper" id="filters_wrapper">
+        &nbsp; Mehrtagesdienste anzeigen: <input id="multidaycheck"
+        class="sch_radio" type="checkbox" checked onchange=
+        "toggleMultiday(this)"> Einfärben: <input type="text" id=
+        "colorize"> 
+        <!--onchange="markEntries(this.value);" onpaste    = "this.onchange();" onsubmit="markEntries(this.value);"-->
+         Filtern: <input type="text" id="filterWrap"><br>
+        Achtung: Ende Nachtdienste wird falsch angezeigt (immer
+        Mitternacht) - Popup-Fenster zeigt richtige Zeiten
+    </div>
+    <div id="scheduler_here" class="dhx_cal_container" style=
+    'width:100%; height:100%;'>
+        <div class="dhx_cal_navline">
+            <div class="dhx_cal_prev_button">
+                &nbsp;
+            </div>
+            <div class="dhx_cal_next_button">
+                &nbsp;
+            </div>
+            <div class="dhx_cal_today_button"></div>
+            <div class="dhx_cal_date"></div>
+            <div class="dhx_cal_tab" name="day_tab"></div>
+            <div class="dhx_cal_tab" name="week_tab"></div>
             <div class="dhx_cal_tab" name="month_tab"></div>
-            <div class="dhx_cal_tab" data-tab="con" style="right:280px;"></div>
-            <div class="dhx_cal_tab" data-tab="prep" style="right:280px;" ></div>
- 
-    </div> 
-    <div class="dhx_cal_header"></div> 
-    <div class="dhx_cal_data"></div> 
-    </div> 
+            <div class="dhx_cal_tab" data-tab="con" style=
+            "right:280px;"></div>
+            <div class="dhx_cal_tab" data-tab="prep" style=
+            "right:280px;"></div>
+        </div>
+        <div class="dhx_cal_header"></div>
+        <div class="dhx_cal_data"></div>
+    </div>
     <script>
-//https://docs.dhtmlx.com/scheduler/filtering.html
+    //https://docs.dhtmlx.com/scheduler/filtering.html
 
-var filter = document.querySelector("#filterWrap");
-filter.addEventListener("input", function(){
-  scheduler.setCurrentView();
-})  
-scheduler.filter_month = scheduler.filter_day = scheduler.filter_week = scheduler.filter_con = scheduler.filter_prep = function(id, event) {
-  if(filter.value == ""){
+    var filter = document.querySelector("#filterWrap");
+    filter.addEventListener("input", function(){
+    scheduler.setCurrentView();
+    })  
+    scheduler.filter_month = scheduler.filter_day = scheduler.filter_week = scheduler.filter_con = scheduler.filter_prep = function(id, event) {
+    if(filter.value == ""){
     return true;
-  }
-  if(event.text.toLowerCase().includes(filter.value.toLowerCase()) ){
+    }
+    if(event.text.toLowerCase().includes(filter.value.toLowerCase()) ){
     return true; 
-  }
-  if(event.Name && event.Name.toLowerCase().includes(filter.value.toLowerCase()) ){
+    }
+    if(event.Name && event.Name.toLowerCase().includes(filter.value.toLowerCase()) ){
     return true; 
-  }
-  return false;
-};
+    }
+    return false;
+    };
 
 
- 
+
     function toggleMultiday(element)
     {
       scheduler.config.multi_day = element.checked ;
@@ -100,7 +111,7 @@ scheduler.filter_month = scheduler.filter_day = scheduler.filter_week = schedule
     document.getElementById('colorize').addEventListener( "input" , colorize);
     document.getElementById('colorize').addEventListener( "paste" , colorize);
 
-function colorize (e){ //KS
+    function colorize (e){ //KS
      var text=e.target.value;
      console.log(text);
      var evs = scheduler.getEvents();
@@ -161,7 +172,7 @@ function colorize (e){ //KS
             scheduler.templates.prep_scale_date = scheduler.templates.week_scale_date;
             scheduler.date.add_prep=function(date,inc){ return scheduler.date.add(date,inc*1,"day"); }//"next" gives you the next 2 days
             scheduler.date.get_prep_end=function(date){ return scheduler.date.add(date,2,"day"); }
- 
+
     });
 
     const dayDate = scheduler.date.date_to_str("%D %d %F %Y");
@@ -170,10 +181,10 @@ function colorize (e){ //KS
     };
 
     scheduler.config.all_timed = "short"; // night events arent multi-day - events under 24h are shown
-    scheduler.config.lightbox.sections=[	
-    	{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
-    	{name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
-    	{name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
+    scheduler.config.lightbox.sections=[        
+        {name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+        {name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
+        {name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
         {name:"time", height:72, type:"time", map_to:"auto"}
     ];
 
@@ -189,6 +200,6 @@ function colorize (e){ //KS
     //dp.init(scheduler);
     //dp.setTransactionMode("JSON"); // use to transfer data with JSON
 
-    </script> 
-    </body> 
+    </script>
+</body>
 </html>

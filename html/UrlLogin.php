@@ -1,4 +1,3 @@
-
 <?php
 SESSION_START();
 
@@ -93,3 +92,13 @@ if($success == 1 && $email != "") {
     exit;
 }
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title></title>
+</head>
+<body>
+</body>
+</html>

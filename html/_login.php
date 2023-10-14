@@ -42,35 +42,52 @@ if(isset($_POST['login'])) {
 if(!isset($_SESSION["HelferID"])) {
 
     ?>
-<form method="post" action="#Info">
-
-  <fieldset>
-    <legend>Login</legend>
-    
-    <table border="0" style="border: 0px solid black;">
-            <tr> 	
-              <td style="border: 0px solid black;">Email</td></tr><tr><td style="border: 0px solid black;">
-              <input name="helfer-email" type="text" size=35 value="<?=htmlspecialchars($HelferEmail ?? '')?>" required>
-              </td>
-            <tr>
-            <tr> 	
-              <td style="border: 0px solid black;">Passwort</td></tr>
-              <tr><td style="border: 0px solid black;">
-              <input name="helfer-passwort" id="helfer-passwort" type="password" size=35 value="<?=htmlspecialchars($HelferHandy ?? '')?>" required>
-              </td><td style="border: 0px solid black;">
-              <input type="button" value="Passwort zeigen" style="width:180px !important" onclick="showPassword('helfer-passwort')">
-              </td>
-            <tr>
-	</table>
-    
-    
-  </fieldset>
-  
-  <p><button style="width: 100px" name="login" value="1">Login</button></p>
-
-
- </form> 
-<?php
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title></title>
+</head>
+<body>
+    <form method="post" action="#Info">
+        <fieldset>
+            <legend>Login</legend>
+            <table border="0" style="border: 0px solid black;">
+                <tr>
+                    <td style="border: 0px solid black;">Email</td>
+                </tr>
+                <tr>
+                    <td style="border: 0px solid black;">
+                    <input name="helfer-email" type="text" size=
+                    "35" value=
+                    "&lt;?=htmlspecialchars($HelferEmail ?? '')?&gt;"
+                    required=""></td>
+                </tr>
+                <tr>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="border: 0px solid black;">
+                    Passwort</td>
+                </tr>
+                <tr>
+                    <td style="border: 0px solid black;">
+                    <input name="helfer-passwort" id=
+                    "helfer-passwort" type="password" size="35"
+                    value=
+                    "&lt;?=htmlspecialchars($HelferHandy ?? '')?&gt;"
+                    required=""></td>
+                    <td style="border: 0px solid black;">
+                    <input type="button" value="Passwort zeigen"
+                    style="width:180px !important" onclick=
+                    "showPassword('helfer-passwort')"></td>
+                </tr>
+            </table>
+        </fieldset>
+        <p><button style="width: 100px" name="login" value=
+        "1">Login</button></p>
+    </form><?php
      exit;
 }
 
@@ -82,3 +99,5 @@ $AdminID = $_SESSION["AdminID"];
 $HelferIsAdmin = $AdminStatus = $_SESSION["AdminStatus"];
 $HelferLevel = $_SESSION["HelferLevel"];
 ?>
+</body>
+</html>

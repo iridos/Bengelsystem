@@ -1,176 +1,178 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
- <head>
-  <title>Drop Am See 2023</title>
-  
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-   
-  
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
+<head>
+    <meta name="generator" content=
+    "HTML Tidy for HTML5 for Linux version 5.6.0">
+    <title>Drop Am See 2023</title>
+    <link rel="stylesheet" href="css/style_desktop.css" media=
+    "screen and (min-width:781px)">
+    <link rel="stylesheet" href="css/style_mobile.css" media=
+    "screen and (max-width:780px)">
+    <meta name="viewport" content="width=480">
+</head>
+<body>
+    <?php
+    SESSION_START();
+    //$HelferID = $_SESSION["HelferId"];
 
-<?php
-SESSION_START();
-//$HelferID = $_SESSION["HelferId"];
+    require_once('konfiguration.php');
+    include 'SQL.php';
 
-require_once('konfiguration.php');
-include 'SQL.php';
+    $db_link = mysqli_connect(
+        MYSQL_HOST,
+        MYSQL_BENUTZER,
+        MYSQL_KENNWORT,
+        MYSQL_DATENBANK
+    );
 
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
+    if(isset($_POST['sent'])) {
 
-if(isset($_POST['sent'])) {
+        $messages = [];
 
-    $messages = [];
+        $HelferName = $_POST['helfer-name'];
+        $HelferEmail = $_POST['helfer-email'];
+        $HelferHandy = $_POST['helfer-handy'];
+        $HelferLevel = $_POST['helfer-level'];
+        $HelferPasswort = $_POST['helfer-passwort'];
+        ;
+        $HelferPasswort2 = $_POST['helfer-passwort2'];
+        ;
 
-    $HelferName = $_POST['helfer-name'];
-    $HelferEmail = $_POST['helfer-email'];
-    $HelferHandy = $_POST['helfer-handy'];
-    $HelferLevel = $_POST['helfer-level'];
-    $HelferPasswort = $_POST['helfer-passwort'];
-    ;
-    $HelferPasswort2 = $_POST['helfer-passwort2'];
-    ;
+        //echo $HelferName;
+        //echo $HelferEmail;
+        //echo $HelferHandy;
 
-    //echo $HelferName;
-    //echo $HelferEmail;
-    //echo $HelferHandy;
+        // Eingaben überprüfen:
 
-    // Eingaben überprüfen:
+        //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+        // $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+        //}
 
-    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    // $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //}
+        if(!filter_var($HelferEmail, FILTER_VALIDATE_EMAIL)) {
+            $messages[] = 'Bitte prüfen Sie die eingegebene E-Mail-Adresse.';
+        }
 
-    if(!filter_var($HelferEmail, FILTER_VALIDATE_EMAIL)) {
-        $messages[] = 'Bitte prüfen Sie die eingegebene E-Mail-Adresse.';
-    }
+        //if(!filter_var($HelferHandy, FILTER_VALIDATE_INT)) {
+        //  $messages[] = 'Bitte prüfen Sie die eingegebene Handynummer';
+        //}
 
-    //if(!filter_var($HelferHandy, FILTER_VALIDATE_INT)) {
-    //  $messages[] = 'Bitte prüfen Sie die eingegebene Handynummer';
-    //}
-
-    if($HelferPasswort != $HelferPasswort2) {
-        $messages[] = 'Passwörter stimmen nicht überein';
-        $HelferPasswort = "";
-        $HelferPasswort2 = "";
-    }
-    if(strlen($HelferPasswort) < 8) {
-        $messages[] = 'Passwörter zu kurz';
-        $HelferPasswort = "";
-        $HelferPasswort2 = "";
-    }
+        if($HelferPasswort != $HelferPasswort2) {
+            $messages[] = 'Passwörter stimmen nicht überein';
+            $HelferPasswort = "";
+            $HelferPasswort2 = "";
+        }
+        if(strlen($HelferPasswort) < 8) {
+            $messages[] = 'Passwörter zu kurz';
+            $HelferPasswort = "";
+            $HelferPasswort2 = "";
+        }
 
 
-    if(empty($messages)) {
-        $db_erg = CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
-        if ($db_erg) {
-            //$insertID = mysql_insert_id();
-            //echo "InserId = ".$insertID;
+        if(empty($messages)) {
+            $db_erg = CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
+            if ($db_erg) {
+                //$insertID = mysql_insert_id();
+                //echo "InserId = ".$insertID;
 
-            // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-            echo "Helfer mit Emailadresse ".$HelferEmail." Angelegt.<br><br>";
-            $HelferName = '';
-            $HelferEmail = '';
-            $HelferHandy = '';
-            $HelferPasswort = '';
-            $HelferPasswort2 = '';
+                // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
+                echo "Helfer mit Emailadresse ".$HelferEmail." Angelegt.<br><br>";
+                $HelferName = '';
+                $HelferEmail = '';
+                $HelferHandy = '';
+                $HelferPasswort = '';
+                $HelferPasswort2 = '';
 
-            //die('<div class="Helfer wurde angelegt.</div>');
+                //die('<div class="Helfer wurde angelegt.</div>');
+            } else {
+                echo "Helfer konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse ".$HelferEmail." bereits.<br><br>";
+            }
         } else {
-            echo "Helfer konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse ".$HelferEmail." bereits.<br><br>";
+            // Fehlermeldungen ausgeben:
+            echo '<div class="error"><ul>';
+            foreach($messages as $message) {
+                echo '<li>'.htmlspecialchars($message).'</li>';
+            }
+            echo '</ul></div>';
         }
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach($messages as $message) {
-            echo '<li>'.htmlspecialchars($message).'</li>';
-        }
-        echo '</ul></div>';
+
+
     }
 
 
-}
-
-
-?>
-
-<p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen.</p>
-<form method="post">
-
-  <table id="customers">
+    ?>
+    <p>Hier können Sie sich selbst einen Account als Helfer
+    anlegen.</p>
+    <form method="post">
+        <table id="customers">
             <tr>
                 <th>Helferdaten</th>
             </tr>
-            <tr> 	
-              <td>Name</td>
-	    </tr>
-	    <tr><td>
-              <input name="helfer-name" type="text" value="<?=htmlspecialchars($HelferName ?? '')?>" required>
-            </td></tr>
             <tr>
-	      <td>Email</td>
-           </tr>
-           <tr><td> 	
-              <input name="helfer-email" type="email " value="<?=htmlspecialchars($HelferEmail ?? '')?>" required>
-              </td></tr>
-            <tr>
-		  <td>Handy</td>
-           </tr>
-           <tr><td> 	
-              <input name="helfer-handy" type="tel" value="<?=htmlspecialchars($HelferHandy ?? '')?>" >
-              </td>
+                <td>Name</td>
             </tr>
             <tr>
-			  <td>Passwort</td></tr>
-              <tr><td> 	
-              <input name="helfer-passwort" type="password" value="<?=htmlspecialchars($HelferPasswort ?? '')?>" required>
-              </td>
+                <td><input name="helfer-name" type="text" value=
+                "&lt;?=htmlspecialchars($HelferName ?? '')?&gt;"
+                required=""></td>
             </tr>
-             <tr><td>Passwort wiederholen </td></tr>
- 	      <tr><td>	
-              <input name="helfer-passwort2" type="password" value="<?=htmlspecialchars($HelferPasswort2 ?? '')?>" required>
-              </td>
+            <tr>
+                <td>Email</td>
             </tr>
-              <tr><td>Helferlevel </td></tr>
- 	      <tr><td>	
-              <select name="helfer-level">
-<?php
-$db_erg = HelferLevel($db_link);
-$selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $HelferLevel = $zeile['HelferLevel'];
-    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
-    if($HelferLevel == 1) {
-        $selected = " selected " ;
-    };
-    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
+            <tr>
+                <td><input name="helfer-email" type="email" value=
+                "&lt;?=htmlspecialchars($HelferEmail ?? '')?&gt;"
+                required=""></td>
+            </tr>
+            <tr>
+                <td>Handy</td>
+            </tr>
+            <tr>
+                <td><input name="helfer-handy" type="tel" value=
+                "&lt;?=htmlspecialchars($HelferHandy ?? '')?&gt;"></td>
+            </tr>
+            <tr>
+                <td>Passwort</td>
+            </tr>
+            <tr>
+                <td><input name="helfer-passwort" type="password"
+                value=
+                "&lt;?=htmlspecialchars($HelferPasswort ?? '')?&gt;"
+                required=""></td>
+            </tr>
+            <tr>
+                <td>Passwort wiederholen</td>
+            </tr>
+            <tr>
+                <td><input name="helfer-passwort2" type="password"
+                value=
+                "&lt;?=htmlspecialchars($HelferPasswort2 ?? '')?&gt;"
+                required=""></td>
+            </tr>
+            <tr>
+                <td>Helferlevel</td>
+            </tr>
+            <tr>
+                <td><select name="helfer-level">
+                    <?php
+                    $db_erg = HelferLevel($db_link);
     $selected = "";
-}
-?>
-              </select>
-              </td>
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferLevel = $zeile['HelferLevel'];
+        $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
+        if($HelferLevel == 1) {
+            $selected = " selected " ;
+        };
+        echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
+        $selected = "";
+    }
+    ?>
+                </select></td>
             </tr>
-          </table>
+        </table><br>
+        <button name="sent" value="1">Helfer Anlegen</button>
+    </form><?php
 
-	<br>
-	<button name="sent" value="1">Helfer Anlegen</button>
-	
-  
-</form>
-
-
-  
-<?php
-
-mysqli_free_result($db_erg);
-?>
-  
- </body>
+    mysqli_free_result($db_erg);
+    ?>
+</body>
 </html>
