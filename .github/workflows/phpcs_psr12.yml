@@ -3,10 +3,10 @@ name: "CI"
 on:
   workflow_dispatch:
     paths:
-      - "html"
+      - "html/**.php"
   pull_request:
     paths:
-      - "html"
+      - "html/**.php"
 
 jobs:
   phpcs:
