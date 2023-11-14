@@ -1,6 +1,9 @@
 name: "CI"
 
 on:
+  workflow_dispatch:
+    paths:
+      - "html"
   pull_request:
     paths:
       - "html"
