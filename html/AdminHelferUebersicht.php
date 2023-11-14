@@ -1,15 +1,15 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 SESSION_START();
-require_once ('konfiguration.php');
-include 'SQL.php';
-$db_link=ConnectDB();
-include '_login.php';
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
 // das hier muss nicht unbedingt eine Adminseite sein
-if($AdminStatus != 1) {
- //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
- echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
- exit;
+if ($AdminStatus != 1) {
+    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
+    echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
+    exit;
 }
 ?>
 <!doctype html>
@@ -33,7 +33,7 @@ if($AdminStatus != 1) {
 
 
 DatenbankAufDeutsch($db_link);
-                    
+
 //$DienstID =$_SESSION["DienstID"];
 //$SchichtID =$_SESSION["SchichtID"];
 
@@ -43,21 +43,21 @@ $AdminID = $_SESSION["AdminID"];
 $_SESSION["HelferID"] = $HelferID;
 
 
- if(isset($_POST['ShowSchicht'])) {
-	 $SchichtID=$_POST['SchichtSearch'];
- }
- if(isset($_POST['SchichtSearch'])) {
-	 $SchichtID=$_POST['SchichtSearch'];
- }
+if (isset($_POST['ShowSchicht'])) {
+    $SchichtID = $_POST['SchichtSearch'];
+}
+if (isset($_POST['SchichtSearch'])) {
+    $SchichtID = $_POST['SchichtSearch'];
+}
 
- if(isset($_POST['ShowSchichten'])) {
-	 $DienstID=$_POST['DienstSearch'];
- }
+if (isset($_POST['ShowSchichten'])) {
+    $DienstID = $_POST['DienstSearch'];
+}
 
- if(isset($_POST['DienstSearch'])) {
-	 $DienstID=$_POST['DienstSearch'];
-     $SchichtID=0;
- }
+if (isset($_POST['DienstSearch'])) {
+    $DienstID = $_POST['DienstSearch'];
+    $SchichtID = 0;
+}
 
 
 
@@ -74,41 +74,38 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
 <table class="commontable">
 <?php
 $db_erg = AlleHelferSchichtenUebersicht($db_link);
-$dauer=0;
-$i=0;
-$OldHelferName="";
-$EinzelDienstStunden="";
-$HelferUeberschrift="";
-while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-{
+$dauer = 0;
+$i = 0;
+$OldHelferName = "";
+$EinzelDienstStunden = "";
+$HelferUeberschrift = "";
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferName = $zeile["Name"];
         $AliasHelferID = $zeile["AliasHelferID"];
         //echo $HelferName." ".$AliasHelferID."<br>";
-        if($HelferName!= $OldHelferName)
-        { 
-          if ($EinzelDienstStunden !=""){
+    if ($HelferName != $OldHelferName) {
+        if ($EinzelDienstStunden != "") {
              // Neue Ueberschrift mit Helfernamen + Stunden
              echo "$HelferUeberschrift </th><th> <img style='width:30px;height:30px;' src='Bilder/PfeilRunter.jpeg'> $dauer Stunden</th>";
              echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelfer' value='". $OldAliasHelferID ."'>+</button></form>\n";
+             echo "<button width='120px' name='AliasHelfer' value='" . $OldAliasHelferID . "'>+</button></form>\n";
              echo "&nbsp;&nbsp;";
              echo "<form style='display:table-cell' action='AdminMeineSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelfer' value='". $OldAliasHelferID ."'>&ndash;</button></form>";
+             echo "<button width='120px' name='AliasHelfer' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
              echo "</div></th>";
-             $dauer=0;
+             $dauer = 0;
              echo "$EinzelDienstStunden</td></tr>\n ";
-          }
-          $EinzelDienstStunden="";
-          $HelferUeberschrift="<tr class='header'><th width='15%'>".$HelferName;
-          $OldHelferName=$HelferName;
-          $OldAliasHelferID=$AliasHelferID;
-          $i+=1;
         }
-        $EinzelDienstStunden.="<tr><td style='width:100px'> ".(int)$zeile["Dauer"]."</td><td>";
-        $EinzelDienstStunden.= $zeile["Was"];
-        $EinzelDienstStunden.= "</td></tr>";
-        $dauer=$dauer+(int)$zeile["Dauer"];
-
+            $EinzelDienstStunden = "";
+            $HelferUeberschrift = "<tr class='header'><th width='15%'>" . $HelferName;
+            $OldHelferName = $HelferName;
+            $OldAliasHelferID = $AliasHelferID;
+            $i += 1;
+    }
+        $EinzelDienstStunden .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
+        $EinzelDienstStunden .= $zeile["Was"];
+        $EinzelDienstStunden .= "</td></tr>";
+        $dauer = $dauer + (int)$zeile["Dauer"];
 }
 echo "$EinzelDienstStunden";
 
