@@ -1,14 +1,6 @@
 name: "CI"
 
-on:
-  workflow_dispatch:
-    paths:
-      - "**.php"
-      - "html"
-  pull_request:
-    paths:
-      - "**.php"
-      - "html"
+on: [workflow_dispatch, pull_request]
 
 jobs:
   phpcs:
@@ -27,6 +19,6 @@ jobs:
 
       - uses: tinovyatkin/action-php-codesniffer@v1
         with:
-          files: "**.php" # you may customize glob as needed
+          files: "html/*.php"
           phpcs_path: php phpcs.phar
           standard: PSR12
