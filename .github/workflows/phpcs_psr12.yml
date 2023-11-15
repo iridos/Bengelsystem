@@ -19,6 +19,4 @@ jobs:
 
       - uses: tinovyatkin/action-php-codesniffer@v1
         with:
-          files: "html/*.php"
-          phpcs_path: php phpcs.phar
           standard: PSR12
