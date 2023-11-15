@@ -12,6 +12,6 @@ jobs:
       - name: Install PHP_CodeSniffer
         run: sudo apt-get -y install php-codesniffer
       - name: Set phpcs to ignore warnings in return value
-        run: phpcs --config-set ignore_warnings_on_exit 1
+        run: sudo phpcs --config-set ignore_warnings_on_exit 1
       - name: Run phpcs
         run: phpcs --standard=PSR12 html
