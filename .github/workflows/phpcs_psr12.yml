@@ -17,6 +17,5 @@ jobs:
           curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
           php phpcs.phar --version
 
-      - uses: tinovyatkin/action-php-codesniffer@v1
-        with:
-          standard: PSR12
+      - name: Run phpcs
+        run: php phpcs.phar --standard=PSR12 html
