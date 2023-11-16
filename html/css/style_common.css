@@ -2,8 +2,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-table, p, div, td, th, input  { 
-font-size: inherit ; 
+table, p, div, td, th, input  {
+font-size: inherit ;
 }
 
 .commontable a {

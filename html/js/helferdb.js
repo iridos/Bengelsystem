@@ -1,10 +1,11 @@
-function showPassword(id) {
-  var x = document.getElementById(id);
-  if (x.type === "password") {
-    x.type = "text";
-  } else {
-    x.type = "password";
-  }
+function showPassword(id)
+{
+    var x = document.getElementById(id);
+    if (x.type === "password") {
+        x.type = "text";
+    } else {
+        x.type = "password";
+    }
 }
 
 //// https://www.w3schools.com/howto/howto_js_collapsible.asp
@@ -21,26 +22,34 @@ function showPassword(id) {
 //      content.style.display = "block";
 //    }
 //  });
-//} 
+//}
 //
 
 //// collapse column rows that are not header
-function collapse_table_rows(){
- $(document).ready(function() {
-  $('tr:not(.header)').hide();
+function collapse_table_rows()
+{
+    $(document).ready(
+        function () {
+            $('tr:not(.header)').hide();
 
-  $('tr.header').click(function() {
-    $(this).find('span').text(function(_, value) {
-      return value == '-' ? '+' : '-'
-    });
-    
-    $(this).nextUntil('tr.header').slideToggle(100, function() {});
-  });
- });
+            $('tr.header').click(
+                function () {
+                    $(this).find('span').text(
+                        function (_, value) {
+                            return value == '-' ? '+' : '-'
+                        }
+                    );
+
+                    $(this).nextUntil('tr.header').slideToggle(100, function () {});
+                }
+            );
+        }
+    );
 }
 
-function expand_all_table_rows(){
+function expand_all_table_rows()
+{
 
- $('tr:not(.header)').hide(); // make all collapsed so that slideToggle doesnt close opened ones
- $('tr:not(.header)').slideToggle(100, function() {});
+    $('tr:not(.header)').hide(); // make all collapsed so that slideToggle doesnt close opened ones
+    $('tr:not(.header)').slideToggle(100, function () {});
 }
