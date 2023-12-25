@@ -16,14 +16,9 @@ SESSION_START();
 require_once 'konfiguration.php';
 require 'SQL.php';
 
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
+$pdo = ConnectDB();
 
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch($pdo);
 
 require '_login.php';
 

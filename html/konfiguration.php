@@ -1,8 +1,8 @@
  
 <?php
 // datenbank-defines extern
-require_once '/etc/helferdb_konfiguration.php';
-// die folgenden Zeilen ohne Kommentarzeichen nach /etc/helferdb_konfiguration.php
+require_once '../etc/helferdb_konfiguration.php';
+// die folgenden Zeilen ohne Kommentarzeichen nach ../etc/helferdb_konfiguration.php
 // kopieren und an die eigene Datenbank anpassen
 // define( 'MYSQL_HOST', 'localhost' );
 // define( 'MYSQL_BENUTZER', 'benutzername_der_datenbank' );
@@ -41,9 +41,8 @@ define('ZEITBEREICHWERTE', $ZeitBereichWerte);
 $TageNamenDeutsch = array("So","Mo","Di","Mi","Do","Fr","Sa");
 
 //Kalender-Konfiguration
-$dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK; // dsn fuer Kalender
+$dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK . ";charset=utf8mb4"; // dsn fuer Kalender
 $options = array(
-    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 );
