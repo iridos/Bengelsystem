@@ -24,7 +24,11 @@ function CreateHelfer($pdo, $HelferName, $HelferEmail, $HelferHandy, $HelferPass
     static $sql = "INSERT INTO Helfer(Name,Email,Handy,Status,BildFile,DoReport,Passwort,HelferLevel)".
         " VALUES (:name,:email,:handy,:status,:bildfile,:doreport,:passwort,:helferlevel)";
     static $stmt = false;
-    if(!$stmt) $stmt = $pdo->prepare($sql);
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare($sql);
+        $stmts_prepared = true;
+    }
     $db_erg = $stmt->execute([
         "name" => $HelferName,
         "email" => $HelferEmail,
@@ -46,7 +50,11 @@ function HelferIstVorhanden($pdo, $Email)
 {
     static $sql = "SELECT count(HelferID) AS Anzahl FROM Helfer WHERE Email = :email";
     static $stmt = false;
-    if(!$stmt) $stmt = $pdo->prepare($sql);
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare($sql);
+        $stmt_prepared = true;
+    }
     $stmt->execute(["email" => $Email]);
     // TODO Test, that this still works
     $zeile = $stmt->fetchAll();
@@ -60,7 +68,11 @@ function HelferLogin($pdo, $HelferEmail, $HelferPasswort, $HelferStatus)
     // Helfer Suchen
     static $sql = "SELECT HelferID,Admin,Name,Passwort,HelferLevel FROM Helfer WHERE Email=:email";
     static $stmt = false;
-    if(!$stmt) $stmt = $pdo->prepare($sql);
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare($sql);
+        $stmt_prepared = true;
+    }
     $db_erg = $stmt->execute(["email" => $HelferEmail]);
     if ($stmt->errorCode() != 1) {
         echo "Login ungueltige Abfrage";
@@ -92,7 +104,11 @@ function HelferListe($pdo)
 
     static $sql = "SELECT HelferID,Name FROM Helfer";
     static $stmt = false;
-    if(!$stmt) $stmt = $pdo->prepare($sql);
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare($sql);
+        $stmt_prepared = true;
+    }
     $db_erg = $stmt->execute();
     if ($stmt->errorCode() != 1) {
         echo "Helferliste ungueltige Abfrage";
@@ -109,7 +125,11 @@ function Helferdaten($pdo, $HelferID)
     static $sql = "SELECT * FROM Helfer Where HelferID = :helferid";
     static $stmt = false;
     if(!$stmt) $stmt = $pdo->prepare($sql);
-    $db_erg = $stmt->execute(["helferid" => $HelferID]);
+    static $stmt_prepared = false;
+    $db_erg stmt_prepared  {
+        $stmt->execute(["helferid" => $HelferID]);
+        $stmt_prepared = true;
+    }
 
     if ($stmt->errorCode() != 1) {
         echo "Helferdaten ungueltige Abfrage<br>\n";
@@ -235,8 +255,10 @@ function AlleSchichtenCount($db_link, $HelferLevel = 1)
 
     //$sql = "select SUM(Soll) As Anzahl from SchichtUebersicht where HelferLevel=$HelferLevel";
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
+        $stmt_prepared = true;
     }
 
 
@@ -255,10 +277,11 @@ function AlleSchichtenCount($db_link, $HelferLevel = 1)
 
 function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
 {
-
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
+        $stmt_prepared = true;
     }
 
 
@@ -317,10 +340,11 @@ function AlleSchichtenEinesHelfers($pdo, $HelferID)
 {
 
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid order by Von");
+        $stmt_prepared = true;
     }
-
 
     $db_erg = $stmt->execute(["helferid" => $HelferID]);
 
@@ -334,11 +358,18 @@ function AlleSchichtenEinesHelfers($pdo, $HelferID)
     return $db_erg;
 }
 
+// FIXME
 function HelferLoeschen($db_link, $HelferID, $AdminID)
 {
 
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
 
+    static $stmt = false;
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare("Delete from Helfer where HelferID='$HelferID'";);
+        $stmt_prepared = true;
+    }
 
     $db_erg = Helferdaten($db_link, $HelferID);
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -374,13 +405,16 @@ function SchichtIdArrayEinesHelfers($db_link, $HelferID)
 
     // Array, um Zeilen mit von mir belegten Schichten in der Schichtuebersicht einfaerben zu koennenn
     static $stmt = false;
-    if(!$stmt) {
-        $stmt = $pdo->prepare("SELECT SchichtID FROM EinzelSchicht WHERE HelferID = $HelferID");
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare("SELECT SchichtID FROM EinzelSchicht WHERE HelferID = :id");
+        $stmt_prepared = true;
     }
     //print_r($sql);
-    $db_erg = mysqli_query($db_link, $sql);
+    $db_erg = $stmt->execute(["id" => $HelferID]);
+
     $schichtIDs = array();
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_NUM)) {
+    while ($zeile = $stmt->fetch()) {
         $schichtIDs[] = $zeile[0];
     }
     return($schichtIDs);
@@ -391,8 +425,10 @@ function AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID)
 
     // TODO: fix GETDATE() array to string conversion
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:id and Bis>:bis order by Von");
+        $stmt_prepared = true;
     }
 
     //$sql = "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." and Bis>'2023-05-20' order by Von";
@@ -417,8 +453,10 @@ function SchichtenSummeEinesHelfers($db_link, $HelferID)
 
     //$sql = "select count Schicht.Dauer as Anzahl  FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." order by Von";
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select count(*) as Anzahl, SUM(TIME_TO_SEC(Schicht.Dauer)) as Dauer FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid");
+        $stmt_prepared = true;
     }
     //echo $sql;
     $db_erg = $stmt->execute(["helferid" => $HelferID]);
@@ -444,7 +482,8 @@ function LogSchichtEingabe($db_link, $HelferID, $SchichtId, $EinzelSchichtId, $A
     $AdminID = mysqli_real_escape_string($db_link, $AdminID);
 
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("SELECT Schicht.Von, Schicht.Bis, Dienst.Was, Helfer.Name
                 FROM EinzelSchicht 
                 JOIN Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID 
@@ -453,6 +492,7 @@ function LogSchichtEingabe($db_link, $HelferID, $SchichtId, $EinzelSchichtId, $A
                 WHERE EinzelSchicht.HelferID = $HelferID
                 AND ( Schicht.SchichtID = $SchichtId OR EinzelSchicht.EinzelSchichtID = $EinzelSchichtId)
                 ");
+        $stmt_prepared = true;
     }
         //error_log(date('Y-m-d H:i') . "  " . $sql ."\n",3,LOGFILE);
     $db_erg = mysqli_query($db_link, $sql);
@@ -481,8 +521,8 @@ function LogSchichtEingabe($db_link, $HelferID, $SchichtId, $EinzelSchichtId, $A
 function HelferSchichtZuweisen($pdo, $HelferID, $SchichtId, $AdminID = 0)
 {
     // Abfrage, ob bereits eine Einzelschicht in der selben Schicht vom Helfer existiert
-    static $stmts_prepared = false;
     static $stmts = false;
+    static $stmts_prepared = false;
     if(!$stmts_prepared) {
         $stmts['einzelschicht_exists'] = $pdo->prepare("SELECT EinzelSchichtID from EinzelSchicht WHERE SchichtID=:schichtid and HelferID=:helferid");
         $stmts['new_einzelschicht'] = $pdo->prepare("INSERT INTO EinzelSchicht(SchichtID,HelferID) VALUES (:schichtid,:helferid)");
@@ -523,8 +563,10 @@ function HelferVonSchichtLoeschen($pdo, $HelferID, $EinzelSchichtID, $AdminID = 
 
     // Lösche Einzelschicht
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("Delete From EinzelSchicht Where EinzelSchichtID = :id");
+        $stmt_prepared = true;
     }
 
     //echo $sql;
@@ -540,8 +582,10 @@ function HelferVonSchichtLoeschen_SchichtID($pdo, $HelferID, $SchichtID, $AdminI
 
     // Lösche Einzelschicht
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("Delete From EinzelSchicht Where SchichtID = :schichtid and HelferID = :helferid limit 1;");
+        $stmt_prepared = true;
     }
     //echo $sql;
     $db_erg = $stmt->execute([
@@ -552,15 +596,13 @@ function HelferVonSchichtLoeschen_SchichtID($pdo, $HelferID, $SchichtID, $AdminI
     return $db_erg;
 }
 
-
-
-
-
 function DetailSchicht($pdo, $InfoSchichtID)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select  Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Dienst,Schicht,Helfer where Dienst.DienstID=Schicht.DienstID AND Helfer.HelferID=Dienst.Leiter And SchichtID=:id");
+        $stmt_prepared = true;
     }
 
     //echo $sql;
@@ -580,8 +622,10 @@ function DetailSchicht($pdo, $InfoSchichtID)
 function BeteiligteHelfer($pdo, $InfoSchichtID)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select  Helfer.HelferID,Name,Handy FROM EinzelSchicht,Helfer where EinzelSchicht.HelferID=Helfer.HelferID And SchichtID=:id");
+        $stmt_prepared = true;
     }
 
     $db_erg = $stmt->execute(["id" => $InfoSchichtID]);
@@ -598,8 +642,10 @@ function BeteiligteHelfer($pdo, $InfoSchichtID)
 function GetDienste($db_link)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel FROM Dienst order By Was");
+        $stmt_prepared = true;
     }
     $db_erg = mysqli_query($db_link, $sql);
     if  ($stmt->errorCode() != 1){
@@ -612,8 +658,10 @@ function GetDienste($db_link)
 function GetDiensteChilds($pdo, $DienstID)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID=:id order by Was");
+        $stmt_prepared = true;
     }
 
     $db_erg = $stmt->execute(["id" => $DienstID]);
@@ -629,10 +677,11 @@ function GetDiensteChilds($pdo, $DienstID)
 function ChangeDienst($pdo, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("UPDATE Dienst SET Was=:was, Wo=:wo, Info=:info, Leiter=:leiter, ElternDienstID=:elterndienstid where DienstID=:dienstid");
+        $stmt_prepared = true;
     }
-
 
     $db_erg = $stmt->execute([
         "was" => $Was,
@@ -653,8 +702,10 @@ function ChangeDienst($pdo, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $Helf
 function NewDienst($pdo, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("INSERT INTO Dienst (Was, Wo, Info, Leiter, ElternDienstID, HelferLevel) values (:was,:wo,:info,:leiter,:elterndienstid,:helferlevel)");
+        $stmt_prepared = true;
     }
 
     $db_erg = $stmt->execute([
@@ -715,11 +766,12 @@ function DeleteDienst($db_link, $DienstID, $Rekursiv)
 
 function GetSchichtenEinesDienstes($db_link, $DienstID)
 {
-
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis FROM Schicht where DienstID=:id");
+        $stmt_prepared = true;
     }
     $db_erg = $stmt->execute(['id' => $DienstID]);
     if  ($stmt->errorCode() != 1){
@@ -733,8 +785,10 @@ function GetSchichtenEinesDienstes($db_link, $DienstID)
 function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("UPDATE Schicht SET Von=:von, Bis=:bis, Soll=:soll where SchichtID=:id");
+        $stmt_prepared = true;
     }
 
     $db_erg = $stmt->execute([
@@ -766,8 +820,10 @@ function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll)
     }
     */
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("INSERT INTO Schicht (DienstID, Von, Bis, Soll) values (:id,:von,:bis,:soll)");
+        $stmt_prepared = true;
     }
 
     $db_erg = $stmt->execute([
@@ -828,8 +884,10 @@ function DeleteSchicht($pdo, $SchichtID, $Rekursiv)
 function AlleHelferSchichtenUebersicht($pdo)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select Helfer.HelferID as AliasHelferID,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was");
+        $stmt_prepared = true;
     }
     $db_erg = $stmt->execute();
 
@@ -845,7 +903,11 @@ function DatenbankAufDeutsch($pdo)
 {
     static $sql = "SET lc_time_names = 'de_DE'";
     static $stmt = false;
-    if(!$stmt) $stmt = $pdo->prepare($sql);
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
+        $stmt = $pdo->prepare($sql);
+        $stmt_prepared = true;
+    }
     $db_erg = $stmt->execute();
 
     if  ($stmt->errorCode() != 1){
@@ -858,8 +920,10 @@ function DatenbankAufDeutsch($pdo)
 function HelferLevel($db_link)
 {
     static $stmt = false;
-    if(!$stmt) {
+    static $stmt_prepared = false;
+    if(!$stmt_prepared) {
         $stmt = $pdo->prepare("select HelferLevel,HelferLevelBeschreibung from HelferLevel");
+        $stmt_prepared = true;
     }
     $db_erg = $stmt->execute();
     if($stmt->errorCode() != 1){
