@@ -4,7 +4,7 @@
     "steps": [
     {
         "id": "selectdatabase",
-        "page": "<h2>Datenbanktyp auswählen<\/h2><p>Für die meisten Conventions sollte eine SQLite Datenbank ausreichen. In diesem Fall ist die Datenbank in einer einzelnen Datei und es ist nicht nötig eine separate Datenbank aufzusetzen.<\/p><p><form action=\"Setup.php\">\r\n    <fieldset>\r\n        <legend>Datenbank auswählen<\/legend>\r\n        <input type=\"hidden\" name=\"stepfrom\" value=\"selectdatabase\" \/>\r\n        <input type=\"radio\" id=\"sqlite\" name=\"databasetype\" value=\"SQLite\" checked \/>\r\n        <label for=\"sqlite\">SQLite<\/label><br \/>\r\n        <input type=\"radio\" id=\"sqlite\" name=\"databasetype\" value=\"MariaDB\" \/>\r\n        <label for=\"sqlite\">MariaDB<\/label><br \/>\r\n        <input type=\"submit\" value=\"Weiter\" \/>\r\n    <\/fieldset>\r\n<\/form><\/p>",
+        "page": "<h2>Datenbanktyp auswählen<\/h2><p>Für die meisten Conventions sollte eine SQLite Datenbank ausreichen. In diesem Fall ist die Datenbank in einer einzelnen Datei und es ist nicht nötig eine separate Datenbank aufzusetzen.<\/p><p><form action=\"Setup.php\" method=\"post\">\r\n    <fieldset>\r\n        <legend>Datenbank auswählen<\/legend>\r\n        <input type=\"hidden\" name=\"stepfrom\" value=\"selectdatabase\" \/>\r\n        <input type=\"radio\" id=\"sqlite\" name=\"databasetype\" value=\"SQLite\" checked \/>\r\n        <label for=\"sqlite\">SQLite<\/label><br \/>\r\n        <input type=\"radio\" id=\"sqlite\" name=\"databasetype\" value=\"MariaDB\" \/>\r\n        <label for=\"sqlite\">MariaDB<\/label><br \/>\r\n        <input type=\"submit\" value=\"Weiter\" \/>\r\n    <\/fieldset>\r\n<\/form><\/p>",
         "redirects": [
         {
             "==": {"databasetype": "SQLite"},
@@ -22,7 +22,23 @@
     },
     {
         "id": "enterlogindata",
-        "page": "<h2>Logindaten f\u00FCr die Datenbank eingeben<\/h2>\r\n<p>Bitte hier zun\u00E4chst die Logindaten f\u00FCr die Datenbank eingeben. Es muss in der Regel nur ein Passwort vergeben werden und die anderen beiden Werte k\u00F6nnen unver\u00E4ndert bleiben.<\/p>\r\n<p><form action=\"Setup.php\" >\r\n    <input type=\"hidden\" name=\"step\" value=\"setupdatabase\" \/>\r\n    <label for=\"host\">Hostname<\/label><br \/>\r\n    <input type=\"text\" id=\"host\" name=\"host\" value=\"localhost\" \/><br \/>\r\n    <label for=\"user\">Benutzername<\/label><br \/>\r\n    <input type=\"text\" id=\"user\" name=\"user\" value=\"helferdb\" \/><br \/>\r\n    <label for=\"password\">Passwort<\/label><br \/>\r\n    <input type=\"password\" id=\"password\" name=\"password\" \/><br \/>\r\n    <input type=\"submit\" value=\"Datenbank einrichten\" \/>\r\n<\/form><\/p>\r\n"
+        "page": "<h2>Logindaten für die Datenbank eingeben<\/h2>\r\n<p>Bitte hier zun\u00E4chst die Logindaten f\u00FCr die Datenbank eingeben. Es muss in der Regel nur ein Passwort vergeben werden und die anderen beiden Werte k\u00F6nnen unver\u00E4ndert bleiben.<\/p>\r\n<p><form action=\"Setup.php\" method=\"post\">\r\n <fieldset>\r\n        <legend>Logindaten eingeben<\/legend>\r\n    <input type=\"hidden\" name=\"step\" value=\"setupdatabase\" \/>\r\n    <input type=\"hidden\" name=\"stepfrom\" value=\"enterlogindata\" \/>\r\n    <label for=\"host\">Hostname<\/label><br \/>\r\n    <input type=\"text\" id=\"host\" name=\"host\" value=\"localhost\" \/><br \/>\r\n    <label for=\"user\">Benutzername<\/label><br \/>\r\n    <input type=\"text\" id=\"user\" name=\"user\" value=\"helferdb\" \/><br \/>\r\n    <label for=\"password\">Passwort<\/label><br \/>\r\n    <input type=\"password\" id=\"password\" name=\"password\" \/><br \/>\r\n    <label for=\"dbname\">Datenbankname<\/label><br \/>\r\n    <input type=\"text\" id=\"dbname\" name=\"dbname\" value=\"helferdb\" \/><br \/>\r\n    <input type=\"submit\" value=\"Datenbank einrichten\" \/>\r\n<\/fieldset>\r\n<\/form><\/p>\r\n",
+        "redirects": [
+        {
+            "==": {"password": ""},
+            "id": "enterlogindata",
+            "warning": "<p style=\"color:red\"><i>Bitte Passwort eingeben!<\/i><\/p>"
+        },
+        {
+            "==": {
+                "host":"",
+                "user":"",
+                "dbname":""
+            },
+            "id": "enterlogindata",
+            "warning": "<p style=\"color:red\"><i>Bitte alle Felder eingeben!<\/i><\/p>"
+        }
+        ]
     },
     {
         "id": "setupdatabase",
