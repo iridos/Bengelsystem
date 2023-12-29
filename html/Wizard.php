@@ -1,7 +1,7 @@
 <?php
 
 class WizardStep {
-    public string $page = "";
+    public $page = "";
     public array $redirects = array();
     public string $warning = "";
     public $code = null;
@@ -124,7 +124,28 @@ class Wizard {
         // If warning not set this does not add anything to the page:
         echo $this->steps[$_POST['step']]->warning;
         $pagedom = new DOMDocument();
-        $pagedom->loadHTML("\xEF\xBB\xBF".$this->steps[$_POST['step']]->page);
+        $pageval = $this->steps[$_POST['step']]->page;
+        if(is_array($pageval)){
+            $page = "\xEF\xBB\xBF";
+            foreach($pageval as $pagepart){
+                foreach($pagepart as $element => $content){
+                    if($element == 'text'){
+                        $page.=$content;
+                    }
+                    elseif($element == 'variable'){
+                        $tmpcontent = $this->storedvariables;
+                        foreach(explode('/',$content) as $pathpart){
+                            $tmpcontent = $tmpcontent[$pathpart];
+                        }
+                        $page.=$tmpcontent;
+                    }
+                }
+            }
+        }
+        else{
+            $page = "\xEF\xBB\xBF".$pageval;
+        }
+        $pagedom->loadHTML($page);
         $forms = $pagedom->getElementsByTagName('form');
         foreach($forms as $form){
             $input = $pagedom->createElement('input');

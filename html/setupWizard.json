@@ -42,7 +42,23 @@
     },
     {
         "id": "setupdatabase",
-        "page": "<h2>Datenbank einrichten<\/h2>\r\n<p>Bitte zunächst mariadb einrichten (oder mysql) und dazu folgendes in der Shell (z.b. bash) eingeben:<\/p>\r\n<pre><code>sudo apt-get install mariadb<\/code><\/pre>"
+        "page": [
+        {"text": "<h2>Datenbanksoftware installieren und starten<\/h2><p>Hier müssen ein paar Sachen per Hand in einem Terminal gemacht werden, die der Setupwizard vernünftigerweise nicht selbst machen sollte da sie Adminrechte (root) erfordern.\r\n<p>Bitte zunächst mariadb einrichten (oder mysql) und dazu folgendes in der Shell (z.b. bash) eingeben:<\/p>\r\n<pre><code>sudo apt-get install mariadb-server<\/code><\/pre><p>Wenn eine Fehlermeldung kommt, dass man nicht in der sudoers Datei ist (oder so ähnlich), vorher folgendes eingeben um zum Adminbenutzer zu wechseln (wenn man zum Adminbenutzer gewechselt ist kann man das vorausgestellte sudo bei allen Kommandos weglassen, es schadet aber auch nicht):<\/p><pre><code>su -<\/code><\/pre><p>Zum Starten der Datenbank sollte jetzt folgendes Kommando ausgeführt werden:<\/p><pre><code>sudo systemctl start mariadb<\/code><\/pre><p>Wenn die Datenbank automatisch bei Start des Computers gestartet werden soll, bitte folgendes eingeben<\/p><pre><code>sudo systemctl enable mariadb<\/pre><\/code><h2>In der Datenbank anmelden und den Benutzer anlegen</h2><p>Jetzt sollte der Datenbankbenutzer und die Datenbank angelegt werden. Dazu müssen wir uns einmal als <i>root</i> Benutzer von der Datenbank selbst (nicht zu verwechseln mit dem root Benutzer vom System) anmelden:<\/p><pre><code>sudo mysql -u root -p<\/code><\/pre><p>Es wird hier nach dem Datenbankpasswort gefragt, aber wenn es nicht gesetzt ist kann man es auch einfach leer lassen.<\/p><p>Um die Datenbank anzulegen bitte in den Datenbankprompt folgendes Kommando eingeben:</p><pre><code>CREATE DATABASE '"},
+        {"variable": "enterlogindata\/dbname"},
+        {"text": "';<\/code><\/pre><p>Wir können jetzt den Datenbankbenutzer anlegen:<\/p><pre><code>CREATE USER '"},
+        {"variable": "enterlogindata\/user"},
+        {"text": "'@'"},
+        {"variable": "enterlogindata\/host"},
+        {"text":"' IDENTIFIED BY '"},
+        {"variable": "enterlogindata\/password"},
+        {"text":"';<\/code><\/pre><p>und ihm alle Rechte auf der Datenbank geben:<\/p><pre><code>GRANT ALL PRIVILEGES ON '"},
+        {"variable": "enterlogindata\/dbname"},
+        {"text":"'.* TO '"},
+        {"variable": "enterlogindata\/user"},
+        {"text": "'@'"},
+        {"variable": "enterlogindata\/host"},
+        {"text": "';<\/code><\/pre><p>Wir müssen außerdem die Änderung anwenden:</p><pre><code>FLUSH PRIVILEGES;<\/code><\/pre><pre><code>QUIT;<\/code><\/pre>"}
+        ]
     }
     ],
     "footer": "</body></html>"
