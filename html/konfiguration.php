@@ -1,7 +1,7 @@
  
 <?php
 // datenbank-defines extern
-require_once '../etc/helferdb_konfiguration.php';
+require_once('../etc/konfiguration.php');
 // die folgenden Zeilen ohne Kommentarzeichen nach ../etc/helferdb_konfiguration.php
 // kopieren und an die eigene Datenbank anpassen
 // define( 'MYSQL_HOST', 'localhost' );

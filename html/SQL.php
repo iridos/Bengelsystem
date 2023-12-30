@@ -5,18 +5,17 @@ require_once 'konfiguration.php';
 
 class DB {
     private static $instance = null;
-    private $pdo = null;
-    private $stmts = array();
+    private static $pdo = null;
+    private static $stmts = array();
 
     private function __construct()
     {
-        $datasourcename = "mysql:host=" . MYSQL_HOST . ";dbname=". MYSQL_DATENBANK . ";charset=utf8mb4";
         self::$pdo = new PDO(
-                $datasourcename,
+                MYSQL_DSN,
                 MYSQL_BENUTZER,
-                MYSQL_KENNWORT
+                MYSQL_KENNWORT,
+                array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING)
                 );
-        self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     }
 
     public static function getInstance()
@@ -46,7 +45,14 @@ class DB {
     {
         return self::$stmts[$method . "::" . $variant]->fetchAll();
     }
-
+    public function pdoErrorCode()
+    {
+        return self::$pdo->errorCode();
+    }
+    public function pdoErrorInfo()
+    {
+        return self::$pdo->errorInfo();
+    }
     public function errorCode($method, $variant = '')
     {
         return self::$stmts[$method . "::" . $variant]->errorCode();
@@ -59,7 +65,7 @@ class DB {
 
     public function onErrorDie($method, $variant = '')
     {
-        if (self::errorCode($method, $variant) != 1) {
+        if (!is_null(self::errorCode($method, $variant)) && self::errorCode($method, $variant) != '1') {
             echo $method . "::" . $variant . " ungueltige Abfrage<br>\n";
             echo "sql:" . $stmts[$method . "::" . $variant]->queryString . "<br>\n";
             die('Ungueltige Abfrage: ' . self::errorInfo($method, $variant)[2]);
