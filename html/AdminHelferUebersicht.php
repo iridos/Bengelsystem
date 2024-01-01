@@ -88,10 +88,10 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
              // Neue Ueberschrift mit Helfernamen + Stunden
              echo "$HelferUeberschrift </th><th> <img style='width:30px;height:30px;' src='Bilder/PfeilRunter.jpeg'> $dauer Stunden</th>";
              echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelfer' value='" . $OldAliasHelferID . "'>+</button></form>\n";
+             echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
              echo "&nbsp;&nbsp;";
              echo "<form style='display:table-cell' action='AdminMeineSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelfer' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
+             echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
              echo "</div></th>";
              $dauer = 0;
              echo "$EinzelDienstStunden</td></tr>\n ";
