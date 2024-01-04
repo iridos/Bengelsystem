@@ -48,12 +48,10 @@ require '_login.php';
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 
     <b>
 <?php
+    echo "Helfer $HelferName";
 if ($HelferIsAdmin) {
-    echo "Admin ";
-} else {
-    echo "Helfer ";
+    echo " (Admin)";
 }
-        echo $HelferName;
 ?> 
     </b>  </td>
   </tr>
