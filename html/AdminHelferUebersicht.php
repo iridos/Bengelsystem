@@ -86,7 +86,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     if ($HelferName != $OldHelferName) {
         if ($EinzelDienstStunden != "") {
              // Neue Ueberschrift mit Helfernamen + Stunden
-             echo "$HelferUeberschrift </th><th> <img style='width:30px;height:30px;' src='Bilder/PfeilRunter.jpeg'> $dauer Stunden</th>";
+             echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden</th>";
              echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
              echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
              echo "&nbsp;&nbsp;";
@@ -97,7 +97,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
              echo "$EinzelDienstStunden</td></tr>\n ";
         }
             $EinzelDienstStunden = "";
-            $HelferUeberschrift = "<tr class='header'><th width='15%'>" . $HelferName;
+            $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_". $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> " . $HelferName . "</div></form>";
             $OldHelferName = $HelferName;
             $OldAliasHelferID = $AliasHelferID;
             $i += 1;

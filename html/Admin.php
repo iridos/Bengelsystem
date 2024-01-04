@@ -60,7 +60,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
   <tr onclick="window.location.href='AdminDienste.php';">
     <td>
-     <a class="fallbacklink" href='AdminDienste.php'><img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b> Dienste und Schichten verwalten</b></a>
+     <a class="fallbacklink" href='AdminDienste.php'><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Dienste und Schichten verwalten</b></a>
     </td>
   </tr>
     <tr onclick="window.location.href='CreateHelfer.php';"> <td>
@@ -68,11 +68,11 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     </td> </tr>
    
     <tr onclick="window.location.href='EmailZuToken.php';"> <td>
-    <img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b>Helfer per Link einladen</b>
+    <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>Helfer per Link einladen</b>
     </td> </tr>
   <tr onclick="window.location.href='AdminHelferUebersicht.php';">
     <td>
-     <a class="fallbacklink" href='AdminHelferUebersicht.php'><img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b>Helfer&uuml;bersicht</b></a>
+     <a class="fallbacklink" href='AdminHelferUebersicht.php'><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>Helfer&uuml;bersicht (und als Admin &auml;ndern)</b></a>
     </td>
   </tr>
 
@@ -98,13 +98,13 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 - inner table for indent--> 
 <tr onclick="window.location.href='AdminUserdaten.php';">
     <!--td class="invis"></td-->
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b> Helferdaten &auml;ndern</b></td>
+    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Helferdaten &auml;ndern</b></td>
   </tr>
   <tr onclick="window.location.href='AdminMeineSchichten.php';">
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b> Schichten Anzeigen/Löschen</b></td>
+    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Schichten Anzeigen/Löschen</b></td>
   </tr>
   <tr onclick="window.location.href='AdminAlleSchichten.php';">
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"><b> Schichten Hinzufügen</b></td>
+    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Schichten Hinzufügen</b></td>
   </tr>
 <!--</table></td> </tr>  inner table for indent end-->
   <!--<tr><th>Weiteres</th></tr>-->
@@ -113,9 +113,6 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     </tr>
     <tr onclick="window.location.href='Ausdrucke.php';">
     <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdrucke</b>  </td> 
-    </tr>
-    <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck.php';">
-    <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdruck Schichten</b>  </td> 
     </tr>
 </table>
 <p> <img src="Bilder/Info.jpeg" width="25px" height="25px"> Dienst: z.B. Badgekontrolle Eingang A. Schicht: ein Dienst zu einer bestimmten Zeit zB 9-12 Uhr
