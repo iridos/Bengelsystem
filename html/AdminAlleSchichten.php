@@ -197,7 +197,7 @@ if (isset($_POST['minusschicht'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $AliasHelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
-    echo '<table  id="customers"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
+    echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
     echo " Dienstplan von $HelferName (Zusammenfassung)<br>";
     echo $zeile['Anzahl'];
     echo " Schichten insgesamt ";
@@ -266,7 +266,7 @@ if ($addschicht != '0') {
 
 
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
-    echo '<table  id="customers">';
+    echo '<table  class="commontable">';
     echo "<thead>";
     echo "<tr>";
     echo "</tr><th  colspan='7'>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
@@ -333,7 +333,7 @@ if ($addschicht != '0') {
     //print_r($MeineDienste);
 
     echo '</table>';
-    echo '<table  id="customers">';
+    echo '<table  class="commontable collapsible">';
 
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         if ($dienstsort == '1') {
