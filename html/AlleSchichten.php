@@ -2,19 +2,19 @@
 <html>
  <head>
   <title>Helfer Drop am See Alle Schichten</title>
-  
+ 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
-   
-  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script> 
-  <script src="js/helferdb.js" type="text/javascript"></script> 
+ 
+  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script>
+  <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>
-  
+ 
  </head>
  <body>
- <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button>   
+ <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button>
  <h1> Alle Schichten / Schichten hinzuf&uuml;gen </h1>
 <div style="width: 100%;">
 <?php
@@ -103,7 +103,7 @@ if (isset($_GET['ZeitBereich'])) {
 ?>
 
 
-<form method="post" action="AlleSchichten.php#Info">  
+<form method="post" action="AlleSchichten.php">
 <?php
 
 
@@ -112,24 +112,17 @@ if (isset($_GET['ZeitBereich'])) {
 ///////////////////////////////////////////////////////////
 if (isset($_POST['plusschicht'])) {
     $messages = [];
-    $SchichtId = $_POST['plusschicht'];
-
-    // Eingaben überprüfen:
-
-    //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //  }
-
-
+    $SchichtID = $_POST['plusschicht'];
+    // Nutzer hat hier zuletzt etwas geändert und wir klappen das deshalb auf,
+    // indem wir unten target=active setzen
+    $_SESSION["SchichtIdAktiv"] = $SchichtID;
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
+        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtID);
 
-        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
         $HelferEmail = '';
         $HelferHandy = '';
-        //die('<div class="Helfer wurde angelegt.</div>');
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -145,6 +138,8 @@ if (isset($_POST['minusschicht'])) {
         $messages = [];
 
         $SchichtID = $_POST['minusschicht'];
+        // Nutzer hat hier zuletzt etwas geaenndert und wir klappen das deshalb auf:
+        $_SESSION["SchichtIdAktiv"] = $SchichtID;
 
     if (empty($messages)) {
             // Helfer aus Schicht entfernen
@@ -169,6 +164,7 @@ if (isset($_POST['minusschicht'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
+    //"Mein Dienstplan"
     echo '<table  class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
     echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' .  " Mein Dienstplan (";
     echo $zeile['Anzahl'];
@@ -206,7 +202,6 @@ if ($addschicht == '0') {
     echo "<button name='addschicht' value='2'>Dienste</button></p>";
 }
 
-//echo "InfoAlleSchichtID ".$InfoAlleSchichtID;
 
 if ($addschicht != '0') {
     //$db_erg = AlleSchichten($db_link,$dienstsort);
@@ -237,21 +232,11 @@ if ($addschicht != '0') {
     $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
         echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
 
-    //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
-    echo '<table  id="customers">';
+    // "Alle Schichten der Con"
+    echo '<table  class="commontable">';
     echo "<tr class='header'>";
-    echo "<th colspan='7'>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
+    echo "<th colspan='7'>Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
 
-    /*
-    if ($dienstsort=='1')
-    {
-    echo "<th>". "Dienst" . "</th>";
-    }
-    else
-    {
-    echo "<th>". "Von" . "</th>";
-    }
-    */
     echo "<tr class='header'>"; // Zeitbereich tr
     if ($ZeitBereich == 1) {
         echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=1\"'>" . "Alle" . "</th>";
@@ -298,7 +283,8 @@ if ($addschicht != '0') {
     //print_r($MeineDienste);
 
     echo '</table>';
-    echo '<table  id="customers">';
+    // Tabelle mit allen Diensten und Schichten
+    echo '<table  class="commontable collapsible">';
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         if ($dienstsort == '1') {
             $Tag = $zeile['Tag'];
@@ -313,7 +299,8 @@ if ($addschicht != '0') {
             $Was = $zeile['Was'];
 
             if ($Was != $OldWas) {
-                echo "<tr class='header'><th  colspan='7' style='width:100%'>";
+                // + in <span> becomes - when rows are opened
+                echo "<tr class='header'><th  colspan='7' style='width:100%'><span>+</span> ";
                 echo $Was;
                 echo "</th>";
                 /*
@@ -349,6 +336,9 @@ if ($addschicht != '0') {
             $rowstyle = 'dbinfo="SchichtID:' . $zeile['SchichtID'] . ';helferlvl:' . $HelferLevel . '" ';
             $regtext  = '';
         }
+        if ($_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
+            $rowstyle = $rowstyle . " target='active' "; // dont collapse when the user did something
+        }
 
                 echo '<tr ' . $rowstyle . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $zeile['SchichtID'] . '#Info\';" >';
 
@@ -363,8 +353,7 @@ if ($addschicht != '0') {
         echo "" . $zeile['Soll'] . "</td>";
                 // buttons sind in der selben Zelle
         echo "<td width='30px'>" . "<button width='20px' name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>" . "";
-        echo "" . "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
-                //echo "<td>$regtext</td>";
+        echo "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
         echo "</tr>\n";
     }
     echo "</table>";
@@ -380,9 +369,9 @@ mysqli_free_result($db_erg);
 
 
 ?>
- 
- </form> 
+
+ </form>
  </div>
- 
+
  </body>
 </html>
