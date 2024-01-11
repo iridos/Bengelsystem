@@ -53,31 +53,43 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 <div style="width: 100%;">
 
 <table class="commontable">
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> &nbsp; <b>Admin HelferDB  <?php echo  EVENTNAME; ?>
-</b>
+    <th>
+       <button name="BackHelferdaten" value="1" onclick="window.location.href = 'index.php';">
+          <b>&larrhk;</b>
+       </button> &nbsp; 
+       <b>Admin HelferDB <?php echo  EVENTNAME; ?></b>
   </th>
   <tr> 
 
 
   <tr onclick="window.location.href='AdminDienste.php';">
     <td>
-     <a class="fallbacklink" href='AdminDienste.php'><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Dienste und Schichten verwalten</b></a>
+     <a class="fallbacklink" href='AdminDienste.php'>
+        <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+        <b> Dienste und Schichten verwalten</b>
+     </a>
     </td>
   </tr>
     <tr onclick="window.location.href='CreateHelfer.php';"> <td>
     <img src="Bilder/More.jpeg" style="width:30px;height:30px;"><b>Seite zur Helfer selbst-Registrierung</b>
     </td> </tr>
-   
+
     <tr onclick="window.location.href='EmailZuToken.php';"> <td>
     <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>Helfer per Link einladen</b>
     </td> </tr>
   <tr onclick="window.location.href='AdminHelferUebersicht.php';">
     <td>
-     <a class="fallbacklink" href='AdminHelferUebersicht.php'><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>Helfer&uuml;bersicht (und als Admin &auml;ndern)</b></a>
+       <a class="fallbacklink" href='AdminHelferUebersicht.php'>
+          <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+          <b>Helfer als Admin &auml;ndern</b>
+       </a>
     </td>
   </tr>
 
-   <th><b>Helfer als Admin &auml;ndern:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;font-size:20" name="AliasHelferID" id="AliasHelferID" onchange="submit()">
+   <th>
+      <b>Helfer als Admin &auml;ndern:<b> 
+      <form style="display:inline-block;" method=post>
+      <select style="height:33px;width:350px;font-size:20" name="AliasHelferID" id="AliasHelferID" onchange="submit()">
 <?php
     $db_erg = HelferListe($db_link);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -99,13 +111,25 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 - inner table for indent--> 
 <tr onclick="window.location.href='AdminUserdaten.php';">
     <!--td class="invis"></td-->
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Helferdaten &auml;ndern</b></td>
+    <td>
+      <img src="Bilder/dot.png" width="30px" height="2px">
+      <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+      <b> Helferdaten &auml;ndern</b>
+    </td>
   </tr>
   <tr onclick="window.location.href='AdminMeineSchichten.php';">
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Schichten Anzeigen/Löschen</b></td>
+    <td>
+        <img src="Bilder/dot.png" width="30px" height="2px">
+        <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+        <b>Schichten Anzeigen/Löschen</b>
+    </td>
   </tr>
   <tr onclick="window.location.href='AdminAlleSchichten.php';">
-    <td><img src="Bilder/dot.png" width="30px" height="2px"><img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b> Schichten Hinzufügen</b></td>
+    <td>
+        <img src="Bilder/dot.png" width="30px" height="2px">
+        <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+        <b> Schichten Hinzufügen</b>
+    </td>
   </tr>
 <!--</table></td> </tr>  inner table for indent end-->
   <!--<tr><th>Weiteres</th></tr>-->
@@ -116,8 +140,12 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdrucke</b>  </td> 
     </tr>
 </table>
-<p> <img src="Bilder/Info.jpeg" width="25px" height="25px"> Dienst: z.B. Badgekontrolle Eingang A. Schicht: ein Dienst zu einer bestimmten Zeit zB 9-12 Uhr
+<p>
+   <img src="Bilder/Info.jpeg" width="25px" height="25px">
+   Dienst: z.B. Badgekontrolle Eingang A. Schicht: ein Dienst zu einer bestimmten Zeit zB 9-12 Uhr
 </p>
-<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> 
+<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';">
+  <b>&larrhk;</b>
+</button>
 </body>
 </html>

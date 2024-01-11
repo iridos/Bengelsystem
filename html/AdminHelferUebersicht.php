@@ -71,7 +71,7 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten</b></th>
   </tr>
 </table>
-<table class="commontable">
+<table class="commontable collapsible">
 <?php
 $db_erg = AlleHelferSchichtenUebersicht($db_link);
 $dauer = 0;

@@ -60,7 +60,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     </tr>
     <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck.php';">
     <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdruck Schichten(I)</b>  </td> </tr>
-    <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck.php';">
+    <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck2.php';">
     <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdruck Schichten(II)</b>  </td> </tr>
 </table>
 <button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
