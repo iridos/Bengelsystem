@@ -9,8 +9,8 @@ require_once '/etc/helferdb_konfiguration.php';
 // define( 'MYSQL_KENNWORT', 'passwort_des_db_nutzers' );
 // define( 'MYSQL_DATENBANK', 'name_der_datenbank' );
 // define( 'LOGFILE', "/pfad/zu/einer/www-schreibbaren/datei");
-// define( VERANSTALTUNGSNAME, "dubbelcon");
-// define( INFORMATIONS_URL, "http://drop-am-see.de/Gelaende");
+define( 'EVENTNAME', "dubbelcon");
+// define( 'INFORMATIONS_URL', "http://drop-am-see.de/Gelaende");
 
 date_default_timezone_set('Europe/Berlin');
 setlocale(LC_TIME, "de_DE.UTF-8");

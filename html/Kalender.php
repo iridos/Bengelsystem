@@ -1,3 +1,12 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,7 +47,6 @@
                     padding-left: 15px;
                     padding-right: 15px;
             }
-    </style-->
 
 </head> 
 <body> 

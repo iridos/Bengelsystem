@@ -1,7 +1,21 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+if ($AdminStatus != 1) {
+    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
+    echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
+    exit;
+}
+?>
 <!doctype html>
 <html lang=de>
 <head>
-  <title>Helfer Drop am See Home</title>
+  <title>Helfer <?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src=js/helferdb.js></script>
@@ -9,40 +23,11 @@
 <meta charset="utf-8">
 </head>
 <body>
-
-<?php
-SESSION_START();
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-
-DatenbankAufDeutsch($db_link);
-
-require '_login.php';
-
-// wird von _login.php miterledigt
-// TODO: hier wird HelferIsAdmin verwendet, woanders ist es AdminStatus
-//$db_erg = Helferdaten($db_link,$HelferID);
-//while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-//{
-//    $HelferName=$zeile['Name'];
-//    $HelferIsAdmin=$zeile['Admin'];
-//}
-
-?>
-
 <div style="width: 100%;">
 
 <table id="customers" >
   <tr onclick="window.location.href='Info.php';">
-    <th><img src="Bilder/Info.jpeg" style="width:30px;height:30px;"> &nbsp; <b>Drop am See 2023</b></th>
+    <th><img src="Bilder/Info.jpeg" style="width:30px;height:30px;"> &nbsp; <b><?php echo EVENTNAME ?></b></th>
   </tr>
   <tr onclick="window.location.href='Userdaten.php';">
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 

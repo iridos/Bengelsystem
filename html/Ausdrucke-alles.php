@@ -1,7 +1,16 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
 <head>
-  <title>Admin Drop am See</title>
+  <title>Admin <?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -14,32 +23,11 @@
 
 <div style="width: 100%;">
 
-<?php
-
-SESSION_START();
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-DatenbankAufDeutsch($db_link);
-
-require '_login.php';
-
-
-?>
-
 <table id="customers" >
   <tr>
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Dienst DAS 2023</b></th>
   </tr>
 </table>
-
 
 <?php
 

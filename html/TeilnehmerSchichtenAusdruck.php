@@ -1,3 +1,17 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+if ($AdminStatus != 1) {
+    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
+    echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
+    exit;
+}
+?>
 <!doctype html>
 <html>
  <head>
@@ -12,19 +26,6 @@
  <!--h1> Alle Schichten Ausdruck</h1-->
 <div style="width: 100%;">
 <?php
-SESSION_START();
-
-require_once('konfiguration.php');
-include 'SQL.php';
-
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-include '_login.php';
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////

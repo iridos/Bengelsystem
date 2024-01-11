@@ -1,7 +1,16 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
  <head>
-  <title>Helfer Drop am See</title>
+  <title>Helfer <?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -9,35 +18,9 @@
   <meta name="viewport" content="width=480" />
  </head>
  <body>
-<?php
-//<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button><br>
-?>
 <div style="width: 100%;">
 <?php
-
-
-SESSION_START();
-
-require_once('konfiguration.php');
-//require_once ('SQL.php');
-include 'SQL.php';
-
-
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-
-
-
 /// Detailinformation zu ausgewaehlten Schicht Holen
-////////////////////////////////////////////////////////
-
-
-
 
 if (isset($_GET['InfoAlleSchichtID'])) {
     $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];

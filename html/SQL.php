@@ -1,4 +1,3 @@
-
 <?php
 
 require_once 'konfiguration.php';
@@ -11,6 +10,7 @@ function ConnectDB()
         MYSQL_KENNWORT,
         MYSQL_DATENBANK
     );
+    DatenbankAufDeutsch($db_link);
     return $db_link;
 }
 
