@@ -94,7 +94,6 @@ if (isset($_GET['ZeitBereich'])) {
 ?>
 
 
-<!--form method="post" action="AlleSchichtenAusdruck.php#Info"-->
 <?php
 
 
@@ -176,7 +175,8 @@ $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
     echo '<table  class="commontable">';
     echo "<tr class='header'>";
-    echo "<th colspan='7'>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
+    echo "<th colspan='7'>" . "Alle Schichten der Con (";
+    echo $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
 
 echo "\n<tr class='header'>\n"; // Zeitbereich tr
 
@@ -227,7 +227,9 @@ foreach ($ZeitBereichWerte as &$EinZeitBereich) {
   //$Text="$Text <br>$MeinVon $MeinBis"; // debug time strings
 
   // write the field for each day
-    echo "<th style='width:{$ZeitBereichFeldBreite}%; $color' onclick='window.location.href=\"AlleSchichtenAusdruck.php?ZeitBereich={$EinZeitBereich}\";'>" . "$Text" . "</th>\n";
+    echo "<th style='width:{$ZeitBereichFeldBreite}%; $color' ";
+    echo "onclick='window.location.href=\"TeilnehmerSchichtenAusdruck.php?ZeitBereich={$EinZeitBereich}\";'>";
+    echo "$Text" . "</th>\n";
 }
 echo "</tr>"; //Zeitbereich tr
 
@@ -242,13 +244,16 @@ $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
 
 echo "</table>\n";
 
-// Table to print out the shifts for people to enter their name in. If a shift is already taken, the name is printed out.
+// Table to print out the shifts for people to enter their name in.
+// If a shift is already taken, the name is printed out.
 // The table prints just one day, specified via Zeitbereich. The heading above wrote out the day.
 // the table is sorted by shift type (Was) first and then by time (Ab).
 // "Was" is printed in the middle together with two-letter day and time.
 // the first and the 5th (last) column also contain two-letter day and time for people to tear off and take with them.
-// the 2nd and 4th column are for the namer. if the shift is already taken, the name is printed in, else the field is empty to write in.
-// we iterate over all tasks (Was) and then over Ist and Soll for each task, filling one field for each Ist or Soll and filling in the name in Ist and leave it empty if it is Soll.
+// the 2nd and 4th column are for the name.
+// if the shift is already taken, the name is printed in, else the field is empty to write in.
+// we iterate over all tasks (Was) and then over Ist and Soll for each task,
+// filling one field for each Ist or Soll and filling in the name in Ist and leave it empty if it is Soll.
 echo "<br>next table<br>\n";
 echo "<table class='commontable'>\n";
 // $db_erg ist aus AlleSchichtenImZeitbereich
@@ -269,7 +274,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<tr class='header'>";
         echo "<th colspan=5 style='text-align:center'>$Was ($TagKurz)</th></tr>\n";
     }
-    $db_erg_helfer = BeteiligteHelfer($db_link, $zeile['SchichtID']); // get the people who are already signed up for this shift
+    // get the people who are already signed up for this shift
+    $db_erg_helfer = BeteiligteHelfer($db_link, $zeile['SchichtID']);
   // Wir geben zwei Helfer pro Zeile fuer die selbe Schicht aus
     while ($Soll > 0) {
         $Soll = $Soll - 1;

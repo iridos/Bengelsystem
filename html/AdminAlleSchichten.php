@@ -16,13 +16,13 @@ if ($AdminStatus != 1) {
 <html>
  <head>
   <title>Helfer Drop am See Alle Schichten</title>
-  
-  
+ 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
-  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script> 
-  <script src="js/helferdb.js" type="text/javascript"></script> 
+
+  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script>
+  <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>
  </head>
@@ -140,18 +140,13 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 ///////////////////////////////////////////////////////////
 if (isset($_POST['plusschicht'])) {
     $messages = [];
-    $SchichtId = $_POST['plusschicht'];
-
-    // Eingaben überprüfen:
-
-    //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //  }
-
-
+    $SchichtID = $_POST['plusschicht'];
+    // Nutzer hat hier zuletzt etwas geändert und wir klappen das deshalb auf,
+    // indem wir unten target=active setzen
+    $_SESSION["SchichtIdAktiv"] = $SchichtID;
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtId, $AdminID);
+        $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtID, $AdminID);
 
         // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
@@ -197,7 +192,7 @@ if (isset($_POST['minusschicht'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $AliasHelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
-    echo '<table  id="customers"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
+    echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
     echo " Dienstplan von $HelferName (Zusammenfassung)<br>";
     echo $zeile['Anzahl'];
     echo " Schichten insgesamt ";
@@ -266,7 +261,7 @@ if ($addschicht != '0') {
 
 
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
-    echo '<table  id="customers">';
+    echo '<table  class="commontable">';
     echo "<thead>";
     echo "<tr>";
     echo "</tr><th  colspan='7'>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
@@ -333,7 +328,7 @@ if ($addschicht != '0') {
     //print_r($MeineDienste);
 
     echo '</table>';
-    echo '<table  id="customers">';
+    echo '<table  class="commontable collapsible">';
 
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         if ($dienstsort == '1') {
@@ -385,6 +380,9 @@ if ($addschicht != '0') {
             $rowstyle = 'style="dummy:' . $zeile['SchichtID'] . '"';
             $regtext  = '';
         }
+        if ($_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
+            $rowstyle = $rowstyle . " target='active' "; // dont collapse when the user did something
+        }
 
                 echo '<tr ' . $rowstyle . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $zeile['SchichtID'] . '#Info\';" >';
 
@@ -399,7 +397,7 @@ if ($addschicht != '0') {
         echo "" . $zeile['Soll'] . "</td>";
                 // buttons sind in der selben Zelle
         echo "<td width='30px'>" . "<button width='20px' name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>" . "";
-        echo "" . "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
+        echo "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
                 //echo "<td>$regtext</td>";
         echo "</tr>\n";
     }
