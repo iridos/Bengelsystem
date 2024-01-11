@@ -105,7 +105,7 @@ $_SESSION["HelferID"] = $HelferID;
 ////////////////////////////////////////////////////////
 
 
-echo '<table id="customers">';
+echo '<table class="commontable">';
 
 
 

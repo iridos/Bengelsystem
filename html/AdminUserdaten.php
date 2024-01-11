@@ -124,7 +124,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
 
     
-          <table id="customers">
+          <table class="commontable">
             <tr>
                 <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> Helferdaten</th>
 <?php echo "<b>" . EVENTNAME . "</b>"; ?>
@@ -157,7 +157,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
              
           </table>
         
-      <table id="customers">
+      <table class="commontable">
       <col style="width:20px">
       <tr>
       <td><input type="checkbox" name="IsAdmin" value=1 align="right" <?php if ($HelferIsAdmin == 1) {

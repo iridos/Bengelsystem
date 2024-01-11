@@ -126,7 +126,7 @@ if (isset($_POST['DienstSearch'])) {
 ?>
 <button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
 <form method="post">
-    <table border="0" id='customers'>    
+    <table border="0" class='commontable'>
     <tr><th>  Dienst</th><th><select name="DienstSearch" id="DienstSearch"  onchange="submit()">
 <?php
 
@@ -168,25 +168,25 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 
 
 
-          <table border="0" id="customers">
-            <tr>     
+          <table border="0" class="commontable">
+            <tr>
               <td style="border: 0px solid black;">Was</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Was" type="text" value="<?php echo htmlspecialchars($Was ?? '')?>">
               </td>
             </tr>
             <tr>
-              <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Wo" type="text " value="<?php echo htmlspecialchars($Wo ?? '')?>">
               </td>
             </tr>
             </tr>
-              <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Info" type="text" value="<?php echo htmlspecialchars($Info ?? '')?>" >
               </td>
             </tr>
             <tr>
-              <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;">     
-                
+              <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;">
+               
                <!--  <input name="Dienst-Leiter" type="text" value="<?php echo htmlspecialchars($Leiter ?? '')?>" > -->
                 <?php
                     echo "<select name='Dienst-Leiter'>";
@@ -200,10 +200,10 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                 }
                     echo "</select>";
                 ?>
-                </td>  
+                </td>
               </tr>
               <tr>
-                <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;">     
+                <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;">
                 
                 <?php
                     //echo "#####".$Gruppe."#####";
@@ -219,7 +219,7 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                     echo "</select>";
                 ?>
                 </td>
-                </td>                
+                </td>
             </tr>
             <tr><td style="border: 0px solid black;">HelferLevel</td></tr>
             <tr><td style="border: 0px solid black;"> 
@@ -243,7 +243,7 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 
 
 <form method="post">
-    <table border="0" id='customers'">    
+    <table border="0" class='commontable'">
     <tr><th>Schicht</th><th><select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
     
     
@@ -277,19 +277,19 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
 
  
         <!--  <table border="0" style="border: 0px solid black;">  -->
-        <table border="0" id='customers'"> 
-            <tr>     
+        <table border="0" class='commontable'"> 
+            <tr>
               <td style="border: 0px solid black;">Von</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Von" type="datetime-local" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Bis</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Bis</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Soll</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Soll</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
               </td>
             <tr>

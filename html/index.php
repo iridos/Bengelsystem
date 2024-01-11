@@ -25,7 +25,7 @@ if ($AdminStatus != 1) {
 <body>
 <div style="width: 100%;">
 
-<table id="customers" >
+<table class="commontable" >
   <tr onclick="window.location.href='Info.php';">
     <th><img src="Bilder/Info.jpeg" style="width:30px;height:30px;"> &nbsp; <b><?php echo EVENTNAME ?></b></th>
   </tr>

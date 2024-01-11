@@ -23,7 +23,7 @@ require '_login.php';
   echo "<b>" . EVENTNAME . "</b><br>";
   echo '<H1> Helferdaten - Log </H1>';
   echo '<p>Hier werden alle Aktionen, die einen Helfer betreffen aufgelistet</p>';
-  echo '<table id="customers">' . "\n";
+  echo '<table class="commontable">' . "\n";
 
   //check for admin status
   $HelferID = $_SESSION["HelferID"];

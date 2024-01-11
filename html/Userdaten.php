@@ -110,7 +110,7 @@ if (isset($_POST['login'])) {
 
 
     
-          <table id="customers">
+          <table class="commontable">
             <tr>
                 <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> Helferdaten <?php echo EVENTNAME; ?></th>
             </tr>

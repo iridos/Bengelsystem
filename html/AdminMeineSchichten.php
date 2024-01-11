@@ -214,7 +214,7 @@ if (! $db_erg) {
   $iSQLCount = mysqli_num_rows($db_erg);
   //$iSQLCount = 3;
 
-echo '<table id="customers">';
+echo '<table class="commontable">';
 
   echo "<thead>";
   echo "<tr>";
@@ -245,7 +245,7 @@ echo "<br><br>";
 $iAlleSchichtenCount = AlleSchichtenCount($db_link);
 $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
 
-echo '<table id="customers" onclick="window.location.href=\'AdminAlleSchichten.php\'">';
+echo '<table class="commontable" onclick="window.location.href=\'AdminAlleSchichten.php\'">';
     echo "<tr>";
         echo "<th>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th>";
     echo "</tr>";

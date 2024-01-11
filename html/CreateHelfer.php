@@ -98,7 +98,7 @@ if (isset($_POST['sent'])) {
 <p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen.</p>
 <form method="post">
 
-  <table id="customers">
+  <table class="commontable">
             <tr>
                 <th>Helferdaten</th>
             </tr>
