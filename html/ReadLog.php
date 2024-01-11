@@ -20,7 +20,7 @@ require '_login.php';
   // print top of page if we are logged in and not redirecting
   echo " </head> \n <body> \n";
   echo '<button name="BackHelferdaten" value="1"  onclick="window.location.href = \'index.php\';"><b>&larrhk;</b></button>' . "\n";
-  echo "<b>" . EVENTNAME . "</b><br>"; 
+  echo "<b>" . EVENTNAME . "</b><br>";
   echo '<H1> Helferdaten - Log </H1>';
   echo '<p>Hier werden alle Aktionen, die einen Helfer betreffen aufgelistet</p>';
   echo '<table id="customers">' . "\n";
