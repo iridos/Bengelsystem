@@ -20,7 +20,6 @@ require '_login.php';
  <body>
 <div style="width: 100%;">
 <?php
-
 /// Detailinformation zu ausgewaehlten Schicht Holen
 
 if (isset($_GET['InfoAlleSchichtID'])) {

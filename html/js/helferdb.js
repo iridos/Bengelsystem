@@ -30,16 +30,21 @@ function collapse_table_rows()
 {
     $(document).ready(
         function () {
-            $('tr:not(.header)').hide();
-
-            $('tr.header').click(
+            // Unter-Zeilen in collapsible Tabellen verbergen
+            $('table.collapsible tr:not(.header)').hide();
+            // Zeile mit dem target="active" (von PHP nach submit gesetzt) und dazugehoerige Zeilen anzeigen
+            $('table.collapsible tr[target="active"]').prevUntil('tr.header').addBack().nextUntil('tr.header').addBack().show();
+            // id="active" als Anker auf letztes tr.header vor der target=active Seite setzen und dort hin springen
+            // damit der Nutzer nach Abschicken des Posts seine geoeffneten Optionen sieht
+            $('table.collapsible tr[target="active"]').prevAll('.header').first().attr('id', 'active');
+            location.href = '#active';
+            $('table.collapsible tr.header').click(
                 function () {
                     $(this).find('span').text(
                         function (_, value) {
                             return value == '-' ? '+' : '-'
                         }
                     );
-
                     $(this).nextUntil('tr.header').slideToggle(100, function () {});
                 }
             );
@@ -50,6 +55,5 @@ function collapse_table_rows()
 function expand_all_table_rows()
 {
 
-    $('tr:not(.header)').hide(); // make all collapsed so that slideToggle doesnt close opened ones
-    $('tr:not(.header)').slideToggle(100, function () {});
+    $('tr:not(.header)').show();
 }
