@@ -15,7 +15,7 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
  <head>
-  <title>Helfer Drop am See Alle Schichten</title>
+  <title>Helfer <?php echo EVENTNAME ?> Alle Schichten</title>
   
   
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
@@ -27,7 +27,8 @@ if ($AdminStatus != 1) {
  </script>
  </head>
  <body>
- <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>   
+ <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>
+<?php echo "<b>" . EVENTNAME . "</b>"; ?>
 <div style="width: 100%;">
 <?php
 

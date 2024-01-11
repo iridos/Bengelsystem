@@ -47,7 +47,7 @@ if (isset($_POST['helfer-status'])) {
 
 // nicht sicher, wo so ein default-text herkommen sollte
 // oder ob es tatsächlich einen geben sollte
-$email_subject = "Drop am See beginnt bald!";
+$email_subject = "<?php echo EVENTNAME ?> beginnt bald!";
 if (isset($_POST['email-subject'])) {
     $email_subject = $_POST['email-subject'];
 }
@@ -68,7 +68,7 @@ XXtokenXX
 Du kannst dich auch später wieder über den Link einloggen und die Schicht ändern. 
 
 Viele Grüße,
-dein Drop am See Team
+dein <?php echo EVENTNAME ?> Team
 ";
 
 if (isset($_POST['email-text'])) {
@@ -84,7 +84,7 @@ if (isset($_POST['sendmail'])) {
 ?>
 <!doctype html>
  <head>
-  <title>Helfer Drop am See: Email Tokens generieren</title>
+  <title>Helfer <?php echo EVENTNAME ?>: Email Tokens generieren</title>
   
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
