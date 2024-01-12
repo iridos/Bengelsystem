@@ -68,7 +68,7 @@ if (isset($_POST['DienstSearch'])) {
 echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
   <tr class="header">
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten</b></th>
+    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten (Helfer ohne Schichten werden momentan noch nicht angezeigt)</b></th>
   </tr>
 </table>
 <table class="commontable collapsible">
@@ -76,38 +76,45 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
 $db_erg = AlleHelferSchichtenUebersicht($db_link);
 $dauer = 0;
 $i = 0;
-$OldHelferName = "";
-$EinzelDienstStunden = "";
+$OldAliasHelferID = "-1";
+$EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
 $HelferUeberschrift = "";
+
+// Function to output helper information
+function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile)
+{
+    echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden</th>";
+    echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
+    echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
+    echo "&nbsp;&nbsp;";
+    echo "<form style='display:table-cell' action='AdminMeineSchichten.php' method='post'>";
+    echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
+    echo "</div></th>";
+    echo "$EinzelDienstStundenZeile</td></tr>\n ";
+}
+
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferName = $zeile["Name"];
         $AliasHelferID = $zeile["AliasHelferID"];
-        //echo $HelferName." ".$AliasHelferID."<br>";
-    if ($HelferName != $OldHelferName) {
-        if ($EinzelDienstStunden != "") {
-             // Neue Ueberschrift mit Helfernamen + Stunden
-             echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden</th>";
-             echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
-             echo "&nbsp;&nbsp;";
-             echo "<form style='display:table-cell' action='AdminMeineSchichten.php' method='post'>";
-             echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
-             echo "</div></th>";
-             $dauer = 0;
-             echo "$EinzelDienstStunden</td></tr>\n ";
+    if ($AliasHelferID != $OldAliasHelferID) {
+        if ($EinzelDienstStundenZeile != "") {
+             outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
         }
-            $EinzelDienstStunden = "";
+            $dauer = 0;
+            $EinzelDienstStundenZeile = "";
             $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> " . $HelferName . "</div></form>";
             $OldHelferName = $HelferName;
             $OldAliasHelferID = $AliasHelferID;
             $i += 1;
     }
-        $EinzelDienstStunden .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
-        $EinzelDienstStunden .= $zeile["Was"];
-        $EinzelDienstStunden .= "</td></tr>";
+        $EinzelDienstStundenZeile .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
+        $EinzelDienstStundenZeile .= $zeile["Was"];
+        $EinzelDienstStundenZeile .= "</td></tr>";
         $dauer = $dauer + (int)$zeile["Dauer"];
 }
-echo "$EinzelDienstStunden";
+if ($EinzelDienstStundenZeile != "") {
+             outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
+}
 
 
 echo "</table>";

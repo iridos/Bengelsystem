@@ -726,6 +726,8 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 function AlleHelferSchichtenUebersicht($db_link)
 {
     $sql = "select Helfer.HelferID as AliasHelferID,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
+    $sql = $sql . " UNION ALL ";
+    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "AlleHelferSchichtenUebersicht ungueltige Abfrage";
