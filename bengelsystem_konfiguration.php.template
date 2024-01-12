@@ -1,16 +1,15 @@
 <?php
 
-// uncomment the following lines and edit the values to suit your installation
 define('MYSQL_HOST', 'localhost');
 define('MYSQL_BENUTZER', 'bengel'); // database user name
-define('MYSQL_KENNWORT', 'a6a273733aae26a47257952d30ab8c88');
+define('MYSQL_KENNWORT', '');
 define('MYSQL_DATENBANK', 'bengelsystem');
-define('LOGFILE', "/var/log/dropamsee/orgatreffen");
-define('EVENTNAME', "Orgatreffen");
-define('INFORMATIONS_URL', "https://anmeldung.kleinkunst-ka.de/orgakon2024/");
-define('SECRET_KEY', "irgendwasZufaelligesblubb"); // emails, siehe unten
-define('SECRET_VERIFICATION', "irgendwasanderes,iblubbbstegalwas"); // emails, siehe unten
-define('URLPREFIX', "https://www.orgatreff.jugglingpatterns.de/Orgatreffen/UrlLogin.php"); //  url for url logins
+define('LOGFILE', "/var/log/jonglierconvention/meinetollejonglierconvention.log");
+define('EVENTNAME', "Meine tolle Jonglierconvention");
+define('INFORMATIONS_URL', "https://meine-tolle-jonglierconvention.de");
+define('SECRET_KEY', "irgendwasZufaelliges"); // emails, see below
+define('SECRET_VERIFICATION', "irgendwasanderes,egalwas"); // emails, see below
+define('URLPREFIX', "https://https://meine-tolle-jonglierconvention.de/Bengelsystem/"); // our servername
 
 define('TAGE_DAUER', 4);
 
@@ -27,3 +26,4 @@ $secret_key = SECRET_KEY;
 $secret_verification = SECRET_VERIFICATION;
 // urlprefix: https Addresse des php Scripts, das die Tokens empfaengt und einen Account anlegt
 $urlprefix = URLPREFIX;
+?>
