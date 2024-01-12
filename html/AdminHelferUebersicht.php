@@ -81,7 +81,8 @@ $EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
 $HelferUeberschrift = "";
 
 // Function to output helper information
-function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile) {
+function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile)
+{
     echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden</th>";
     echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
     echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
@@ -113,7 +114,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 }
 if ($EinzelDienstStundenZeile != "") {
              outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
-        }
+}
 
 
 echo "</table>";
