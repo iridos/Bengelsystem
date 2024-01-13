@@ -47,7 +47,7 @@ if (isset($_POST['helfer-status'])) {
 
 // nicht sicher, wo so ein default-text herkommen sollte
 // oder ob es tatsächlich einen geben sollte
-$email_subject = "<?php echo EVENTNAME ?> beginnt bald!";
+$email_subject = EVENTNAME . " beginnt bald!";
 if (isset($_POST['email-subject'])) {
     $email_subject = $_POST['email-subject'];
 }
@@ -68,7 +68,7 @@ XXtokenXX
 Du kannst dich auch später wieder über den Link einloggen und die Schicht ändern. 
 
 Viele Grüße,
-dein <?php echo EVENTNAME ?> Team
+dein " . EVENTNAME . " Team
 ";
 
 if (isset($_POST['email-text'])) {
