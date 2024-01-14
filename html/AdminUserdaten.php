@@ -39,16 +39,14 @@ HelferAuswahlButton($db_link, $AliasHelferID);
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
 
-echo "Admin=$AdminID<br>";
-echo "Helfer=$HelferID<br>";
-echo "Alias=$AliasHelferID<br>";
+//debug output: echo "Admin=$AdminID<br>"; echo "Helfer=$HelferID<br>"; echo "Alias=$AliasHelferID<br>";
 
 
 ?>
 <!doctype html>
 <html>
  <head>
-  <title>Drop am See Helferdaten ändern</title>
+  <title><?php echo EVENTNAME ?> Helferdaten ändern</title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
@@ -126,10 +124,10 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
 
     
-          <table id="customers">
+          <table class="commontable">
             <tr>
                 <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> Helferdaten</th>
-            </tr>
+<?php echo "<b>" . EVENTNAME . "</b>"; ?>
 <form method="post">
             <tr>     
               <td>Name</td></tr><tr><td>
@@ -159,7 +157,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
              
           </table>
         
-      <table id="customers">
+      <table class="commontable">
       <col style="width:20px">
       <tr>
       <td><input type="checkbox" name="IsAdmin" value=1 align="right" <?php if ($HelferIsAdmin == 1) {

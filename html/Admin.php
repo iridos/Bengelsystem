@@ -15,7 +15,7 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
 <head>
-  <title>Admin Drop am See</title>
+  <title>Admin <?php echo EVENTNAME ?></title>
   <link rel="stylesheet" href="css/style_common.css"/>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -57,7 +57,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
        <button name="BackHelferdaten" value="1" onclick="window.location.href = 'index.php';">
           <b>&larrhk;</b>
        </button> &nbsp; 
-       <b>Admin HelferDB</b>
+       <b>Admin HelferDB <?php echo  EVENTNAME; ?></b>
   </th>
   <tr> 
 
@@ -81,7 +81,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     <td>
        <a class="fallbacklink" href='AdminHelferUebersicht.php'>
           <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
-          <b>Helfer als Admin &auml;ndern</b>
+          <b>Helferübersicht und als Admin &auml;ndern</b>
        </a>
     </td>
   </tr>

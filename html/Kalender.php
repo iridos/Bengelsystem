@@ -1,3 +1,13 @@
+<?php
+
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,7 +48,6 @@
                     padding-left: 15px;
                     padding-right: 15px;
             }
-    </style-->
 
 </head> 
 <body> 
@@ -170,10 +179,10 @@ function colorize (e){ //KS
     };
 
     scheduler.config.all_timed = "short"; // night events arent multi-day - events under 24h are shown
-    scheduler.config.lightbox.sections=[	
-    	{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
-    	{name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
-    	{name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
+    scheduler.config.lightbox.sections=[    
+        {name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+        {name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
+        {name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
         {name:"time", height:72, type:"time", map_to:"auto"}
     ];
 

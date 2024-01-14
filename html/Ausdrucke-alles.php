@@ -1,7 +1,16 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
 <head>
-  <title>Admin Drop am See</title>
+  <title>Admin <?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -14,36 +23,15 @@
 
 <div style="width: 100%;">
 
-<?php
-
-SESSION_START();
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-DatenbankAufDeutsch($db_link);
-
-require '_login.php';
-
-
-?>
-
-<table id="customers" >
+<table class="commontable" >
   <tr>
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Dienst DAS 2023</b></th>
   </tr>
 </table>
 
-
 <?php
 
-echo '<table id="customers" >';
+echo '<table class="commontable" >';
 
 $db_erg = GetDiensteChilds($db_link, 0);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -67,7 +55,7 @@ echo "</table>";
 $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00");
 
 $OldWas = "";
-echo "<br><br><table id='customers' style='page-break-before:always'>";
+echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
   <tr>
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Schichten der Dienste DAS 2023</b></th>
@@ -78,8 +66,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
     if ($Was != $OldWas) {
             echo "</table>";
-        //echo '<table id="customers" style="page-break-before:always">';
-        echo '<table id="customers">';
+        //echo '<table class="commontable" style="page-break-before:always">';
+        echo '<table class="commontable">';
         echo "<tr><th colspan=3>";
             echo $Was;
         echo "</th></tr>";
@@ -106,7 +94,7 @@ echo "</table>";
 
 $OldHelferName = "";
 
-echo "<br><br><table id='customers' style='page-break-before:always'>";
+echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
   <tr>
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
@@ -118,8 +106,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
     if ($HelferName != $OldHelferName) {
             echo "</table>";
-            //echo '<table id="customers" style="page-break-before:always">';
-            echo '<table id="customers">';
+            //echo '<table class="commontable" style="page-break-before:always">';
+            echo '<table class="commontable">';
             echo "<tr><th colspan=3>";
             echo $HelferName;
             echo "</th></tr>";

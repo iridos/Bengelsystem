@@ -15,7 +15,7 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
 <head>
-  <title>Admin Drop am See</title>
+  <title>Admin <?php echo EVENTNAME ?></title>
   <link rel="stylesheet" href="css/style_common.css"/>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -27,8 +27,6 @@ if ($AdminStatus != 1) {
 <hr>
  
 <?php
-
-DatenbankAufDeutsch($db_link);
 
 $AliasHelferID = 0;
 

@@ -1,3 +1,12 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+SESSION_START();
+require_once 'konfiguration.php';
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
  <head>
@@ -12,18 +21,6 @@
  <body>
 
 <?php
-SESSION_START();
-//$HelferID = $_SESSION["HelferId"];
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
 
 if (isset($_POST['sent'])) {
     $messages = [];
@@ -101,7 +98,7 @@ if (isset($_POST['sent'])) {
 <p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen.</p>
 <form method="post">
 
-  <table id="customers">
+  <table class="commontable">
             <tr>
                 <th>Helferdaten</th>
             </tr>
