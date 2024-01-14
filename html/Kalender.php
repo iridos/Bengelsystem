@@ -1,13 +1,3 @@
-<?php
-
-// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
-require_once 'konfiguration.php';
-require 'SQL.php';
-$db_link = ConnectDB();
-require '_login.php';
-
-?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,9 +5,9 @@ require '_login.php';
   <meta charset="utf-8">
   <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
   <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
-  <!-- link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
+  <!-- link href="../scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
   <link href="scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8">
-  <link rel="stylesheet" href="../scheduler/samples/common/controls_styles.css">
+  <link rel="stylesheet" href="scheduler/samples/common/controls_styles.css">
     <style>
 
         html, body{
@@ -48,6 +38,7 @@ require '_login.php';
                     padding-left: 15px;
                     padding-right: 15px;
             }
+    </style-->
 
 </head> 
 <body> 
@@ -143,7 +134,7 @@ function colorize (e){ //KS
     });       
     scheduler.config.full_day=false;
     scheduler.config.xml_date="%Y-%m-%d %H:%i"; // deprecated but needed for database format
-    scheduler.config.first_hour = 0;            // only show from this hour on
+    scheduler.config.first_hour = 8;            // only show from this hour on
     scheduler.config.last_hour = 24;            // last hour 
     scheduler.setLoadMode("day");               // dynamic loading loads only current day if needed
     scheduler.config.details_on_create=true;    // ???
@@ -164,7 +155,7 @@ function colorize (e){ //KS
             scheduler.date.get_con_end=function(date){ return scheduler.date.add(date,4,"day"); }
             
             //preparation phase 2 days
-            function setprep(){scheduler.setCurrentView(new Date(2023,4,16));}
+            function setprep(){scheduler.setCurrentView(new Date(2023,8,13));}
             scheduler.date.prep_start = function(date){return date};
             scheduler.templates.prep_date = scheduler.templates.week_date;
             scheduler.templates.prep_scale_date = scheduler.templates.week_scale_date;
@@ -179,10 +170,10 @@ function colorize (e){ //KS
     };
 
     scheduler.config.all_timed = "short"; // night events arent multi-day - events under 24h are shown
-    scheduler.config.lightbox.sections=[    
-        {name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
-        {name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
-        {name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
+    scheduler.config.lightbox.sections=[	
+    	{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+    	{name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
+    	{name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
         {name:"time", height:72, type:"time", map_to:"auto"}
     ];
 
@@ -191,7 +182,7 @@ function colorize (e){ //KS
     };
 
     // actual init
-    scheduler.init('scheduler_here', new Date(2023,4,18), "con");
+    scheduler.init('scheduler_here', new Date(2023,8,14), "con");
     scheduler.load("data/api-helfer.php");
     //https://docs.dhtmlx.com/scheduler/api__scheduler_createdataprocessor.html
     //var dp = scheduler.createDataProcessor("data/api.php");  // this would be for saving 

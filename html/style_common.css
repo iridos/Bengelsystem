@@ -1,0 +1,112 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+table, p, div, td, th, input  { 
+font-size: inherit ; 
+}
+
+.commontable a {
+ color: inherit;
+ text-decoration: inherit;
+}
+
+.commontable,#customers {
+  font-size: inherit;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.commontable td,#customers td, .commontable th,#customers th {
+  border: 1px solid #ddd;
+  padding: 4px;
+}
+
+.commontable tr:nth-child(even),#customers tr:nth-child(even){background-color: #f2f2f2;}
+
+.commontable tr:hover ,#customers tr:hover {background-color: #ddd;}
+
+.commontable th,#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #1090CF;
+  color: white;
+}
+
+
+#selected th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #0000FF;
+  color: white;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  color: black;
+  background: white;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+input, select, textarea {
+  width: 95%;
+}
+
+.commontable button,.back button,.helfer button,#customers button {
+  text-decoration: none; /* dont underline links */
+  display: inline-block; /* makes it possible to set top and bottom margins */
+  width: 45px;
+  height: 45px;
+  text-align: center;
+}
+// spoiler stuff
+input[id^="spoiler"]{
+ display: none !important;
+}
+input[id^="spoiler"] + label {
+  display: block;
+  width: 80px;
+  margin: 0 auto;
+  padding: 5px 0px;
+  background: #51a;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .6s;
+}
+input[id^="spoiler"]:checked + label {
+  color: #333;
+  background: #ccc;
+}
+input[id^="spoiler"] + label + .spoiler {
+  width: 90%;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin: 10px auto 0; 
+  padding: 10px; 
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: all .6s;
+}
+input[id^="spoiler"]:checked + label + .spoiler{
+  height: auto;
+  opacity: 1;
+  padding: 10px;
+}
+.remark {
+  margin: 50px;
+  background-color: #ffffcc;
+}
+
+

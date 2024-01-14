@@ -1,0 +1,10 @@
+@import "style_common.css";
+
+html, body {
+  font-size: 25;
+}
+
+button,select { 
+  font-size: 27; 
+  }
+		

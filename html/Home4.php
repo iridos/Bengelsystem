@@ -1,9 +1,7 @@
 <html>
 <html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Helfer Stochercon </title>
+  <title>Helfer Stochercon Home</title>
   <link rel="stylesheet" href="style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="style_mobile.css" media="screen and (max-width:780px)"/>
   <script src=js/helferdb.js></script>
@@ -17,6 +15,7 @@ SESSION_START();
 require_once ('../hidden/konfiguration.php');
 include 'SQL.php';
 
+
 $db_link = mysqli_connect (
                      MYSQL_HOST, 
                      MYSQL_BENUTZER, 
@@ -26,16 +25,91 @@ $db_link = mysqli_connect (
 
 DatenbankAufDeutsch($db_link);
 
-include '_login.php';
+/// Logout
+////////////////////////////////////////////////////////
+if(isset($_GET['logout']))
+{
+		unset($_SESSION["HelferID"]);
+		//$_POST['login'] = 1;
+} 
 
-// wird von _login.php miterledigt
-// TODO: hier wird HelferIsAdmin verwendet, woanders ist es AdminStatus
-//$db_erg = Helferdaten($db_link,$HelferID);
-//while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-//{
-//    $HelferName=$zeile['Name']; 
-//    $HelferIsAdmin=$zeile['Admin'];
-//}
+/// Login
+////////////////////////////////////////////////////////
+if(isset($_POST['login'])) 
+{
+	$messages = [];
+	// Eingaben überprüfen:
+	//if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
+	//  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
+	//}
+        if (isset ($_POST['helfer-name'])) {	
+	  $HelferName = $_POST['helfer-name'];
+        }
+	$HelferEmail = $_POST['helfer-email'];
+	$HelferPasswort = $_POST['helfer-passwort']; 
+
+	if(empty($messages)) 
+	{
+		HelferLogin($db_link,$HelferEmail,$HelferPasswort, 0 );
+	} 
+	else 
+	{
+		// Fehlermeldungen ausgeben:
+		echo '<div class="error"><ul>';
+		foreach($messages as $message) {
+		echo '<li>'.htmlspecialchars($message).'</li>';
+		}
+		echo '</ul></div>';
+	}
+	
+}
+
+if(!isset($_SESSION["HelferID"]))
+{
+
+?>
+<form method="post" action="#Info">
+
+  <fieldset>
+    <legend>Login</legend>
+    
+    <table border="0" style="border: 0px solid black;">
+            <tr> 	
+              <td style="border: 0px solid black;">Email</td></tr><tr><td style="border: 0px solid black;">
+              <input name="helfer-email" type="text" size=35 value="<?=htmlspecialchars($HelferEmail??'')?>" required>
+              </td>
+            <tr>
+            <tr> 	
+              <td style="border: 0px solid black;">Passwort</td></tr>
+              <tr><td style="border: 0px solid black;">
+              <input name="helfer-passwort" id="helfer-passwort" type="password" size=35 value="<?=htmlspecialchars($HelferHandy??'')?>" required>
+              </td><td style="border: 0px solid black;">
+              <input type="button" value="Passwort zeigen" style="width:180px !important" onclick="showPassword('helfer-passwort')">
+              </td>
+            <tr>
+	</table>
+    
+    
+  </fieldset>
+  
+  <p><button style="width: 100px" name="login" value="1">Login</button></p>
+
+
+ </form> 
+<?php
+ exit;	
+}
+
+
+$HelferID = $_SESSION["HelferID"];
+$AdminID = $_SESSION["AdminID"];
+
+$db_erg = Helferdaten($db_link,$HelferID);
+while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
+{
+    $HelferName=$zeile['Name']; 
+    $HelferIsAdmin=$zeile['Admin'];
+}
 
 ?>
 

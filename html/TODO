@@ -1,0 +1,4 @@
+* Login sollte ueberpruefen, ob jemand bereits eingeloggt ist
+* alle Seiten (via _login?) sollten pruefen, ob die HelferId existiert
+* SQL.php sollte nie $db_erg zurueckgeben, sondern immer Arrays/Listen mit den Ergebnissen und $db_erg sollte mit msqli_free_results freigegeben werden
+* Helfer Liste mit Telefon und Anzahl Stunden

@@ -1,7 +1,5 @@
 <?php
-
-function encode_string($key, $email, $level, $verification)
-{
+function encode_string($key, $email, $level, $verification) {
     // String verification anfuegen am Ende, um abgeschnittene URLs zu verhindern
     $token_content = $email . '|' . $level . '|' . $verification;
 
@@ -13,9 +11,9 @@ function encode_string($key, $email, $level, $verification)
     // sha256 hash des passworts, damit das Geheimnis lang genug ist
     $cipher_key = openssl_digest($key, 'SHA256', true);
     $cipher_text = openssl_encrypt($token_content, $cipher_method, $cipher_key, $cipher_options, $iv);
-
-    if (isset($debug)) {
-        echo "<br>encode: cipher:" . chunk_split(bin2hex($cipher_text), 4, ' ') . " <br>iv:" . chunk_split(bin2hex($iv), 4, ' ') . " <br>iv_length:$iv_length<br>cipher_key " . chunk_split(bin2hex($cipher_key), 4, ' ') . "<br>";
+    
+    if(isset($debug)) {
+        echo "<br>encode: cipher:".chunk_split(bin2hex($cipher_text),4,' ')." <br>iv:".chunk_split(bin2hex($iv),4,' ')." <br>iv_length:$iv_length<br>cipher_key ".chunk_split(bin2hex($cipher_key),4,' ')."<br>";
     }
 
     $cipher_text = $iv . $cipher_text;
@@ -25,8 +23,7 @@ function encode_string($key, $email, $level, $verification)
     return $encrypted_data;
 }
 
-function decode_string($key, $encrypted_data, $verification)
-{
+function decode_string($key, $encrypted_data, $verification) {
     // Entschlüsseln des verschuesselten Textes
     // erst base64 entfernen - urldecode muss wenn noetig vorher angewendet werden
     $decoded_cipher_text = base64_decode($encrypted_data);
@@ -38,18 +35,16 @@ function decode_string($key, $encrypted_data, $verification)
     $cipher_options = OPENSSL_RAW_DATA;
     $cipher_key = openssl_digest($key, 'SHA256', true);
 
-    if (isset($debug)) {
-        echo "<br>decode: cipher:" . chunk_split(bin2hex($cipher_text), 4, ' ') .  " <br>iv:" . chunk_split(bin2hex($iv), 4, ' ') .  " <br>iv_length:$iv_length<br>cipher_key " .  chunk_split(bin2hex($cipher_key), 4, ' ');
+    if(isset($debug)){
+       echo "<br>decode: cipher:".chunk_split(bin2hex($cipher_text),4,' ').  " <br>iv:".chunk_split(bin2hex($iv),4,' ').  " <br>iv_length:$iv_length<br>cipher_key ".  chunk_split(bin2hex($cipher_key),4,' ');
     }
 
     $decrypted_data = openssl_decrypt($cipher_text, $cipher_method, $cipher_key, $cipher_options, $iv);
 
-    if (isset($debug)) {
-        echo "<br> decrypted_data " . $decrypted_data . " end<br>";
-    }
+    if(isset($debug)){echo "<br> decrypted_data " . $decrypted_data." end<br>";}
     $verification_length = strlen($verification);
 
-    if (substr($decrypted_data, -$verification_length) == $verification) {
+    if(substr($decrypted_data, -$verification_length) == $verification) {
         list($email, $level, $verification_code) = explode('|', $decrypted_data);
         return array(
             'email' => $email,
@@ -60,6 +55,7 @@ function decode_string($key, $encrypted_data, $verification)
         error_log("Verschlüsseltes Token enthielt den Verifikationscode nicht: $decrypted_data<br>\n");
          return array(
             'success' => 0
-         );
+        );
     }
 }
+?>
