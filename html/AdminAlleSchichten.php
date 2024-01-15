@@ -88,7 +88,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 if (isset($_GET['ZeitBereich'])) {
     $ZeitBereich = $_GET['ZeitBereich'];
 } else {
-    $ZeitBereich = 1;
+    $ZeitBereich = 0;
 }
 
 function HelferAuswahlButton($db_link, $AliasHelferID)
@@ -111,6 +111,7 @@ if (isset($_POST['AliasHelferID'])) {
     $AliasHelferID = $_SESSION["AliasHelferID"];
 } else {
     HelferAuswahlButton($db_link, $AliasHelferID);
+    echo "<p>Erst Helfer auswählen</p>";
     exit;
 }
 HelferAuswahlButton($db_link, $AliasHelferID);
@@ -118,7 +119,7 @@ HelferAuswahlButton($db_link, $AliasHelferID);
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
 
-$db_erg = Helferdaten($db_link, $HelferID);
+$db_erg = Helferdaten($db_link, $AliasHelferID);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferName = $zeile['Name'];
 }
@@ -192,8 +193,9 @@ if (isset($_POST['minusschicht'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $AliasHelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
+    //"Dienstplan von"
     echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
-    echo " Dienstplan von $HelferName (Zusammenfassung)<br>";
+    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . "Dienstplan von $HelferName: ";
     echo $zeile['Anzahl'];
     echo " Schichten insgesamt ";
     echo $zeile['Dauer'] / 3600;
@@ -232,94 +234,24 @@ if ($addschicht == '0') {
 //echo "InfoAlleSchichtID ".$InfoAlleSchichtID;
 
 if ($addschicht != '0') {
-    //$db_erg = AlleSchichten($db_link,$dienstsort);
-    //$db_erg = AlleSchichtenImZeitbereich($db_link,"2023-05-18 00:00:00","2023-05-19 00:00:00");
-    if ($ZeitBereich == 1) {  // Alle
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00", -1);
-    }
-    if ($ZeitBereich == 2) {  // Davor
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2023-05-18 00:00:00", -1);
-    }
-    if ($ZeitBereich == 3) {  // Do
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-18 00:00:00", "2023-05-19 00:00:00", -1);
-    }
-    if ($ZeitBereich == 4) {  // Fr
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-19 00:00:00", "2023-05-20 00:00:00", -1);
-    }
-    if ($ZeitBereich == 5) {  // Sa
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-20 00:00:00", "2023-05-21 00:00:00", -1);
-    }
-    if ($ZeitBereich == 6) {  // So
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-21 00:00:00", "2023-05-22 00:00:00", -1);
-    }
-    if ($ZeitBereich == 7) {  // Danach
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-22 00:00:00", "2223-05-22 00:00:00", -1);
-    }
+    echo '<table class="commontable">';
+    require('_zeitbereich.php');
+    $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "AdminAlleSchichten.php");
+    $MeinVon = $Bereich['MeinVon'];
+    $MeinBis = $Bereich['MeinBis'];
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, -1);
+
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);
     $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
-
+    echo '</table>';
 
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
     echo '<table  class="commontable">';
-    echo "<thead>";
-    echo "<tr>";
-    echo "</tr><th  colspan='7'>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
-
-    /*
-    if ($dienstsort=='1')
-    {
-    echo "<th>". "Dienst" . "</th>";
-    }
-    else
-    {
-    echo "<th>". "Von" . "</th>";
-    }
-    */
-    if ($ZeitBereich == 1) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=1\"'>" . "Alle" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=1\"'>" . "Alle" . "</th>";
-    }
-    if ($ZeitBereich == 2) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=2\"'>" . "Davor" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=2\"'>" . "Davor" . "</th>";
-    }
-    if ($ZeitBereich == 3) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=3\"'>" . "Do" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=3\"'>" . "Do" . "</th>";
-    }
-    if ($ZeitBereich == 4) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=4\"'>" . "Fr" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=4\"'>" . "Fr" . "</th>";
-    }
-    if ($ZeitBereich == 5) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=5\"'>" . "Sa" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=5\"'>" . "Sa" . "</th>";
-    }
-    if ($ZeitBereich == 6) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=6\"'>" . "So" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=6\"'>" . "So" . "</th>";
-    }
-    if ($ZeitBereich == 7) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=7\"'>" . "Danach" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=7\"'>" . "Danach" . "</th>";
-    }
-    //echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=2\"'>". "Davor" . "</th>";
-    //echo "<th style='width:50px'>". "Do" . "</th>";
-    //echo "<th style='width:50px'>". "Fr" . "</th>";
-    //echo "<th style='width:50px'>". "Sa" . "</th>";
-    //echo "<th style='width:50px'>". "So" . "</th>";
-    //echo "<th style='width:100px'>". "Danach" . "</th>";
+    echo "<tr class='header'>";
+    echo "<th colspan='7'>Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
 
     echo "</tr>";
-    echo "</thead>";
 
     $OldTag = "";
     $OldWas = "";
@@ -344,7 +276,8 @@ if ($addschicht != '0') {
             $Was = $zeile['Was'];
 
             if ($Was != $OldWas) {
-                echo "<tr class='header'><th  colspan='7' style='width:100%'>";
+                // + in <span> becomes - when rows are opened
+                echo "<tr class='header'><th  colspan='7' style='width:100%'><span>+</span> ";
                 echo $Was;
                 echo "</th>";
                 /*
@@ -377,7 +310,7 @@ if ($addschicht != '0') {
              $regtext  = 'Meine!';
         } else {
             // dummy-style, um SchichtID unsichtbar im Tag anzuzeigen
-            $rowstyle = 'style="dummy:' . $zeile['SchichtID'] . '"';
+            $rowstyle = 'dbinfo="SchichtID:' . $zeile['SchichtID'] . ';helferlvl:' . $HelferLevel . '" ';
             $regtext  = '';
         }
         if ($_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
@@ -398,7 +331,6 @@ if ($addschicht != '0') {
                 // buttons sind in der selben Zelle
         echo "<td width='30px'>" . "<button width='20px' name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>" . "";
         echo "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
-                //echo "<td>$regtext</td>";
         echo "</tr>\n";
     }
     echo "</table>";
@@ -414,9 +346,9 @@ mysqli_free_result($db_erg);
 
 
 ?>
- 
- </form> 
+
+ </form>
  </div>
- 
+
  </body>
 </html>

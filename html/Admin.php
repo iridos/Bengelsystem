@@ -133,7 +133,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
   </tr>
 <!--</table></td> </tr>  inner table for indent end-->
   <!--<tr><th>Weiteres</th></tr>-->
-    <tr onclick="window.location.href='Kalender-all.html';">
+    <tr onclick="window.location.href='Kalender-all.php';">
     <td><img src="Bilder/More.jpeg" style="width:30px;height:30px"><b> Admin Kalenderansicht</b> </td>
     </tr>
     <tr onclick="window.location.href='Ausdrucke.php';">

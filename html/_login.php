@@ -48,8 +48,9 @@ if (!isset($_SESSION["HelferID"])) {
   <title>Helfer <?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-<meta name="viewport" content="width=480" />
-<meta charset="utf-8">
+  <script src="js/helferdb.js" type="text/javascript"></script>
+  <meta name="viewport" content="width=480" />
+  <meta charset="utf-8">
 </head>
 <body>
 <form method="post" action="#Info">
