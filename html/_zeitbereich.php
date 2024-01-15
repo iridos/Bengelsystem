@@ -12,6 +12,7 @@ function KalenderDatum ($start_date)
 }
 function AusgabeZeitbereichZeile ($start_date,$ZeitBereich,$TageNamenDeutsch,$SeitenName) 
 {
+    // SeitenName kann vom aufrufenden Script ueber pathinfo( __FILE__ )['filename'] gesetzt werden
     // ZeitbereichWerte (array): -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
     $ZeitBereichWerte = ZEITBEREICHWERTE;
     $ZeitBereichFelder = count($ZeitBereichWerte);
