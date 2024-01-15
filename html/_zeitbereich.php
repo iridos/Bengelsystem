@@ -10,7 +10,7 @@ function KalenderDatum ($start_date)
     $KalenderDatum = "$KalenderDatum,$KalenerMonat,".date_format($start_date, "d");
     return ($KalenderDatum );
 }
-function AusgabeZeitbereichZeile ($start_date,$ZeitBereich,$TageNamenDeutsch) 
+function AusgabeZeitbereichZeile ($start_date,$ZeitBereich,$TageNamenDeutsch,$SeitenName) 
 {
     // ZeitbereichWerte (array): -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
     $ZeitBereichWerte = ZEITBEREICHWERTE;
@@ -58,7 +58,7 @@ function AusgabeZeitbereichZeile ($start_date,$ZeitBereich,$TageNamenDeutsch)
         }
       // write the field for each day
         echo "<th style='width:{$ZeitBereichFeldBreite}%; $color' ";
-        echo "onclick='window.location.href=\"TeilnehmerSchichtenAusdruck.php?ZeitBereich={$EinZeitBereich}\";'>";
+        echo "onclick='window.location.href=\"{$SeitenName}?ZeitBereich={$EinZeitBereich}\";'>";
         echo "$Text" . "</th>\n";
 }
 echo "</tr>"; //Zeitbereich tr
