@@ -198,10 +198,10 @@ if ($addschicht == '0') {
 if ($addschicht != '0') {
     echo '<table class="commontable">';
     require('_zeitbereich.php');
-    $Bereich = AusgabeZeitbereichZeile($start_date,$ZeitBereich,$TageNamenDeutsch,"AlleSchichten.php");
+    $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "AlleSchichten.php");
     $MeinVon = $Bereich['MeinVon'];
     $MeinBis = $Bereich['MeinBis'];
-    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon , $MeinBis, -1);
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, -1);
 
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);

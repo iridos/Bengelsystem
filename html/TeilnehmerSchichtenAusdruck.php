@@ -177,7 +177,7 @@ $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
 
 require('_zeitbereich.php');
 
-$Bereich = AusgabeZeitbereichZeile($start_date,$ZeitBereich,$TageNamenDeutsch,"TeilnehmerSchichtenAusdruck.php");
+$Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "TeilnehmerSchichtenAusdruck.php");
 $MeinVon = $Bereich['MeinVon'];
 $MeinBis = $Bereich['MeinBis'];
 

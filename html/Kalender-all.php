@@ -167,7 +167,7 @@ function colorize (e){ //KS
             scheduler.date.get_con_end=function(date){ return scheduler.date.add(date,4,"day"); }
             
             //preparation phase 2 days
-            function setprep(){scheduler.setCurrentView(new Date(<?php echo KalenderDatum ($start_date);?>));}
+            function setprep(){scheduler.setCurrentView(new Date(<?php echo KalenderDatum($start_date);?>));}
             scheduler.date.prep_start = function(date){return date};
             scheduler.templates.prep_date = scheduler.templates.week_date;
             scheduler.templates.prep_scale_date = scheduler.templates.week_scale_date;
@@ -194,7 +194,7 @@ function colorize (e){ //KS
     };
 
     // actual init
-    scheduler.init('scheduler_here', new Date(<?php echo KalenderDatum ($start_date);?>), "con");
+    scheduler.init('scheduler_here', new Date(<?php echo KalenderDatum($start_date);?>), "con");
     scheduler.load("data/api-full.php");
     //https://docs.dhtmlx.com/scheduler/api__scheduler_createdataprocessor.html
     //var dp = scheduler.createDataProcessor("data/api.php");  // this would be for saving 
