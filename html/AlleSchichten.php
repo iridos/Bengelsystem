@@ -84,7 +84,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 if (isset($_GET['ZeitBereich'])) {
     $ZeitBereich = $_GET['ZeitBereich'];
 } else {
-    $ZeitBereich = 1;
+    $ZeitBereich = 0;
 }
 
 
