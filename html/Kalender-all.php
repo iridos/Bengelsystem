@@ -1,5 +1,4 @@
 <?php
-// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 SESSION_START();
 require_once 'konfiguration.php';
 require 'SQL.php';

@@ -18,7 +18,7 @@ function AusgabeZeitbereichZeile ($start_date,$ZeitBereich,$TageNamenDeutsch)
     $ZeitBereichFeldBreite = round(100 / $ZeitBereichFelder); // % width for style
     
     $format = 'Y-m-d';
-    
+    echo "\n<tr class='header'>\n"; // Zeitbereich tr
     // iterate over all days plus "before" and "after"
     // Wenn TAG_DAUER=4, dann sind die Werte 1-4 die Tage der Con
     // ZeitBereichWerte = [-1, 0, 1, 2, 3, 4, 1000]

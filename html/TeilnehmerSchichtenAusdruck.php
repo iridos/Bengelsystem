@@ -162,11 +162,6 @@ if (isset($_POST['minusschicht'])) {
 
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
-if ($addschicht == '0') {
-    echo "<p><b>Schichten Hinzufügen geordnet nach</b>";
-    echo "<button name='addschicht' value='1'>Tage</button>";
-    echo "<button name='addschicht' value='2'>Dienste</button></p>";
-}
 
 
 // fuer Anzahlanzeige in Ueberschrift
@@ -179,60 +174,12 @@ $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
     echo "<th colspan='7'>" . "Alle Schichten der Con (";
     echo $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
 
-echo "\n<tr class='header'>\n"; // Zeitbereich tr
 
-// Zeitbereich: -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
-$ZeitBereichWerte = ZEITBEREICHWERTE;
-$ZeitBereichFelder = count($ZeitBereichWerte);
-$ZeitBereichFeldBreite = round(100 / $ZeitBereichFelder); // % width for style
+require('_zeitbereich.php');
 
-$format = 'Y-m-d';
-
-// iterate over all days plus "before" and "after"
-// Wenn TAG_DAUER=4, dann sind die Werte 1-4 die Tage der Con
-// ZeitBereichWerte = [-1, 0, 1, 2, 3, 4, 1000]
-// -1: davor, 0: alle, 1-4: Tag 1-4, 1000: danach
-foreach ($ZeitBereichWerte as &$EinZeitBereich) {
-    if ($EinZeitBereich > 0 && $EinZeitBereich <= TAGE_DAUER) {
-        $PlusTage = $EinZeitBereich - 1;
-      //TODO: only if locale DE
-        $day = $start_date->add(new DateInterval("P{$PlusTage}D"));
-        $Wochentag = $TageNamenDeutsch[date_format($day, 'w')];
-
-        $Text = "$Wochentag (Tag{$EinZeitBereich})";
-        $Von = date_format($day, $format) . " 00:00:00";
-        $Bis = date_format($day, $format) . " 23:59:59";
-    } elseif ($EinZeitBereich == -1) {
-        $Text = 'Davor';
-        $Von = "2000-01-01 00:00:00";
-        $Bis = date_format($start_date, $format) . " 00:00:00";
-    } elseif ($EinZeitBereich == 0) {
-        $Text = 'Alle' ;
-        $Von = "2000-01-01 00:00:00";
-        $Bis = "3000-01-01 00:00:00";
-    } elseif ($EinZeitBereich == 1000) {
-        $Text = 'Danach';
-           $tage_dauer = TAGE_DAUER;
-           $day = $start_date->add(new DateInterval("P{$tage_dauer}D"));
-        $Von = date_format($day, $format) . " 00:00:00";
-        $Bis = "3000-01-01 00:00:00";
-    }
-  // highlight the selected time range
-    if ($EinZeitBereich == $ZeitBereich) {
-        $color = 'background-color:#0000FF; ' ;
-        $MeinVon = $Von;
-        $MeinBis = $Bis;
-    } else {
-        $color = '';
-    }
-  //$Text="$Text <br>$MeinVon $MeinBis"; // debug time strings
-
-  // write the field for each day
-    echo "<th style='width:{$ZeitBereichFeldBreite}%; $color' ";
-    echo "onclick='window.location.href=\"TeilnehmerSchichtenAusdruck.php?ZeitBereich={$EinZeitBereich}\";'>";
-    echo "$Text" . "</th>\n";
-}
-echo "</tr>"; //Zeitbereich tr
+$Bereich = AusgabeZeitbereichZeile($start_date,$ZeitBereich,$TageNamenDeutsch);
+$MeinVon = $Bereich['MeinVon'];
+$MeinBis = $Bereich['MeinBis'];
 
 $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevel);
 //echo "<tr><th class=header> AlleSchichtenImZeitbereich(db_link,$Von,$Bis,$HelferLevel);</th></tr>"; // debug
@@ -255,7 +202,6 @@ echo "</table>\n";
 // if the shift is already taken, the name is printed in, else the field is empty to write in.
 // we iterate over all tasks (Was) and then over Ist and Soll for each task,
 // filling one field for each Ist or Soll and filling in the name in Ist and leave it empty if it is Soll.
-echo "<br>next table<br>\n";
 echo "<table class='commontable'>\n";
 // $db_erg ist aus AlleSchichtenImZeitbereich
 // und gibt zurueck  Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden

@@ -134,15 +134,15 @@ if (isset($_POST['minusschicht'])) {
         $_SESSION["SchichtIdAktiv"] = $SchichtID;
 
     if (empty($messages)) {
-            // Helfer aus Schicht entfernen
-            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
+        // Helfer aus Schicht entfernen
+        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
     } else {
-            // Fehlermeldungen ausgeben:
-            echo '<div class="error"><ul>';
+        // Fehlermeldungen ausgeben:
+        echo '<div class="error"><ul>';
         foreach ($messages as $message) {
                 echo '<li>' . htmlspecialchars($message) . '</li>';
         }
-            echo '</ul></div>';
+        echo '</ul></div>';
     }
 }
 
@@ -157,7 +157,7 @@ if (isset($_POST['minusschicht'])) {
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
     //"Mein Dienstplan"
-    echo '<table  class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
+    echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
     echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' .  " Mein Dienstplan (";
     echo $zeile['Anzahl'];
     echo " Schichten, ";
@@ -196,32 +196,17 @@ if ($addschicht == '0') {
 
 
 if ($addschicht != '0') {
-    //$db_erg = AlleSchichten($db_link,$dienstsort);
-    //$db_erg = AlleSchichtenImZeitbereich($db_link,"2023-05-18 00:00:00","2023-05-19 00:00:00",$HelferLevel);
-    if ($ZeitBereich == 1) {  // Alle
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 2) {  // Davor
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2023-05-18 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 3) {  // Do
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-18 00:00:00", "2023-05-19 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 4) {  // Fr
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-19 00:00:00", "2023-05-20 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 5) {  // Sa
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-20 00:00:00", "2023-05-21 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 6) {  // So
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-21 00:00:00", "2023-05-22 00:00:00", $HelferLevel);
-    }
-    if ($ZeitBereich == 7) {  // Danach
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-22 00:00:00", "2223-05-22 00:00:00", $HelferLevel);
-    }
+    echo '<table class="commontable">';
+    require('_zeitbereich.php');
+    $Bereich = AusgabeZeitbereichZeile($start_date,$ZeitBereich,$TageNamenDeutsch);
+    $MeinVon = $Bereich['MeinVon'];
+    $MeinBis = $Bereich['MeinBis'];
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon , $MeinBis, -1);
+
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);
     $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+    echo '</table>';
         echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
 
     // "Alle Schichten der Con"
@@ -229,44 +214,7 @@ if ($addschicht != '0') {
     echo "<tr class='header'>";
     echo "<th colspan='7'>Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
 
-    echo "<tr class='header'>"; // Zeitbereich tr
-    if ($ZeitBereich == 1) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=1\"'>" . "Alle" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=1\"'>" . "Alle" . "</th>";
-    }
-    if ($ZeitBereich == 2) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=2\"'>" . "Davor" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=2\"'>" . "Davor" . "</th>";
-    }
-    if ($ZeitBereich == 3) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=3\"'>" . "Do" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=3\"'>" . "Do" . "</th>";
-    }
-    if ($ZeitBereich == 4) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=4\"'>" . "Fr" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=4\"'>" . "Fr" . "</th>";
-    }
-    if ($ZeitBereich == 5) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=5\"'>" . "Sa" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=5\"'>" . "Sa" . "</th>";
-    }
-    if ($ZeitBereich == 6) {
-        echo "<th style='width:50px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=6\"'>" . "So" . "</th>";
-    } else {
-        echo "<th style='width:50px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=6\"'>" . "So" . "</th>";
-    }
-    if ($ZeitBereich == 7) {
-        echo "<th style='width:100px; background-color:#0000FF' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=7\"'>" . "Danach" . "</th>";
-    } else {
-        echo "<th style='width:100px' onclick='window.location.href=\"AlleSchichten.php?ZeitBereich=7\"'>" . "Danach" . "</th>";
-    }
-
-    echo "</tr>"; //Zeitbereich tr
+    echo "</tr>";
 
     $OldTag = "";
     $OldWas = "";
