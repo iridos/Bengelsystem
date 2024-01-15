@@ -676,7 +676,7 @@ function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer)
     }
     */
     //$sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ",'" . $Dauer .  "')";
-    $sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) OUTPUT Inserted.SchichtID values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ",'" . $Dauer .  "')";
+    $sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ",'" . $Dauer .  "')";
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "Keine Schicht erstellt";
@@ -686,8 +686,7 @@ function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer)
         die('Ungueltige Abfrage: ' . $err);
     } else {
         //TODO: DienstID aufloesen
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName  hat Schicht angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
-        return $db_erg;
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName  hat Schicht angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);       
     }
 }
 
