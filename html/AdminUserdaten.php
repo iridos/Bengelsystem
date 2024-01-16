@@ -76,6 +76,7 @@ if (isset($_POST['change'])) {
     $HelferName = $_POST['helfer-name'];
     $HelferEmail = $_POST['helfer-email'];
     $HelferHandy = $_POST['helfer-handy'];
+    $HelferLevel = $_POST['helfer-level'];
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
     if ($_POST['IsAdmin']) {
         $HelferIsAdmin = 1;
@@ -85,7 +86,7 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID, $HelferLevel);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -117,6 +118,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];
     $HelferIsAdmin = $zeile['Admin'];
+    $HelferLevel = $zeile['HelferLevel'];
 }
 
 ?>
@@ -153,8 +155,26 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
               <td>Neues Helfer Passwort</td></tr><tr><td>     
               <input name="helfer-newpasswort" type="text" value="<?php echo htmlspecialchars($HelferPasswort ?? '')?>" >
               </td>
+            </tr> 
+              <tr><td>Helferlevel </td></tr>
+           <tr><td>    
+              <select name="helfer-level">
+<?php
+$db_erg = HelferLevel($db_link);
+$selected = "";
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $HelferLevel = $zeile['HelferLevel'];
+    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
+    if ($HelferLevel == 1) {
+        $selected = " selected " ;
+    };
+    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
+    $selected = "";
+}
+?>
+              </select>
+              </td>
             </tr>
-             
           </table>
         
       <table class="commontable">
