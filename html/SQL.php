@@ -232,7 +232,7 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
 
 function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
 {
-    error_log( "AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
+    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
     $Von = mysqli_real_escape_string($db_link, $Von);
     $Bis = mysqli_real_escape_string($db_link, $Bis);
