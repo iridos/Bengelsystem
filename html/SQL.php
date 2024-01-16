@@ -113,44 +113,45 @@ function Helferdaten($db_link, $HelferID)
 
 
 
-function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
+function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)
 {
 
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
     $HelferName = mysqli_real_escape_string($db_link, $HelferName);
     $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
     $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
+    $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
 
     if ($HelferNewPasswort == "") {
         //$sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' ".($HelferIsAdmin!=-1)?',Admin='$HelferIsAdmin.':'." Where HelferId=".$HelferID;
         if ($HelferIsAdmin == -1) {
-            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',HelferLevel='$HelferLevel' Where HelferId=" . $HelferID;
         } else {
-            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',Admin=$HelferIsAdmin,HelferLevel='$HelferLevel' Where HelferId=" . $HelferID;
         }
           echo $sql;
         $db_erg = mysqli_query($db_link, $sql);
         echo "<li>Helferdaten geändert</li>";
         if ($AdminID != 0) {
-                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Admin: $HelferIsAdmin\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Admin: $HelferIsAdmin\n", 3, LOGFILE);
         } else {
-                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Admin: $HelferIsAdmin\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Admin: $HelferIsAdmin\n", 3, LOGFILE);
         }
     } else {
         $HelferNewPasswort = "€" . $HelferNewPasswort . "ß";
         $PasswortHash = password_hash($HelferNewPasswort, PASSWORD_DEFAULT);
         if ($HelferIsAdmin == -1) {
-            $sql = "UPDATE Helfer SET Name='" . $HelferName . "',Email='" . $HelferEmail . "',Handy='" . $HelferHandy . "',Passwort='" . $PasswortHash . "' Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='" . $HelferName . "',Email='" . $HelferEmail . "',Handy='" . $HelferHandy . "',HelferLevel='$HelferLevel',Passwort='" . $PasswortHash . "' Where HelferId=" . $HelferID;
         } else {
-            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',$HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
         }
           //echo $sql;
         $db_erg = mysqli_query($db_link, $sql);
         echo "<li>Passwort geändert</li>";
         if ($AdminID != 0) {
-                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Passwort: neu gesetzt\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
         } else {
-                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Passwort: neu gesetzt\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
         }
     }
 
@@ -231,6 +232,7 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
 
 function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
 {
+    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
     $Von = mysqli_real_escape_string($db_link, $Von);
     $Bis = mysqli_real_escape_string($db_link, $Bis);
@@ -241,7 +243,7 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
     }
 
     $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= '" . $Von . "' and Von <'" . $Bis . "' and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel order by Was,Von";
-    error_log($sql);
+    error_log("AlleSchichtenImZeitbereich sql " . $sql);
     $db_erg = mysqli_query($db_link, $sql);
 
     if (! $db_erg) {
@@ -755,9 +757,9 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 
 function AlleHelferSchichtenUebersicht($db_link)
 {
-    $sql = "select Helfer.HelferID as AliasHelferID,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
+    $sql = "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
     $sql = $sql . " UNION ALL ";
-    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
+    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "AlleHelferSchichtenUebersicht ungueltige Abfrage";
