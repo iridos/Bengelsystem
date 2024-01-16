@@ -1,7 +1,7 @@
  
 <?php
 // create the file below from the template:
-require_once '../bengelsystem_konfiguration.php';
+require_once  __DIR__ . '/../bengelsystem_konfiguration.php';
 
 // muss nicht angepasst werden // no changes needed
 // Zeitbereich: -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
