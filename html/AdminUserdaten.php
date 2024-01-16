@@ -86,7 +86,7 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID, $HelferLevel);
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferIsAdmin, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';

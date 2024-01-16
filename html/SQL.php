@@ -113,7 +113,7 @@ function Helferdaten($db_link, $HelferID)
 
 
 
-function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0, $HelferLevel)
+function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)
 {
 
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
