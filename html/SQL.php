@@ -637,7 +637,7 @@ function GetSchichtenEinesDienstes($db_link, $DienstID)
     return $db_erg;
 }
 
-function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
+function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll, $Dauer)
 {
     $SchichtID = mysqli_real_escape_string($db_link, $SchichtID);
     $Von = mysqli_real_escape_string($db_link, $Von);
@@ -645,7 +645,7 @@ function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
     $Soll = mysqli_real_escape_string($db_link, $Soll);
 
 
-    $sql = "UPDATE Schicht SET Von='" . $Von . "', Bis='" . $Bis . "', Soll='" . $Soll . "' where SchichtID=" . $SchichtID;
+    $sql = "UPDATE Schicht SET Von='" . $Von . "', Bis='" . $Bis . "', Soll='" . $Soll ."', Dauer='" . $Dauer . "' where SchichtID=" . $SchichtID;
 
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
@@ -748,6 +748,19 @@ function DatenbankAufDeutsch($db_link)
     }
 }
 
+function LastInsertId($db_link)
+{
+    $sql = "SELECT LAST_INSERT_ID()";
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "ungueltige Last InsertID";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+    
+    $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    return $zeile['LAST_INSERT_ID()'];
+}
 
 function HelferLevel($db_link)
 {
