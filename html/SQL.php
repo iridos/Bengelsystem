@@ -657,7 +657,7 @@ function GetSchichtenEinesDienstes($db_link, $DienstID)
 
 
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
-    $sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis FROM Schicht where DienstID=" . $DienstID;
+    $sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis, DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Schicht where DienstID=" . $DienstID;
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "GetSchichtenEinesDienstes ungueltige Abfrage";
@@ -667,7 +667,7 @@ function GetSchichtenEinesDienstes($db_link, $DienstID)
     return $db_erg;
 }
 
-function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
+function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll, $Dauer)
 {
     $SchichtID = mysqli_real_escape_string($db_link, $SchichtID);
     $Von = mysqli_real_escape_string($db_link, $Von);
@@ -675,7 +675,7 @@ function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
     $Soll = mysqli_real_escape_string($db_link, $Soll);
 
 
-    $sql = "UPDATE Schicht SET Von='" . $Von . "', Bis='" . $Bis . "', Soll='" . $Soll . "' where SchichtID=" . $SchichtID;
+    $sql = "UPDATE Schicht SET Von='" . $Von . "', Bis='" . $Bis . "', Soll='" . $Soll . "', Dauer='" . $Dauer . "' where SchichtID=" . $SchichtID;
 
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
@@ -685,7 +685,7 @@ function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll)
     }
 }
 
-function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll)
+function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer)
 {
 
     $DienstID = mysqli_real_escape_string($db_link, $DienstID);
@@ -705,12 +705,12 @@ function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll)
         return Null;
     }
     */
-    $sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll) values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ")";
-
+    //$sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ",'" . $Dauer .  "')";
+    $sql = "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values ('" . $DienstID . "','" . $Von . "','" . $Bis . "'," . $Soll . ",'" . $Dauer .  "')";
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "Keine Schicht erstellt";
-        //echo $sql;
+        echo $sql;
                 error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit $sql  \n", 3, LOGFILE);
                 $err = mysqli_error($db_link);
         die('Ungueltige Abfrage: ' . $err);
@@ -778,6 +778,19 @@ function DatenbankAufDeutsch($db_link)
     }
 }
 
+function LastInsertId($db_link)
+{
+    $sql = "SELECT LAST_INSERT_ID()";
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "ungueltige Last InsertID";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+    $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    return $zeile['LAST_INSERT_ID()'];
+}
 
 function HelferLevel($db_link)
 {

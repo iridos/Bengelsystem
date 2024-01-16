@@ -30,6 +30,7 @@ if ($AdminStatus != 1) {
 DatenbankAufDeutsch($db_link);
 
 $DienstID = $_SESSION["DienstID"];
+$NewDienstID = 0;
 $SchichtID = $_SESSION["SchichtID"];
 
 
@@ -65,6 +66,7 @@ if (isset($_POST['NewDienst'])) {
     $Gruppe = $_POST['Dienst-Gruppe'];
        $HelferLevel = $_POST['HelferLevel'];
     NewDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    $NewDienstID = LastInsertId($db_link);
 }
 
 
@@ -79,17 +81,42 @@ if (isset($_POST['ChangeSchicht'])) {
     $Von = $_POST['Schicht-Von'];
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
+    $Dauer = $_POST['Schicht-Dauer'];
 
-    ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll);
+    ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll, $Dauer);
 }
+
+if (isset($_POST['Schicht-Automatic-Bis'])) {
+    $AutomaticBis = 1;
+} else {
+    $AutomaticBis = 0;
+}
+
+if (isset($_POST['Schicht-Anschlussschicht'])) {
+    $Anschlussschicht = 1;
+} else {
+    $Anschlussschicht = 0;
+}
+
 
 
 if (isset($_POST['NewSchicht'])) {
     $Von = $_POST['Schicht-Von'];
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
+    $Dauer = $_POST['Schicht-Dauer'];
 
-    NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll);
+    if ($AutomaticBis) {
+        $Temp = new DateTime($Von);
+      //$Temp2 = DateInterval::createFromDateString('3600 seconds');
+        $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
+
+        $Temp = $Temp->add($Temp2);
+        $Bis = $Temp->format('Y-m-d H:i:s');
+    }
+    NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer);
+    $SchichtID = LastInsertId($db_link);
+    //echo "+".$SchichtID."+";
 }
 
 
@@ -97,6 +124,7 @@ if (isset($_POST['DeleteSchicht'])) {
     if (!DeleteSchicht($db_link, $SchichtID, false)) {
         echo "Erst Helfer aus Schicht austragen<br>";
     }
+    $SchichtID = 0;
 }
 
 
@@ -104,8 +132,9 @@ if (isset($_POST['DeleteSchicht'])) {
 if (isset($_POST['ShowSchicht'])) {
     $SchichtID = $_POST['SchichtSearch'];
 }
-if (isset($_POST['SchichtSearch'])) {
+if (isset($_POST['SchichtSearch']) && !isset($_POST['NewSchicht']) && !isset($_POST['DeleteSchicht'])) {
     $SchichtID = $_POST['SchichtSearch'];
+    echo "SchichtSearch<br>";
 }
 
 if (isset($_POST['ShowSchichten'])) {
@@ -118,7 +147,9 @@ if (isset($_POST['DienstSearch'])) {
 }
 
 
-
+if ($NewDienstID != 0) {
+    $DienstID = $NewDienstID;
+}
 
 // Dienste Anzeigen
 ////////////////////////////////////////////////////////
@@ -145,6 +176,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
     } else {
         echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
+
         $Was = $zeile['Was'];
         $Wo = $zeile['Wo'];
         $Info = $zeile['Info'];
@@ -213,7 +245,7 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                     if ($zeile['DienstID'] != $Gruppe) {
                               echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
                     } else {
-                              echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
+                          echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
                     }
                 }
                     echo "</select>";
@@ -243,7 +275,7 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 
 
 <form method="post">
-    <table border="0" class='commontable'">
+    <table border="0" class='commontable'>
     <tr><th>Schicht</th><th><select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
     
     
@@ -253,6 +285,8 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 $Soll = 1;
 $db_erg = GetSchichtenEinesDienstes($db_link, $DienstID);
 
+echo "+" . $SchichtID . "+";
+
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     if ($SchichtID == 0) {
         $SchichtID = $zeile['SchichtID'];
@@ -261,9 +295,14 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<option value='" . $zeile['SchichtID'] . "'>" . $zeile['TagVon'] . "</option>";
     } else {
         echo "<option value='" . $zeile['SchichtID'] . "' selected='selected'>" . $zeile['TagVon'] . "</option>";
-        $Von = $zeile['Von'];
-        $Bis = $zeile['Bis'];
-        $Soll = (int)$zeile['Soll'];
+        if (isset($_POST['NewSchicht']) && $Anschlussschicht) {
+            $Von = $Bis;
+        } else {
+            $Von = $zeile['Von'];
+            $Bis = $zeile['Bis'];
+            $Soll = (int)$zeile['Soll'];
+            $Dauer = $zeile['Dauer'];
+        }
     }
 }
 
@@ -283,8 +322,15 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
               <input name="Schicht-Von" type="datetime-local" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
               </td>
             <tr>
+            <tr>
+              <td style="border: 0px solid black;">Dauer</td></tr><tr><td style="border: 0px solid black;">
+              <input name="Schicht-Dauer" type="time" value="<?php echo htmlspecialchars($Dauer ?? '')?>" required>
+              </td>
+            <tr>
             </tr>
-              <td style="border: 0px solid black;">Bis</td></tr><tr><td style="border: 0px solid black;">
+            <tr>
+            </tr>
+              <td style="border: 0px solid black;">Bis </td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
               </td>
             <tr>
@@ -296,7 +342,20 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
             </tr>
 
           </table>
-          <p><button name="ChangeSchicht" value="1">Ändern</button><button name="NewSchicht" value="1">Neue</button><button name='DeleteSchicht' value='1'>Löschen</button></p>
+          <?php if ($AutomaticBis) { ?>
+               <input  style="width:unset" width = 20 name="Schicht-Automatic-Bis" type="checkbox" checked  > Endzeit von Dauer<br>
+          <?php } else { ?>
+                <input  style="width:unset" width = 20 name="Schicht-Automatic-Bis" type="checkbox" > Endzeit von Dauer<br>
+          <?php }?>
+
+           <?php if ($Anschlussschicht) { ?>
+               <input  style="width:unset" width = 20 name="Schicht-Anschlussschicht" type="checkbox" checked  > Anschlussschicht vorbereiten<br>
+           <?php } else { ?>
+               <input  style="width:unset" width = 20 name="Schicht-Anschlussschicht" type="checkbox" > Anschlussschicht vorbereiten<br>
+           <?php }?>
+               
+           <p><button name="NewSchicht" value="1">Neue</button><br>
+          <button name="ChangeSchicht" value="1">Ändern</button><button name='DeleteSchicht' value='1'>Löschen</button></p>
 
 
  </form>
