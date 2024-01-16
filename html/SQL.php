@@ -621,6 +621,36 @@ function DeleteDienst($db_link, $DienstID, $Rekursiv)
     }
 }
 
+
+function GetDiensteForDay($db_link, $helferlevel, $datestring)
+{
+    $unixtime = strtotime($datestring);
+    $date1 = date('Y-m-d', $unixtime + 24 * 60 * 60);
+    $date2 = date('Y-m-d', $unixtime);
+    $sql = "SELECT DienstId, Was, Wo, Info FROM Dienst INNER JOIN Schicht USING (DienstID) WHERE HelferLevel=" . $helferlevel . " GROUP BY DienstId HAVING MIN(Von)<'" . $date1 . "' AND MAX(Bis)>'" . $date2 . "' ORDER BY MIN(Von) ASC;";
+    $db_erg = mysqli_query($db_link, $sql);
+    if (! $db_erg) {
+        echo "GetDienste ungueltige Abfrage";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+    return $db_erg;
+}
+
+function GetSchichtenForDienstForDay($db_link, $DienstID, $datestring)
+{
+    $unixtime = strtotime($datestring);
+    $date1 = date('Y-m-d', $unixtime + 24 * 60 * 60);
+    $date2 = date('Y-m-d', $unixtime);
+    $sql = "select Von, Bis, Soll, Name, Handy from Schicht left join EinzelSchicht using (SchichtId) left join Helfer using (HelferId) where DienstId=" . $DienstID . " and Von<'" . $date1 . "' and Bis>'" . $date2 . "' order by Von;";
+    $db_erg = mysqli_query($db_link, $sql);
+    if (! $db_erg) {
+        echo "GetDienste ungueltige Abfrage";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+    return $db_erg;
+}
+
+
 function GetSchichtenEinesDienstes($db_link, $DienstID)
 {
     $DienstID = mysqli_real_escape_string($db_link, $DienstID);
