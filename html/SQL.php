@@ -129,7 +129,7 @@ function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $
         } else {
             $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',Admin=$HelferIsAdmin,HelferLevel='$HelferLevel' Where HelferId=" . $HelferID;
         }
-          echo $sql;
+        //echo $sql;
         $db_erg = mysqli_query($db_link, $sql);
         echo "<li>Helferdaten geändert</li>";
         if ($AdminID != 0) {
@@ -554,8 +554,7 @@ function ChangeDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $
     $Gruppe = mysqli_real_escape_string($db_link, $Gruppe);
     $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);     // int (1,2) Teilnehmer oder Dauerhelfer
 
-    $sql = "UPDATE Dienst SET Was='" . $Was . "', Wo='" . $Wo . "', Info='" . $Info . "', Leiter=" . $Leiter . ", ElternDienstID=" . $Gruppe . " where DienstID=" . $DienstID;
-
+    $sql = "UPDATE Dienst SET Was='{$Was}', Wo='{$Wo}', Info='{$Info}', Leiter={$Leiter}, ElternDienstID={$Gruppe} where DienstID={$DienstID}";
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "Fehler Change Dienst";
