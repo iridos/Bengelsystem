@@ -686,7 +686,7 @@ function ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll, $Dauer)
     }
 }
 
-function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer)
+function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName)
 {
 
     $DienstID = mysqli_real_escape_string($db_link, $DienstID);

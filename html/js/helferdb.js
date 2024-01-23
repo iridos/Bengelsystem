@@ -25,8 +25,9 @@ function setEndDate()
         var end = new Date(start);
         var endHours=start.getHours()+delta.getHours();
         end.setHours(endHours);
+        console.log("Schicht-Von: "+document.getElementById("Schicht-Von").value+'Z'+" Schicht-Dauer: "+"0000-01-01T"+ document.getElementById("Schicht-Dauer").value + "Schicht-Bis: " + end.toISOString().replace(/.000Z/,""));
         end.setMinutes(start.getMinutes()+delta.getMinutes());
-        document.getElementById("Schicht-Bis").value=end.toISOString().replace(/.000Z/,"");;
+        document.getElementById("Schicht-Bis").value=end.toISOString().replace(/.000Z/,"");
         }
 }
 
