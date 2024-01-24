@@ -1,6 +1,6 @@
 <?php
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
