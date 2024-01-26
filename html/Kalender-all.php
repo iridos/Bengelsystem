@@ -145,15 +145,16 @@ function colorize (e){ //KS
 
     });       
     scheduler.config.full_day=false;
+    scheduler.config.readonly_form = true;
     scheduler.config.xml_date="%Y-%m-%d %H:%i"; // deprecated but needed for database format
-    scheduler.config.first_hour = 0;            // only show from this hour on
+    scheduler.config.first_hour = 7;            // only show from this hour on
     scheduler.config.last_hour = 24;            // last hour 
     scheduler.setLoadMode("day");               // dynamic loading loads only current day if needed
     scheduler.config.details_on_create=true;    // ???
     scheduler.config.details_on_dblclick=true;  
     scheduler.i18n.setLocale("de");             // german
     scheduler.config.default_date="%l, %d %F";  // %l long day eg Montag, 
-    //scheduler.config.readonly = true;         // doesnt show lightbox if true so disabled
+    scheduler.config.readonly = true;         // doesnt show lightbox if true so disabled
 
     scheduler.locale.labels.con_tab = "4-Tage"  // for custom time ranges
     scheduler.locale.labels.prep_tab = "2-Tage"
@@ -185,7 +186,7 @@ function colorize (e){ //KS
     scheduler.config.lightbox.sections=[
         {name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
         {name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
-        {name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
+        {name:"Kontakt", height:200, type:"textarea", map_to:"Kontakt" },
         {name:"time", height:72, type:"time", map_to:"auto"}
     ];
 
