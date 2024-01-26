@@ -195,9 +195,8 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 // Aktueller Dienst und dessen Schichten Anzeigen
 ////////////////////////////////////////////////////////
 
-if( !isset($DienstID)) 
-{ 
-    echo "<img src='Bilder/Attention_Sign.svg' width='20px'> Bitte erst Dienst Auswählen </body></html>"; 
+if (!isset($DienstID)) {
+    echo "<img src='Bilder/Attention_Sign.svg' width='20px'> Bitte erst Dienst Auswählen </body></html>";
     exit;
 }
 ?>
@@ -350,13 +349,17 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
             </tr>
 
           </table>
-               <input  style="width:unset" width=20 id="Schicht-Automatic-Bis" name="Schicht-Automatic-Bis" type="checkbox" onclick="setEndDate()" <?php 
-                 if ($AutomaticBis) { echo "checked";} 
-                 ?>  > Endzeit von Dauer<br>
+               <input  style="width:unset" width=20 id="Schicht-Automatic-Bis" name="Schicht-Automatic-Bis" type="checkbox" onclick="setEndDate()" <?php
+                if ($AutomaticBis) {
+                    echo "checked";
+                }
+                ?>  > Endzeit von Dauer<br>
 
                <input  style="width:unset" width=20 id="Schicht-Anschlussschicht" name="Schicht-Anschlussschicht" type="checkbox" <?php
-                 if ($Anschlussschicht) { echo "checked"; }
-               ?>   > Anschlussschicht vorbereiten<br>
+                if ($Anschlussschicht) {
+                    echo "checked";
+                }
+                ?>   > Anschlussschicht vorbereiten<br>
            <p>
              <button name="NewSchicht" value="1">Schicht anlegen</button>
              <button name="ChangeSchicht" value="1">Ändern</button>

@@ -18,17 +18,16 @@ function setEndDate()
     // because maybe browsers also convert to UTC for the internal value
     // but I guess in the worst case we have ZZ at the end and the js autofill fails
     var checkBox = document.getElementById("Schicht-Automatic-Bis");
-    if (checkBox.checked == true)
-        {
-        var start = new Date(document.getElementById("Schicht-Von").value+'Z');
-        var delta = new Date("0000-01-01T"+ document.getElementById("Schicht-Dauer").value);
+    if (checkBox.checked == true) {
+        var start = new Date(document.getElementById("Schicht-Von").value + 'Z');
+        var delta = new Date("0000-01-01T" + document.getElementById("Schicht-Dauer").value);
         var end = new Date(start);
-        var endHours=start.getHours()+delta.getHours();
+        var endHours = start.getHours() + delta.getHours();
         end.setHours(endHours);
-        console.log("Schicht-Von: "+document.getElementById("Schicht-Von").value+'Z'+" Schicht-Dauer: "+"0000-01-01T"+ document.getElementById("Schicht-Dauer").value + "Schicht-Bis: " + end.toISOString().replace(/.000Z/,""));
-        end.setMinutes(start.getMinutes()+delta.getMinutes());
-        document.getElementById("Schicht-Bis").value=end.toISOString().replace(/.000Z/,"");
-        }
+        console.log("Schicht-Von: " + document.getElementById("Schicht-Von").value + 'Z' + " Schicht-Dauer: " + "0000-01-01T" + document.getElementById("Schicht-Dauer").value + "Schicht-Bis: " + end.toISOString().replace(/.000Z/,""));
+        end.setMinutes(start.getMinutes() + delta.getMinutes());
+        document.getElementById("Schicht-Bis").value = end.toISOString().replace(/.000Z/,"");
+    }
 }
 
 //// https://www.w3schools.com/howto/howto_js_collapsible.asp
