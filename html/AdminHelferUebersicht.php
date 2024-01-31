@@ -68,7 +68,7 @@ if (isset($_POST['DienstSearch'])) {
 echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
   <tr class="header">
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten (Helfer ohne Schichten werden momentan noch nicht angezeigt)</b></th>
+    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten</b></th>
   </tr>
 </table>
 <table class="commontable collapsible">
