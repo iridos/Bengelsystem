@@ -28,7 +28,7 @@ class DB {
 
     public function prepare($method, $sql, $variant = '')
     {
-        self::$stmts[$method . "::" . $variant] = self::$pdo->prepare($sql);
+        return self::$stmts[$method . "::" . $variant] = self::$pdo->prepare($sql);
     }
 
     public function execute($method, $values = array(), $variant = '')
@@ -40,7 +40,23 @@ class DB {
     {
         return self::$stmts[$method . "::" . $variant]->fetch($mode,$cursorOrientation,$cursorOffset);
     }
-
+    public function executeScript($method, $filename, $variant = '')
+    {
+        $sqlFromFile = file_get_contents($filename);
+        $sqlStatements = explode(";", $sqlFromFile);
+        $statementcounter = 0;
+        foreach($sqlStatements as $sqlStatement){
+            if(self::prepare($method, $sqlStatement.";", $variant) == false){
+                return array();
+            };
+            $retval[$statementcounter] = self::execute($method,array(),$variant);
+            if(!is_null(self::pdoErrorCode()) && self::pdoErrorCode() != '00000'){
+                return $retval;
+            }
+            $statementcounter++;
+        }
+        return $retval;
+    }
     public function fetchAll($method, $variant = '')
     {
         return self::$stmts[$method . "::" . $variant]->fetchAll();

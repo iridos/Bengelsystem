@@ -145,7 +145,11 @@ class Wizard {
         else{
             $page = "\xEF\xBB\xBF".$pageval;
         }
+        libxml_use_internal_errors(true);
         $pagedom->loadHTML($page);
+        foreach (libxml_get_errors() as $error) {
+            echo "<p>Error when parsing html for step \"".$_POST['step']."\":".$error->line." ".$error->column." ".$error->message."</p>";
+        }
         $forms = $pagedom->getElementsByTagName('form');
         foreach($forms as $form){
             $input = $pagedom->createElement('input');

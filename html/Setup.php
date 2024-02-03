@@ -18,10 +18,10 @@ $wizard->addCode('enterlogindata',function($storedvariables){
 });
 
 $wizard->addCode('createdatabase',function($storedvariables){
-    $conf_file = fopen("../etc/konfiguration.php", "w");
+    $conf_file = fopen("../bengelsystem_konfiguration.php", "w");
     fwrite($conf_file, "<?php\n");
     if($storedvariables['selectdatabase']['databasetype'] == 'SQLite'){
-        fwrite($conf_file, "define( 'MYSQL_DSN', 'sqlite:". realpath("../etc") . "/helferdb.sql' );\n");
+        fwrite($conf_file, "define( 'MYSQL_DSN', 'sqlite:". realpath("..") . "/helferdb.sqlite3' );\n");
         fwrite($conf_file, "define( 'MYSQL_BENUTZER', '' );\n");
         fwrite($conf_file, "define( 'MYSQL_KENNWORT', '' );\n");
         fwrite($conf_file, "define( 'MYSQL_DATENBANK', '' );\n");
@@ -45,7 +45,7 @@ $wizard->addCode('createdatabase',function($storedvariables){
         echo "<p>Fehler ".$db->pdoErrorCode()." beim Verbindungsversuch mit der Datenbank: \"".$db->pdoErrorInfo()[2]."\"</p>";
         $_POST['step'] = 'createdatabase';
     } else {
-        echo "<p>Successfully connected to database!</p>";
+        echo "<p>Erfolgreich mit der Datenbank verbunden!</p>";
     }
 });
 
@@ -61,29 +61,21 @@ $wizard->addCode('createdatabasetables',function($storedvariables){
         echo "<p>Fehler ".$db->pdoErrorCode()." beim Verbindungsversuch mit der Datenbank: \"".$db->pdoErrorInfo()[2]."\"</p>";
         $_POST['step'] = 'createdatabase';
     } else {
-        echo "<p>Successfully connected to database!</p>";
+        echo "<p>Erfolgreich mit der Datenbank verbunden!</p>";
     }
-    $sql = file_get_contents("../etc/helferdb_schema_test.sql");
-    $db->prepare(__METHOD__,$sql);
-    if(!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '1'){
-        echo "<pre>";
-        var_dump(__METHOD__);
-        var_dump($db->errorCode(__METHOD__));
-        var_dump($db->errorInfo(__METHOD__));
-        echo "</pre>";
-        echo "<p>Fehler: \"".$db->errorInfo(__METHOD__)[2]."\"</p>";
-        $_POST['step'] = 'createdatabasetables';
+    if($storedvariables['selectdatabase']['databasetype'] == 'SQLite'){
+        $dbscript = "../helferdb_structure_sqlite.sql";
+    } elseif ($storedvariables['selectdatabase']['databasetype'] == 'MariaDB'){
+        $dbscript = "../helferdb_structure_mariadb.sql";
     }
-    $db->execute(__METHOD__);
-    if(!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '1'){
-        echo "<pre>";
-        var_dump(__METHOD__);
-        var_dump($db->errorCode(__METHOD__));
-        var_dump($db->errorInfo(__METHOD__));
-        echo "</pre>";
-        echo "<p>Fehler: \"".$db->errorInfo(__METHOD__)[2]."\"</p>";
-        $_POST['step'] = 'createdatabasetables';
+    $statementsReturnvalues = $db->executeScript(__METHOD__, $dbscript);
+    if(!is_null($db->pdoErrorCode()) && $db->pdoErrorCode() != '00000'){
+        echo "<p>Fehler ".$db->pdoErrorCode()." bei Statement Nr. ".sizeof($statementsReturnvalues)." beim Versuch Tabellen anzulegen: \"".$db->pdoErrorInfo()[2]."\"</p>";
+        $_POST['step'] = 'createdatabase';
+    } else {
+        echo "<p>Datenbanktabellen wurden erfolgreich angelegt!</p>";
     }
+
 });
 
 $wizard->renderPHP();
