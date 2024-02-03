@@ -4,6 +4,20 @@ require_once("Wizard.php");
 
 $wizard = new Wizard();
 
+$wizard->addCode('basedata',function($storedvariables){
+    $basedata['eventname'] = $_POST['eventname'];
+    $basedata['startdate'] = $_POST['startdate'];
+    $basedata['duration'] = $_POST['duration'];
+    $basedata['timezone'] = $_POST['timezone'];
+    $basedata['locale'] = $_POST['locale'];
+    $basedata['logfile'] = $_POST['logfile'];
+    $basedata['infourl'] = $_POST['infourl'];
+    $basedata['urlprefix'] = $_POST['urlprefix'];
+    $basedata['secretkey'] = $_POST['secretkey'];
+    $basedata['secretverification'] = $_POST['secretverification'];
+    return $basedata;
+});
+
 $wizard->addCode('selectdatabase',function($storedvariables){
     $selectdatabase['databasetype'] = $_POST['databasetype'];
     return $selectdatabase;
@@ -32,6 +46,19 @@ $wizard->addCode('createdatabase',function($storedvariables){
         fwrite($conf_file, "define( 'MYSQL_KENNWORT', '".$storedvariables['enterlogindata']['password']."' );\n");
         fwrite($conf_file, "define( 'MYSQL_DATENBANK', '".$storedvariables['enterlogindata']['dbname']."' );\n");
     }
+    fwrite($conf_file, "define( 'LOGFILE', '".$storedvariables['basedata']['logfile']."' );\n");
+    fwrite($conf_file, "define( 'EVENTNAME', '".$storedvariables['basedata']['eventname']."' );\n");
+    fwrite($conf_file, "define( 'INFORMATIONS_URL', '".$storedvariables['basedata']['infourl']."' );\n");
+    fwrite($conf_file, "define( 'SECRET_KEY', '".$storedvariables['basedata']['secretkey']."' );\n");
+    fwrite($conf_file, "define( 'SECRET_VERIFICATION', '".$storedvariables['basedata']['secretverification']."' );\n");
+    fwrite($conf_file, "define( 'URLPREFIX', '".$storedvariables['basedata']['urlprefix']."' );\n");
+    fwrite($conf_file, "define( 'TAGE_DAUER', '".$storedvariables['basedata']['duration']."' );\n");
+    fwrite($conf_file, "date_default_timezone_set('".$storedvariables['basedata']['timezone']."');\n");
+    fwrite($conf_file, "setlocale(LC_TIME, \"".$storedvariables['basedata']['locale']."\");\n");
+    fwrite($conf_file, "\$start_date = new DateTimeImmutable(\"".$storedvariables['basedata']['startdate']."\");\n");
+    fwrite($conf_file, "\$secret_key = SECRET_KEY;\n");
+    fwrite($conf_file, "\$secret_verification = SECRET_VERIFICATION;\n");
+    fwrite($conf_file, "\$urlprefix = URLPREFIX;\n");
     fwrite($conf_file, "?>");
     // Test configuration:
     require_once("SQL.php");
