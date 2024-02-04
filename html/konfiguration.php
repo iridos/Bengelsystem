@@ -12,11 +12,6 @@ require_once('../bengelsystem_konfiguration.php');
 // define( VERANSTALTUNGSNAME, "dubbelcon");
 // define( INFORMATIONS_URL, "http://drop-am-see.de/Gelaende");
 
-date_default_timezone_set('Europe/Berlin');
-setlocale(LC_TIME, "de_DE.UTF-8");
-$start_date = new DateTimeImmutable("2023-05-18");
-define('TAGE_DAUER', 4);
-
 // Geheimer Schlüssel für die Verschlüsselung von Tokens
 // das ist das Passwort, mit dem sich aus den Tokens auch wieder der Username/Email extrahieren lässt
 

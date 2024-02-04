@@ -1,4 +1,3 @@
-
 <?php
 
 require_once 'konfiguration.php';
@@ -36,7 +35,7 @@ class DB {
         return self::$stmts[$method . "::" . $variant]->execute($values);
     }
 
-    public function fetch($method, $variant = '', int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0) : mixed
+    public function fetch($method, $variant = '', int $mode = PDO::FETCH_BOTH, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0)
     {
         return self::$stmts[$method . "::" . $variant]->fetch($mode,$cursorOrientation,$cursorOffset);
     }
@@ -81,7 +80,7 @@ class DB {
 
     public function onErrorDie($method, $variant = '')
     {
-        if (!is_null(self::errorCode($method, $variant)) && self::errorCode($method, $variant) != '1') {
+        if (!is_null(self::errorCode($method, $variant)) && self::errorCode($method, $variant) != '00000') {
             echo $method . "::" . $variant . " ungueltige Abfrage<br>\n";
             echo "sql:" . $stmts[$method . "::" . $variant]->queryString . "<br>\n";
             die('Ungueltige Abfrage: ' . self::errorInfo($method, $variant)[2]);
@@ -121,7 +120,7 @@ function HelferIstVorhanden($Email)
     $db->execute(__METHOD__,["email" => $Email]);
     // TODO Test, that this still works
     $zeile = $db->fetchAll(__METHOD__);
-    return $zeile['Anzahl'];
+    return $zeile[0]['Anzahl'];
 }
 
 //TODO: pruefen, ob Helfer bereits eingeloggt
@@ -132,21 +131,21 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"SELECT HelferID,Admin,Name,Passwort,HelferLevel FROM Helfer WHERE Email=:email");
     $db_erg = $db->execute(__METHOD__,["email" => $HelferEmail]);
-    if ($db->errorCode(__METHOD__) != 1) {
+    if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         echo "Login ungueltige Abfrage";
-        die('Ungueltige Abfrage: ' . $stmt->errorInfo(__METHOD__)[2]);
+        die('Ungueltige Abfrage: ' . $db->errorInfo(__METHOD__)[2]);
     }
-    while ($zeile = $stmt->fetchAll()) {
+    while ($zeile = $db->fetchAll(__METHOD__)) {
         $HelferPasswort = "€" . $HelferPasswort . "ß";
         //echo "<b>".$HelferPasswort."</b><br>";
         //echo "<b>".$zeile['Passwort']."</b><br>";
-        if (password_verify($HelferPasswort, $zeile['Passwort'])) {
-            $_SESSION["HelferID"] = $zeile['HelferID'];
-            $_SESSION["HelferName"] = $zeile['Name'];
+        if (password_verify($HelferPasswort, $zeile[0]['Passwort'])) {
+            $_SESSION["HelferID"] = $zeile[0]['HelferID'];
+            $_SESSION["HelferName"] = $zeile[0]['Name'];
             //TODO: das sollte nur gesetzt werden, wenn der Helfer Admin ist
-            $_SESSION["AdminID"] = $zeile['HelferID'];
-            $_SESSION["AdminStatus"] = $zeile['Admin'];
-            $_SESSION["HelferLevel"] = $zeile['HelferLevel'];
+            $_SESSION["AdminID"] = $zeile[0]['HelferID'];
+            $_SESSION["AdminStatus"] = $zeile[0]['Admin'];
+            $_SESSION["HelferLevel"] = $zeile[0]['HelferLevel'];
             return 1;
         } else {
             echo "Falsches Passwort<br>";
@@ -157,7 +156,7 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
 
 // Liste der Helfer fuer Admin-Seite
 //TODO: HelferLevel
-function HelferListe($pdo)
+function HelferListe()
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"SELECT HelferID,Name FROM Helfer");
@@ -167,7 +166,7 @@ function HelferListe($pdo)
 }
 
 
-function Helferdaten($pdo, $HelferID)
+function Helferdaten($HelferID)
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"SELECT * FROM Helfer Where HelferID = :helferid");
@@ -178,7 +177,7 @@ function Helferdaten($pdo, $HelferID)
 
 
 
-function HelferdatenAendern($pdo, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
+function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy Where HelferId=:id",'password_empty');
@@ -566,7 +565,7 @@ function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLeve
     $db->onErrorDie(__METHOD__);
 }
 
-function NewDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
+function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"INSERT INTO Dienst (Was, Wo, Info, Leiter, ElternDienstID, HelferLevel) values (:was,:wo,:info,:leiter,:elterndienstid,:helferlevel)");
@@ -579,14 +578,12 @@ function NewDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
         "helferlevel" => $HelferLevel
     ]);
 
-    if  ($db->errorCode(__METHOD__) != 1){
-        echo "Fehler New Dienst";
-        //        echo $sql;
-        $err =  $stmt->errorInfo(__METHOD__)[2];
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit Anfrage $sql   Grund: $err  \n", 3, LOGFILE);
+    if  (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000'){
+        $err =  $db->errorInfo(__METHOD__)[2];
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht konnte nicht angelegt werden  Grund: $err  \n", 3, LOGFILE);
         die('Ungueltige Abfrage: ' . $err);
     } else {
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName(ID:HelferID)  hat Dienst angelegt mit Was: $WAS Wo: $Wo Info: $Info Leiter: $Leiter Gruppe $Gruppe, HelferLevel $HelferLevel  \n", 3, LOGFILE);
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: Dienst wurde angelegt mit Was: $Was Wo: $Wo Info: $Info Leiter: $Leiter Gruppe $Gruppe, HelferLevel $HelferLevel  \n", 3, LOGFILE);
     }
 }
 
