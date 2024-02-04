@@ -1,8 +1,7 @@
 <?php
 
-SESSION_START();
-
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 require '_crypt.php';
 

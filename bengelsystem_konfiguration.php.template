@@ -16,6 +16,8 @@ define('TAGE_DAUER', 4);
 date_default_timezone_set('Europe/Berlin');
 setlocale(LC_TIME, "de_DE.UTF-8");
 $start_date = new DateTimeImmutable("2023-05-18");
+// das hier setzen, um mehr als eine Instanz der des Bengelsystems mit separaten Accounts laufen zu lassen
+//session_save_path("/var/lib/php/sessions");
 
 
 // Geheimer Schlüssel für die Verschlüsselung von Tokens

@@ -1,10 +1,9 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
-require '_login.php';
 
 ?>
 <!doctype html>
@@ -95,7 +94,7 @@ if (isset($_POST['sent'])) {
 
 ?>
 
-<p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen.</p>
+<p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen. Danach zum <a href="index.php">Login</a></p>
 <form method="post">
 
   <table class="commontable">

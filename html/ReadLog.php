@@ -1,8 +1,8 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
-require 'SQL.php';
+SESSION_START();
+require_once 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
 
@@ -28,7 +28,6 @@ require '_login.php';
   //check for admin status
   $HelferID = $_SESSION["HelferID"];
   $AdminID = $_SESSION["AdminID"];
-  require 'SQL.php';
   $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
   DatenbankAufDeutsch($db_link);
 

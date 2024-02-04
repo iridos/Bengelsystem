@@ -1,7 +1,7 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
@@ -19,10 +19,10 @@ if ($AdminStatus != 1) {
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-
+  <script src="js/helferdb.js" type="text/javascript"></script>
   <meta name="viewport" content="width=480" />
  </head>
- <body>
+ <body onload="setEndDate();">
 <div style="width: 100%;">
 <?php
 
@@ -114,7 +114,7 @@ if (isset($_POST['NewSchicht'])) {
         $Temp = $Temp->add($Temp2);
         $Bis = $Temp->format('Y-m-d H:i:s');
     }
-    NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer);
+    NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
     $SchichtID = LastInsertId($db_link);
     //echo "+".$SchichtID."+";
 }
@@ -195,6 +195,10 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 // Aktueller Dienst und dessen Schichten Anzeigen
 ////////////////////////////////////////////////////////
 
+if (!isset($DienstID)) {
+    echo "<img src='Bilder/Attention_Sign.svg' width='20px'> Bitte erst Dienst Auswählen </body></html>";
+    exit;
+}
 ?>
 
 
@@ -267,8 +271,11 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
              </td></tr>
           </table>
           
-          <p><button name="ChangeDienst" value="1">Ändern</button><button name="NewDienst" value="1">Neue</button><button name='DeleteDienst' value='1'>Löschen</button></p>
-
+          <p>
+             <button name="NewDienst" value="1">Dienst anlegen</button>
+             <button name="ChangeDienst" value="1">Ändern</button>
+             <button name='DeleteDienst' value='1'>Löschen</button>
+          </p>
 </form>
 
 
@@ -319,45 +326,45 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
         <table border="0" class='commontable'"> 
             <tr>
               <td style="border: 0px solid black;">Von</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Von" type="datetime-local" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
+              <input id="Schicht-Von" name="Schicht-Von" type="datetime-local" onKeyUp="setEndDate()" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
               </td>
             <tr>
             <tr>
               <td style="border: 0px solid black;">Dauer</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Dauer" type="time" value="<?php echo htmlspecialchars($Dauer ?? '')?>" required>
+              <input id="Schicht-Dauer" name="Schicht-Dauer" type="time" onChange="setEndDate()" value="<?php echo htmlspecialchars($Dauer ?? '01:00')?>" required>
               </td>
             <tr>
             </tr>
             <tr>
             </tr>
               <td style="border: 0px solid black;">Bis </td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
+              <input id="Schicht-Bis" name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Soll</td></tr><tr><td style="border: 0px solid black;">
+              <td style="border: 0px solid black;">Anzahl Helfer (Soll)</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
               </td>
             <tr>
             </tr>
 
           </table>
-          <?php if ($AutomaticBis) { ?>
-               <input  style="width:unset" width = 20 name="Schicht-Automatic-Bis" type="checkbox" checked  > Endzeit von Dauer<br>
-          <?php } else { ?>
-                <input  style="width:unset" width = 20 name="Schicht-Automatic-Bis" type="checkbox" > Endzeit von Dauer<br>
-          <?php }?>
+               <input  style="width:unset" width=20 id="Schicht-Automatic-Bis" name="Schicht-Automatic-Bis" type="checkbox" onclick="setEndDate()" <?php
+                if ($AutomaticBis) {
+                    echo "checked";
+                }
+                ?>  > Endzeit von Dauer<br>
 
-           <?php if ($Anschlussschicht) { ?>
-               <input  style="width:unset" width = 20 name="Schicht-Anschlussschicht" type="checkbox" checked  > Anschlussschicht vorbereiten<br>
-           <?php } else { ?>
-               <input  style="width:unset" width = 20 name="Schicht-Anschlussschicht" type="checkbox" > Anschlussschicht vorbereiten<br>
-           <?php }?>
-               
-           <p><button name="NewSchicht" value="1">Neue</button><br>
-          <button name="ChangeSchicht" value="1">Ändern</button><button name='DeleteSchicht' value='1'>Löschen</button></p>
-
-
+               <input  style="width:unset" width=20 id="Schicht-Anschlussschicht" name="Schicht-Anschlussschicht" type="checkbox" <?php
+                if ($Anschlussschicht) {
+                    echo "checked";
+                }
+                ?>   > Anschlussschicht vorbereiten<br>
+           <p>
+             <button name="NewSchicht" value="1">Schicht anlegen</button>
+             <button name="ChangeSchicht" value="1">Ändern</button>
+             <button name='DeleteSchicht' value='1'>Löschen</button>
+          </p>
  </form>
  
 <button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b><b>&larrhk;</b></b></button> 
