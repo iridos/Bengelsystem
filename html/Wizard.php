@@ -96,7 +96,7 @@ class Wizard {
     private array $steps = array();
     private string $footer = "";
     private array $storedvariables = array();
-    public function __construct($json_file = 'setupWizard.json'){
+    public function __construct($json_file = '../wizard.json'){
         $stepsArray = json_decode(file_get_contents($json_file), true);
         $this->header = $stepsArray['header'];
         $this->firststep = $stepsArray['firststep'];

@@ -2,7 +2,7 @@
 
 require_once("Wizard.php");
 
-$wizard = new Wizard();
+$wizard = new Wizard("../setupWizard.json");
 
 $wizard->addCode('basedata',function($storedvariables){
     $basedata['eventname'] = $_POST['eventname'];
