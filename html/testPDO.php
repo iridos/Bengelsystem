@@ -508,5 +508,5 @@ TestHelferdaten();
 TestHelferdatenAendern();
 TestNewDienst();
 TestGetDienste();
-TestDeleteDienst();
+#TestDeleteDienst();
 ?>

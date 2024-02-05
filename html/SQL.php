@@ -58,7 +58,7 @@ class DB {
     }
     public function fetchAll($method, $variant = '')
     {
-        return self::$stmts[$method . "::" . $variant]->fetchAll();
+        return self::$stmts[$method . "::" . $variant]->fetchAll(PDO::FETCH_ASSOC);
     }
     public function pdoErrorCode()
     {
@@ -536,7 +536,8 @@ function GetDienste()
     $db->prepare(__METHOD__,"SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel FROM Dienst order By Was");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $dienste = $db->fetchAll(__METHOD__);
+    return $dienste;
 }
 
 function GetDiensteChilds($DienstID)

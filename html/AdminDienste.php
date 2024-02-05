@@ -131,7 +131,7 @@ if (isset($_POST['DienstSearch'])) {
 <?php
 
 
-$db_erg = GetDienste($db_link);
+$zeilen = GetDienste($db_link);
 
 $Was = "";
 $Wo = "";
@@ -140,7 +140,7 @@ $Leiter = "";
 $Gruppe = "";
 $HelferLevel = "";
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+while ($zeilen as $zeile){
     if ($zeile['DienstID'] != $DienstID) {
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
     } else {
