@@ -69,10 +69,10 @@ if (isset($_POST['change'])) {
 // Helferdate holen
 ///////////////////////////////////////////////////////////////
 
-$db_erg = Helferdaten($db_link, $HelferID);
+$zeilen = Helferdaten($db_link, $HelferID);
 
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+while ($zeilen as $zeile)) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];

@@ -162,7 +162,8 @@ function HelferListe()
     $db->prepare(__METHOD__,"SELECT HelferID,Name FROM Helfer");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $helfer = $db->fetchAll(__METHOD__);
+    return $helfer;
 }
 
 
@@ -172,7 +173,8 @@ function Helferdaten($HelferID)
     $db->prepare(__METHOD__,"SELECT * FROM Helfer Where HelferID = :helferid");
     $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $helferdaten = $db->fetchAll(__METHOD__);
+    return $helferdaten;
 }
 
 

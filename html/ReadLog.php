@@ -30,8 +30,8 @@ if (!isset($_SESSION["HelferID"]) || ! $_SESSION["HelferID"] > 0) {
   $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
   DatenbankAufDeutsch($db_link);
 
-  $db_erg = Helferdaten($db_link, $HelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+  $zeilen = Helferdaten($db_link, $HelferID);
+while ($zeilen as $zeile)) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }

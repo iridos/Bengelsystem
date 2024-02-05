@@ -190,8 +190,8 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                <!--  <input name="Dienst-Leiter" type="text" value="<?php echo htmlspecialchars($Leiter ?? '')?>" > -->
                 <?php
                     echo "<select name='Dienst-Leiter'>";
-                    $db_erg = HelferListe($db_link);
-                while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+                    $zeilen = HelferListe($db_link);
+                while ($zeilen as $zeile) {
                     if ($zeile['HelferID'] != $Leiter) {
                               echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</option>";
                     } else {

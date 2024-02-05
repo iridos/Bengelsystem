@@ -47,8 +47,8 @@ if ($AliasHelferID != 0) {
 }
 //echo "AliasHelfer=$AliasHelferID <br>";
 
-$db_erg = Helferdaten($db_link, $HelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$zeilen = Helferdaten($db_link, $HelferID);
+while ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }
@@ -83,8 +83,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
    <th><b>Helfer als Admin &auml;ndern:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;font-size:20" name="AliasHelfer" id="AliasHelfer" onchange="submit()">
 <?php
-    $db_erg = HelferListe($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $zeilen = HelferListe($db_link);
+while ($zeilen as $zeile) {
     if ($AliasHelferID != $zeile['HelferID']) {
         echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
     } else {

@@ -84,8 +84,8 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
     echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $zeilen = HelferListe($db_link);
+    while ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
                 echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
@@ -112,9 +112,9 @@ HelferAuswahlButton($db_link, $AliasHelferID);
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
 
-$db_erg = Helferdaten($db_link, $AliasHelferID);
+$zeilen = Helferdaten($db_link, $AliasHelferID);
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+while ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
 }
 
