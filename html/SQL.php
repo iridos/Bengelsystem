@@ -597,14 +597,14 @@ function DeleteDienst($DienstID, $Rekursiv)
     } else {
         // Pruefen ob noch Schichten eingetragen sind
         $db = DB::getInstance();
-        $db->prepare(__METHOD__,"SELECT SchichtID FROM Schicht where DienstID=:id",'check_dienst');
+        $db->prepare(__METHOD__,"SELECT SchichtID FROM Schicht where DienstID=:id",'check_schicht');
         $db->prepare(__METHOD__,"DELETE FROM Dienst where DienstID=:id",'delete_dienst');
         
-        $db_erg = $db->execute(__METHOD__,['id' => $DienstID],'check_dienst');
+        $db_erg = $db->execute(__METHOD__,['id' => $DienstID],'check_schicht');
 
-        $db->onErrorDie(__METHOD__,'check_dienst');
+        $db->onErrorDie(__METHOD__,'check_schicht');
 
-        if ($db->fetch(__METHOD__,'check_dienst')) {
+        if (!$db->fetch(__METHOD__,'check_schicht')){
             // Eintrag löschen
             $db_erg = $db->execute(__METHOD__,['id' => $DienstID],'delete_dienst');
             $db->onErrorDie(__METHOD__,'delete_dienst');

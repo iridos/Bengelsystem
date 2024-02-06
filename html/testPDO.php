@@ -371,7 +371,7 @@ function TestDeleteDienst(){
         echo "Old DeleteDienst returns".var_export($erg_old, true)."\n";
         echo "New DeleteDienst returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "DeleteDienst ok";
+    else echo "DeleteDienst ok\n";
 }
 
 function TestGetDiensteForDay(){
@@ -505,4 +505,5 @@ TestHelferdatenAendern();
 TestNewDienst();
 TestGetDienste();
 TestDeleteDienst();
+TestNewDienst();
 ?>

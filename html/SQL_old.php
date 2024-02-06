@@ -616,7 +616,6 @@ function DeleteDienst($db_link, $DienstID, $Rekursiv)
             // Eintrag löschen
             $sql = "DELETE FROM Dienst where DienstID=" . $DienstID;
 
-            echo $sql;
             $db_erg = mysqli_query($db_link, $sql);
             if (! $db_erg) {
                 echo "Fehler DeleteDienst";
