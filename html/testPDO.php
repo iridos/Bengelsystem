@@ -329,14 +329,21 @@ function TestGetDienste(){
 }
 
 function TestGetDiensteChilds(){
+    $dienste = GetDienste();
     $dbl = old\ConnectDB();
-    $erg_old = old\GetDiensteChilds($dbl, $DienstID);
-    $erg_new = GetDiensteChilds($DienstID);
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old GetDiensteChilds returns".var_export($erg_old, true)."\n";
-        echo "New GetDiensteChilds returns '".var_export($erg_new, true)."'\n";
+    $erg_old_empty = old\GetDiensteChilds($dbl, $dienste[1]["DienstID"]);
+    $erg_new_empty = GetDiensteChilds($dienste[1]["DienstID"]);
+    $erg_old_child = old\GetDiensteChilds($dbl, $dienste[0]["DienstID"]);
+    $erg_new_child = GetDiensteChilds($dienste[0]["DienstID"]);
+    if((gettype($erg_old_empty) != gettype($erg_new_empty)) || ($erg_old_empty != $erg_new_empty)){
+        echo "Old GetDiensteChilds empty returns".var_export($erg_old_empty, true)."\n";
+        echo "New GetDiensteChilds empty returns '".var_export($erg_new_empty, true)."'\n";
     }
-    else echo "GetDiensteChilds ok";
+    else if((gettype($erg_old_child) != gettype($erg_new_child)) || ($erg_old_child != $erg_new_child)){
+        echo "Old GetDiensteChilds child returns".var_export($erg_old_child, true)."\n";
+        echo "New GetDiensteChilds child returns '".var_export($erg_new_child, true)."'\n";
+    }
+    else echo "GetDiensteChilds ok\n";
 }
 
 function TestChangeDienst(){
@@ -344,12 +351,12 @@ function TestChangeDienst(){
     HelferLogin("max3@example.com", "hola531",  0);
     $dbl = old\ConnectDB();
     $erg_old = old\ChangeDienst($dbl, $dienste[0]["DienstID"], "Frühstück", "Foyer", "SChnibbeln", $_SESSION["HelferID"], 0, $_SESSION["HelferLevel"]);
-    $erg_new = ChangeDienst($dienste[1]["DienstID"], "Frühstück", "Foyer", "SChnibbeln", $_SESSION["HelferID"], 0, $_SESSION["HelferLevel"]);
+    $erg_new = ChangeDienst($dienste[1]["DienstID"], "Frühstück", "Foyer", "SChnibbeln", $_SESSION["HelferID"], $dienste[0]["DienstID"], $_SESSION["HelferLevel"]);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old ChangeDienst returns".var_export($erg_old, true)."\n";
         echo "New ChangeDienst returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "ChangeDienst ok";
+    else echo "ChangeDienst ok\n";
 }
 
 function TestNewDienst(){
@@ -509,4 +516,5 @@ TestGetDienste();
 TestDeleteDienst();
 TestNewDienst();
 TestChangeDienst();
+TestGetDiensteChilds();
 ?>

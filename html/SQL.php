@@ -88,6 +88,7 @@ class DB {
     }
 }
 
+// ok
 function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel = 1)
 {
     // Neuen Helfer anlegen
@@ -112,6 +113,7 @@ function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, 
     return $db_erg;
 }
 
+// ok
 // testet fuer urllogin, ob Helfer bereits existiert
 function HelferIstVorhanden($Email)
 {
@@ -123,6 +125,7 @@ function HelferIstVorhanden($Email)
     return $zeile[0]['Anzahl'];
 }
 
+// ok
 //TODO: pruefen, ob Helfer bereits eingeloggt
 function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
 {
@@ -154,6 +157,7 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
     }
 }
 
+// ok
 // Liste der Helfer fuer Admin-Seite
 //TODO: HelferLevel
 function HelferListe()
@@ -166,7 +170,7 @@ function HelferListe()
     return $helfer;
 }
 
-
+// ok
 function Helferdaten($HelferID)
 {
     $db = DB::getInstance();
@@ -178,7 +182,7 @@ function Helferdaten($HelferID)
 }
 
 
-
+// ok
 function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
 {
     $db = DB::getInstance();
@@ -532,6 +536,7 @@ function BeteiligteHelfer($InfoSchichtID)
     return $db_erg;
 }
 
+// ok
 function GetDienste()
 {
     $db = DB::getInstance();
@@ -548,9 +553,11 @@ function GetDiensteChilds($DienstID)
     $db->prepare(__METHOD__,"SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID=:id order by Was");
     $db_erg = $db->execute(__METHOD__,["id" => $DienstID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $dienste = $db->fetchAll(__METHOD__);
+    return $dienste;
 }
 
+// ok
 function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
@@ -568,6 +575,7 @@ function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLeve
     $db->onErrorDie(__METHOD__);
 }
 
+// ok
 function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
@@ -590,6 +598,7 @@ function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
     }
 }
 
+// ok
 function DeleteDienst($DienstID, $Rekursiv)
 {
     if ($Rekursiv) {
