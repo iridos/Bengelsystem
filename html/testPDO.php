@@ -340,9 +340,11 @@ function TestGetDiensteChilds(){
 }
 
 function TestChangeDienst(){
+    $dienste = GetDienste();
+    HelferLogin("max3@example.com", "hola531",  0);
     $dbl = old\ConnectDB();
-    $erg_old = old\ChangeDienst($dbl, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
-    $erg_new = ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    $erg_old = old\ChangeDienst($dbl, $dienste[0]["DienstID"], "Frühstück", "Foyer", "SChnibbeln", $_SESSION["HelferID"], 0, $_SESSION["HelferLevel"]);
+    $erg_new = ChangeDienst($dienste[1]["DienstID"], "Frühstück", "Foyer", "SChnibbeln", $_SESSION["HelferID"], 0, $_SESSION["HelferLevel"]);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old ChangeDienst returns".var_export($erg_old, true)."\n";
         echo "New ChangeDienst returns '".var_export($erg_new, true)."'\n";
@@ -506,4 +508,5 @@ TestNewDienst();
 TestGetDienste();
 TestDeleteDienst();
 TestNewDienst();
+TestChangeDienst();
 ?>
