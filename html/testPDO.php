@@ -406,14 +406,15 @@ function TestGetSchichtenForDienstForDay(){
 }
 
 function TestGetSchichtenEinesDienstes(){
+    $dienste = GetDienste();
     $dbl = old\ConnectDB();
-    $erg_old = old\GetSchichtenEinesDienstes($dbl, $DienstID);
-    $erg_new = GetSchichtenEinesDienstes($DienstID);
+    $erg_old = old\GetSchichtenEinesDienstes($dbl, $dienste[0]["DienstID"]);
+    $erg_new = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old GetSchichtenEinesDienstes returns".var_export($erg_old, true)."\n";
         echo "New GetSchichtenEinesDienstes returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "GetSchichtenEinesDienstes ok";
+    else echo "GetSchichtenEinesDienstes ok\n";
 }
 
 function TestChangeSchicht(){
@@ -519,4 +520,5 @@ TestNewDienst();
 TestChangeDienst();
 TestGetDiensteChilds();
 TestNewSchicht();
+TestGetSchichtenEinesDienstes();
 ?>

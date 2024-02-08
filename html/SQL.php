@@ -21,6 +21,9 @@ class DB {
     {
         if(self::$instance == null){
             self::$instance = new DB();
+            // Set database to german (FIXME should be configurable)
+            self::prepare(__METHOD__,"SET lc_time_names = 'de_DE'");
+            self::execute(__METHOD__);
         }
         return self::$instance;
     }
@@ -629,10 +632,11 @@ function GetSchichtenEinesDienstes($DienstID)
 {
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis FROM Schicht where DienstID=:id");
+    $db->prepare(__METHOD__,"SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis, DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Schicht where DienstID=:id");
     $db_erg = $db->execute(__METHOD__,['id' => $DienstID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $schichten = $db->fetchAll(__METHOD__);
+    return $schichten;
 }
 
 function ChangeSchicht($SchichtID, $Von, $Bis, $Soll)
@@ -650,6 +654,7 @@ function ChangeSchicht($SchichtID, $Von, $Bis, $Soll)
     $db->onErrorDie(__METHOD__);
 }
 
+// ok
 function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
 {
 
