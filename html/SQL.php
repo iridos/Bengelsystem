@@ -547,6 +547,7 @@ function GetDienste()
     return $dienste;
 }
 
+// ok
 function GetDiensteChilds($DienstID)
 {
     $db = DB::getInstance();
@@ -649,7 +650,7 @@ function ChangeSchicht($SchichtID, $Von, $Bis, $Soll)
     $db->onErrorDie(__METHOD__);
 }
 
-function NewSchicht($DienstID, $Von, $Bis, $Soll)
+function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
 {
 
     /*
@@ -665,24 +666,25 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll)
     }
     */
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"INSERT INTO Schicht (DienstID, Von, Bis, Soll) values (:id,:von,:bis,:soll)");
+    $db->prepare(__METHOD__,"INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values (:id,:von,:bis,:soll,:dauer)");
 
     $db_erg = $db->execute(__METHOD__,[
         'id' => $DienstID,
         'von' => $Von,
         'bis' => $Bis,
-        'soll' => $Soll
+        'soll' => $Soll,
+        'dauer' => $Dauer
     ]);
 
-    if  ($db->errorCode(__METHOD__) != 1){
+    if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         echo "Keine Schicht erstellt";
         //echo $sql;
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit $sql  \n", 3, LOGFILE);
-        $err = $stmt->errorInfo(__METHOD__)[2];
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht konnte nicht angelegt werden mit $sql  \n", 3, LOGFILE);
+        $err = $db->errorInfo(__METHOD__)[2];
         die('Ungueltige Abfrage: ' . $err);
     } else {
         //TODO: DienstID aufloesen
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName  hat Schicht angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht wurde angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
     }
 }
 

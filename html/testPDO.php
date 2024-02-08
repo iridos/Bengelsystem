@@ -428,14 +428,15 @@ function TestChangeSchicht(){
 }
 
 function TestNewSchicht(){
+    $dienste = GetDienste();
     $dbl = old\ConnectDB();
-    $erg_old = old\NewSchicht($dbl, $DienstID, $Von, $Bis, $Soll, $Dauer);
-    $erg_new = NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer);
+    $erg_old = old\NewSchicht($dbl, $dienste[0]["DienstID"], "2024-02-15T09:00", "2024-02-15T10:30", 2, "01:30");
+    $erg_new = NewSchicht($dienste[0]["DienstID"], "2024-02-15T10:30", "2024-02-15T12:00", 2, "01:30");
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old NewSchicht returns".var_export($erg_old, true)."\n";
         echo "New NewSchicht returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "NewSchicht ok";
+    else echo "NewSchicht ok\n";
 }
 
 function TestDeleteSchicht(){
@@ -517,4 +518,5 @@ TestDeleteDienst();
 TestNewDienst();
 TestChangeDienst();
 TestGetDiensteChilds();
+TestNewSchicht();
 ?>

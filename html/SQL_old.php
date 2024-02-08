@@ -720,12 +720,12 @@ function NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer)
     if (! $db_erg) {
         echo "Keine Schicht erstellt";
         echo $sql;
-                error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit $sql  \n", 3, LOGFILE);
+                error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht konnte nicht angelegt mit $sql  \n", 3, LOGFILE);
                 $err = mysqli_error($db_link);
         die('Ungueltige Abfrage: ' . $err);
     } else {
         //TODO: DienstID aufloesen
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName  hat Schicht angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht wurde angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
     }
 }
 
