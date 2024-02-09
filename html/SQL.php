@@ -628,6 +628,24 @@ function DeleteDienst($DienstID, $Rekursiv)
     }
 }
 
+// ok
+function GetSchichtenForDienstForDay($DienstID, $datestring)
+{
+    $db = DB::getInstance();
+    $db->prepare(__METHOD__,"select Von, Bis, Soll, Name, Handy from Schicht left join EinzelSchicht using (SchichtId) left join Helfer using (HelferId) where DienstId=:id and Von<:von and Bis>:bis order by Von;");
+    $unixtime = strtotime($datestring);
+    $db_erg = $db->execute(__METHOD__,[
+        'id' => $DienstID,
+        'von' => date('Y-m-d', $unixtime + 24 * 60 * 60),
+        'bis' => date('Y-m-d', $unixtime)
+    ]);
+    $db->onErrorDie(__METHOD__);
+    $schichten = $db->fetchAll(__METHOD__);
+    return $schichten;
+}
+
+
+// ok
 function GetSchichtenEinesDienstes($DienstID)
 {
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
@@ -639,16 +657,18 @@ function GetSchichtenEinesDienstes($DienstID)
     return $schichten;
 }
 
-function ChangeSchicht($SchichtID, $Von, $Bis, $Soll)
+// ok
+function ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"UPDATE Schicht SET Von=:von, Bis=:bis, Soll=:soll where SchichtID=:id");
+    $db->prepare(__METHOD__,"UPDATE Schicht SET Von=:von, Bis=:bis, Soll=:soll, Dauer=:dauer where SchichtID=:id");
 
     $db_erg = $db->execute(__METHOD__,[
         'von' => $Von,
         'bis' => $Bis,
         'soll' => $Soll,
-        'id' => $SchichtID
+        'id' => $SchichtID,
+        'dauer' => $Dauer
     ]);
 
     $db->onErrorDie(__METHOD__);

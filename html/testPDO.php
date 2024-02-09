@@ -3,6 +3,7 @@ session_start();
 require_once 'SQL_old.php';
 require_once 'SQL.php';
 
+// ok
 function TestCreateHelfer(){
     $dbl = old\ConnectDB();
     $erg_old = old\CreateHelfer($dbl, "Max Mustermann", "max@example.com", "+49123-45", "hola234");
@@ -14,6 +15,7 @@ function TestCreateHelfer(){
     else echo "CreateHelfer ok\n";
 }
 
+// ok
 function TestHelferIstVorhanden(){
     $dbl = old\ConnectDB();
     $erg_old = old\HelferIstVorhanden($dbl, "max@example.com");
@@ -25,6 +27,7 @@ function TestHelferIstVorhanden(){
     else echo "HelferIstVorhanden ok\n";
 }
 
+// ok
 function TestHelferLogin(){
     $dbl = old\ConnectDB();
     $erg_old = old\HelferLogin($dbl, "max@example.com", "hola234", 0);
@@ -57,6 +60,7 @@ function TestHelferLogin(){
     else echo "HelferLogin ok\n";
 }
 
+// ok
 function TestHelferListe(){
     $dbl = old\ConnectDB();
     $erg_old = old\HelferListe($dbl);
@@ -68,6 +72,7 @@ function TestHelferListe(){
     else echo "HelferListe ok\n";
 }
 
+// ok
 function TestHelferdaten(){
     $dbl = old\ConnectDB();
     HelferLogin("max@example.com", "hola234",  0);
@@ -80,6 +85,7 @@ function TestHelferdaten(){
     else echo "Helferdaten ok\n";
 }
 
+// ok
 function TestHelferdatenAendern(){
     $dbl = old\ConnectDB();
     HelferLogin("max@example.com", "hola234",  0);
@@ -317,6 +323,7 @@ function TestBeteiligteHelfer(){
     else echo "BeteiligteHelfer ok";
 }
 
+// ok
 function TestGetDienste(){
     $dbl = old\ConnectDB();
     $erg_old = old\GetDienste($dbl);
@@ -328,6 +335,7 @@ function TestGetDienste(){
     else echo "GetDienste ok\n";
 }
 
+// ok
 function TestGetDiensteChilds(){
     $dienste = GetDienste();
     $dbl = old\ConnectDB();
@@ -346,6 +354,7 @@ function TestGetDiensteChilds(){
     else echo "GetDiensteChilds ok\n";
 }
 
+// ok
 function TestChangeDienst(){
     $dienste = GetDienste();
     HelferLogin("max3@example.com", "hola531",  0);
@@ -359,6 +368,7 @@ function TestChangeDienst(){
     else echo "ChangeDienst ok\n";
 }
 
+// ok
 function TestNewDienst(){
     $dbl = old\ConnectDB();
     HelferLogin("max3@example.com", "hola531",  0);
@@ -371,6 +381,7 @@ function TestNewDienst(){
     else echo "NewDienst ok\n";
 }
 
+// ok
 function TestDeleteDienst(){
     $dbl = old\ConnectDB();
     $dienste = GetDienste();
@@ -394,40 +405,59 @@ function TestGetDiensteForDay(){
     else echo "GetDiensteForDay ok";
 }
 
+// ok
 function TestGetSchichtenForDienstForDay(){
+    $dienste = GetDienste();
     $dbl = old\ConnectDB();
-    $erg_old = old\GetSchichtenForDienstForDay($dbl, $DienstID, $datestring);
-    $erg_new = GetSchichtenForDienstForDay($DienstID, $datestring);
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old GetSchichtenForDienstForDay returns".var_export($erg_old, true)."\n";
-        echo "New GetSchichtenForDienstForDay returns '".var_export($erg_new, true)."'\n";
+    $erg_old_good = old\GetSchichtenForDienstForDay($dbl, $dienste[0]["DienstID"], "2024-02-16");
+    $erg_new_good = GetSchichtenForDienstForDay($dienste[0]["DienstID"], "2024-02-16");
+    $erg_old_bad = old\GetSchichtenForDienstForDay($dbl, $dienste[0]["DienstID"], "2024-02-15");
+    $erg_new_bad = GetSchichtenForDienstForDay($dienste[0]["DienstID"], "2024-02-15");
+    if((gettype($erg_old_good) != gettype($erg_new_good)) || ($erg_old_good != $erg_new_good)){
+        echo "Old GetSchichtenForDienstForDay returns".var_export($erg_old_good, true)."\n";
+        echo "New GetSchichtenForDienstForDay returns '".var_export($erg_new_good, true)."'\n";
     }
-    else echo "GetSchichtenForDienstForDay ok";
+    else if((gettype($erg_old_bad) != gettype($erg_new_bad)) || ($erg_old_bad != $erg_new_bad)){
+        echo "Old GetSchichtenForDienstForDay returns".var_export($erg_old_bad, true)."\n";
+        echo "New GetSchichtenForDienstForDay returns '".var_export($erg_new_bad, true)."'\n";
+    }
+    else echo "GetSchichtenForDienstForDay ok\n";
 }
 
+// ok
 function TestGetSchichtenEinesDienstes(){
     $dienste = GetDienste();
     $dbl = old\ConnectDB();
-    $erg_old = old\GetSchichtenEinesDienstes($dbl, $dienste[0]["DienstID"]);
-    $erg_new = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old GetSchichtenEinesDienstes returns".var_export($erg_old, true)."\n";
-        echo "New GetSchichtenEinesDienstes returns '".var_export($erg_new, true)."'\n";
+    $erg_old_good = old\GetSchichtenEinesDienstes($dbl, $dienste[0]["DienstID"]);
+    $erg_new_good = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
+    $erg_old_bad = old\GetSchichtenEinesDienstes($dbl, 0);
+    $erg_new_bad = GetSchichtenEinesDienstes(0);
+    if((gettype($erg_old_good) != gettype($erg_new_good)) || ($erg_old_good != $erg_new_good)){
+        echo "Old GetSchichtenEinesDienstes returns".var_export($erg_old_good, true)."\n";
+        echo "New GetSchichtenEinesDienstes returns '".var_export($erg_new_good, true)."'\n";
+    }
+    else if((gettype($erg_old_bad) != gettype($erg_new_bad)) || ($erg_old_bad != $erg_new_bad)){
+        echo "Old GetSchichtenEinesDienstes returns".var_export($erg_old_bad, true)."\n";
+        echo "New GetSchichtenEinesDienstes returns '".var_export($erg_new_bad, true)."'\n";
     }
     else echo "GetSchichtenEinesDienstes ok\n";
 }
 
+// ok
 function TestChangeSchicht(){
+    $dienste = GetDienste();
+    $schichten =  GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
     $dbl = old\ConnectDB();
-    $erg_old = old\ChangeSchicht($dbl, $SchichtID, $Von, $Bis, $Soll, $Dauer);
-    $erg_new = ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer);
+    $erg_old = old\ChangeSchicht($dbl, $schichten[0]["SchichtID"], "2024-02-16T09:00", "2024-02-16T10:30", 1, "01:00");
+    $erg_new = ChangeSchicht($schichten[1]["SchichtID"], "2024-02-16T10:30", "2024-02-16T12:00", 1, "01:00");
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old ChangeSchicht returns".var_export($erg_old, true)."\n";
         echo "New ChangeSchicht returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "ChangeSchicht ok";
+    else echo "ChangeSchicht ok\n";
 }
 
+// ok
 function TestNewSchicht(){
     $dienste = GetDienste();
     $dbl = old\ConnectDB();
@@ -521,4 +551,6 @@ TestChangeDienst();
 TestGetDiensteChilds();
 TestNewSchicht();
 TestGetSchichtenEinesDienstes();
+TestChangeSchicht();
+TestGetSchichtenForDienstForDay();
 ?>
