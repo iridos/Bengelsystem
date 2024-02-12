@@ -52,3 +52,11 @@ CREATE TABLE `Status` (
   `Text` text NOT NULL,
   PRIMARY KEY (`StatusID`)
 );
+DROP VIEW IF EXISTS `SchichtUebersicht`;
+CREATE VIEW `SchichtUebersicht` AS SELECT
+   `Schicht`.`DienstID` AS `DienstID`,
+   `Schicht`.`SchichtID` AS `SchichtID`,
+   `Schicht`.`Von` AS `Von`,`Schicht`.
+   `Bis` AS `Bis`,
+   count(`EinzelSchicht`.`SchichtID`) AS `C`,
+   `Schicht`.`Soll` AS `Soll` FROM (`Schicht` LEFT JOIN `EinzelSchicht` ON(`Schicht`.`SchichtID` = `EinzelSchicht`.`SchichtID`)) GROUP BY `Schicht`.`SchichtID`;

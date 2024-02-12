@@ -21,9 +21,11 @@ class DB {
     {
         if(self::$instance == null){
             self::$instance = new DB();
-            // Set database to german (FIXME should be configurable)
-            self::prepare(__METHOD__,"SET lc_time_names = 'de_DE'");
-            self::execute(__METHOD__);
+            if(DBTYPE === 'mariadb'){
+                // Set database to german (FIXME should be configurable)
+                self::prepare(__METHOD__,"SET lc_time_names = 'de_DE'");
+                self::execute(__METHOD__);
+            }
         }
         return self::$instance;
     }
@@ -269,7 +271,8 @@ function AlleSchichten($Sort, $HelferLevel = 1)
         $db->onErrorDie(__METHOD__,'sort_by_was_von');
     }
 
-    return $db_erg;
+    $schichten = $db->fetchAll(__METHOD__);
+    return $schichten;
 }
 
 function AlleSchichtenCount($HelferLevel = 1)

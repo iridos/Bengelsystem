@@ -191,8 +191,9 @@ function AlleSchichten($db_link, $Sort, $HelferLevel = 1)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-
-    return $db_erg;
+    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    array_pop($zeilen);
+    return $zeilen;
 }
 
 function AlleSchichtenCount($db_link, $HelferLevel = 1)

@@ -36,15 +36,18 @@ $wizard->addCode('createdatabase',function($storedvariables){
     fwrite($conf_file, "<?php\n");
     if($storedvariables['selectdatabase']['databasetype'] == 'SQLite'){
         fwrite($conf_file, "define( 'MYSQL_DSN', 'sqlite:". realpath("..") . "/helferdb.sqlite3' );\n");
+        fwrite($conf_file, "define( 'MYSQL_HOST', '' );\n");
         fwrite($conf_file, "define( 'MYSQL_BENUTZER', '' );\n");
         fwrite($conf_file, "define( 'MYSQL_KENNWORT', '' );\n");
         fwrite($conf_file, "define( 'MYSQL_DATENBANK', '' );\n");
+        fwrite($conf_file, "define( 'DBTYPE', 'sqlite');\n");
     } elseif ($storedvariables['selectdatabase']['databasetype'] == 'MariaDB'){
         fwrite($conf_file, "define( 'MYSQL_DSN', 'mysql:host=" . $storedvariables['enterlogindata']['host'] . ";dbname=". $storedvariables['enterlogindata']['dbname'] . ";charset=utf8mb4' );\n");
         fwrite($conf_file, "define( 'MYSQL_HOST', '".$storedvariables['enterlogindata']['host']."' );\n");
         fwrite($conf_file, "define( 'MYSQL_BENUTZER', '".$storedvariables['enterlogindata']['user']."' );\n");
         fwrite($conf_file, "define( 'MYSQL_KENNWORT', '".$storedvariables['enterlogindata']['password']."' );\n");
         fwrite($conf_file, "define( 'MYSQL_DATENBANK', '".$storedvariables['enterlogindata']['dbname']."' );\n");
+        fwrite($conf_file, "define( 'DBTYPE', 'mariadb');\n");
     }
     fwrite($conf_file, "define( 'LOGFILE', '".$storedvariables['basedata']['logfile']."' );\n");
     fwrite($conf_file, "define( 'EVENTNAME', '".$storedvariables['basedata']['eventname']."' );\n");
