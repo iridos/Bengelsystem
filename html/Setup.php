@@ -71,7 +71,7 @@ $wizard->addCode('createdatabase',function($storedvariables){
     catch( PDOException $exception ) {
         echo "<p>Fehler beim Verbindungsversuch mit der Datenbank: \"".$exception->getMessage( )."\"</p>";
     }
-    if(!is_null($db->pdoErrorCode()) && $db->pdoErrorCode() != '1'){
+    if(!is_null($db->pdoErrorCode()) && $db->pdoErrorCode() != '00000'){
         echo "<p>Fehler ".$db->pdoErrorCode()." beim Verbindungsversuch mit der Datenbank: \"".$db->pdoErrorInfo()[2]."\"</p>";
         $_POST['step'] = 'createdatabase';
     } else {
@@ -87,7 +87,7 @@ $wizard->addCode('createdatabasetables',function($storedvariables){
     catch( PDOException $exception ) {
         echo "<p>Fehler beim Verbindungsversuch mit der Datenbank: \"".$exception->getMessage( )."\"</p>";
     }
-    if(!is_null($db->pdoErrorCode()) && $db->pdoErrorCode() != '1'){
+    if(!is_null($db->pdoErrorCode()) && $db->pdoErrorCode() != '00000'){
         echo "<p>Fehler ".$db->pdoErrorCode()." beim Verbindungsversuch mit der Datenbank: \"".$db->pdoErrorInfo()[2]."\"</p>";
         $_POST['step'] = 'createdatabase';
     } else {
