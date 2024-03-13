@@ -170,15 +170,16 @@ function TestAlleSchichten(){
     else echo "AlleSchichten ok\n";
 }
 
+// ok
 function TestAlleSchichtenCount(){
     $dbl = old\ConnectDB();
-    $erg_old = old\AlleSchichtenCount($dbl, $HelferLevel = 1);
-    $erg_new = AlleSchichtenCount($HelferLevel = 1);
+    $erg_old = old\AlleSchichtenCount($dbl, 2);
+    $erg_new = AlleSchichtenCount(2);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleSchichtenCount returns".var_export($erg_old, true)."\n";
         echo "New AlleSchichtenCount returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleSchichtenCount ok";
+    else echo "AlleSchichtenCount ok\n";
 }
 
 function TestAlleBelegteSchichtenCount(){
@@ -555,4 +556,5 @@ TestGetSchichtenEinesDienstes();
 TestChangeSchicht();
 TestGetSchichtenForDienstForDay();
 TestAlleSchichten();
+TestAlleSchichtenCount();
 ?>

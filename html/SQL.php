@@ -285,7 +285,7 @@ function AlleSchichtenCount($HelferLevel = 1)
     $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel]);
     $db->onErrorDie(__METHOD__);
     $zeile = $db->fetchAll(__METHOD__);
-    return $zeile['Anzahl'];
+    return $zeile[0]['Anzahl'];
 }
 
 
