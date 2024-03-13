@@ -158,18 +158,16 @@ function TestHelferdatenAendern(){
     }
 }
 
+// ok
 function TestAlleSchichten(){
     $dbl = old\ConnectDB();
     $erg_old = old\AlleSchichten($dbl, 1, 2);
-var_dump($erg_old);
     $erg_new = AlleSchichten(1, 2);
-var_dump($erg_new);
-die("Test");
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleSchichten returns".var_export($erg_old, true)."\n";
         echo "New AlleSchichten returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleSchichten ok";
+    else echo "AlleSchichten ok\n";
 }
 
 function TestAlleSchichtenCount(){

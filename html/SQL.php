@@ -266,12 +266,13 @@ function AlleSchichten($Sort, $HelferLevel = 1)
     if ($Sort == '1') {
         $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel],'sort_by_von');
         $db->onErrorDie(__METHOD__,'sort_by_von');
+        $schichten = $db->fetchAll(__METHOD__,'sort_by_von');
     } else {
         $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel],'sort_by_was_von');
         $db->onErrorDie(__METHOD__,'sort_by_was_von');
+        $schichten = $db->fetchAll(__METHOD__,'sort_by_was_von');
     }
 
-    $schichten = $db->fetchAll(__METHOD__);
     return $schichten;
 }
 
