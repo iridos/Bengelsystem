@@ -182,15 +182,16 @@ function TestAlleSchichtenCount(){
     else echo "AlleSchichtenCount ok\n";
 }
 
+// ok
 function TestAlleBelegteSchichtenCount(){
     $dbl = old\ConnectDB();
-    $erg_old = old\AlleBelegteSchichtenCount($dbl, $HelferLevel = 1);
-    $erg_new = AlleBelegteSchichtenCount($HelferLevel = 1);
+    $erg_old = old\AlleBelegteSchichtenCount($dbl, 2);
+    $erg_new = AlleBelegteSchichtenCount(2);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleBelegteSchichtenCount returns".var_export($erg_old, true)."\n";
         echo "New AlleBelegteSchichtenCount returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleBelegteSchichtenCount ok";
+    else echo "AlleBelegteSchichtenCount ok\n";
 }
 
 function TestAlleSchichtenImZeitbereich(){
@@ -270,15 +271,22 @@ function TestLogSchichtEingabe(){
     else echo "LogSchichtEingabe ok";
 }
 
+// ok
 function TestHelferSchichtZuweisen(){
     $dbl = old\ConnectDB();
-    $erg_old = old\HelferSchichtZuweisen($dbl, $HelferID, $SchichtId, $AdminID = 0);
-    $erg_new = HelferSchichtZuweisen($HelferID, $SchichtId, $AdminID = 0);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer1 = $_SESSION;
+    HelferLogin("max3@example.com", "hola531",  0);
+    $helfer2 = $_SESSION;
+    $dienste = GetDienste();
+    $schichten = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
+    $erg_old = old\HelferSchichtZuweisen($dbl, $helfer1['HelferID'], $schichten[0]['SchichtID'],0);
+    $erg_new = HelferSchichtZuweisen($helfer2['HelferID'], $schichten[0]['SchichtID'],0);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old HelferSchichtZuweisen returns".var_export($erg_old, true)."\n";
         echo "New HelferSchichtZuweisen returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "HelferSchichtZuweisen ok";
+    else echo "HelferSchichtZuweisen ok\n";
 }
 
 function TestHelferVonSchichtLoeschen(){
@@ -557,4 +565,6 @@ TestChangeSchicht();
 TestGetSchichtenForDienstForDay();
 TestAlleSchichten();
 TestAlleSchichtenCount();
+TestHelferSchichtZuweisen();
+TestAlleBelegteSchichtenCount();
 ?>

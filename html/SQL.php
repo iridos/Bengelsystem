@@ -289,14 +289,14 @@ function AlleSchichtenCount($HelferLevel = 1)
 }
 
 
-function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
+function AlleBelegteSchichtenCount($HelferLevel = 1)
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
-    $db_erg = $db->execute(__METHOD__,["helferlevel" => $Helferlevel]);
+    $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel]);
     $db->onErrorDie(__METHOD__);
     $zeile = $db->fetchAll(__METHOD__);
-    return $zeile['Anzahl'];
+    return $zeile[0]['Anzahl'];
 }
 
 
@@ -420,8 +420,8 @@ function SchichtenSummeEinesHelfers($db_link, $HelferID)
 }
 
 
-// FIXME
-function LogSchichtEingabe($db_link, $HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $AdminID = 0)
+// ok (?)
+function LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $AdminID = 0)
 {
     $db = DB::getInstance();
 
@@ -430,22 +430,26 @@ function LogSchichtEingabe($db_link, $HelferID, $SchichtId, $EinzelSchichtId, $A
         JOIN Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID 
         JOIN Dienst ON Schicht.DienstID = Dienst.DienstID 
         JOIN Helfer ON EinzelSchicht.HelferID = Helfer.HelferID
-        WHERE EinzelSchicht.HelferID = $HelferID
-        AND ( Schicht.SchichtID = $SchichtId OR EinzelSchicht.EinzelSchichtID = $EinzelSchichtId)
+        WHERE EinzelSchicht.HelferID = :helferid
+        AND ( Schicht.SchichtID = :schichtid OR EinzelSchicht.EinzelSchichtID = :einzelschichtid)
         ");
         //error_log(date('Y-m-d H:i') . "  " . $sql ."\n",3,LOGFILE);
-    $db_erg = mysqli_query($db_link, $sql);
+    $db_erg = $db->execute(__METHOD__,[
+        "helferid" => $HelferID,
+        "schichtid" => $SchichtId,
+        "einzelschichtid" => $EinzelSchichtId
+    ]);
+    $zeile = $db->fetchAll(__METHOD__);
 
-    if (mysqli_num_rows($db_erg) > 1) {
+    if (is_array($zeile) && count($zeile) > 1) {
         echo "HelferSchichtZuweisen: Es wurden mehr als eine Zeile zurueckgegeben\n <br>";
         // Fehler geht ins normale Error-Management, nicht ins Logfile
         error_log(date('Y-m-d H:i') . "  HelferSchichtZuweisen: Es wurden mehr als eine Zeile zurueckgegben.\n", 0);
-    } elseif (mysqli_num_rows($db_erg) == 1) {
-        $row = mysqli_fetch_assoc($db_erg);
-        $Von = $row["Von"];
-        $Bis = $row["Bis"];
-        $Was = $row["Was"];
-        $HelferName = $row["Name"];
+    } elseif (is_array($zeile) && (count($zeile) == 1)) {
+        $Von = $zeile[0]["Von"];
+        $Bis = $zeile[0]["Bis"];
+        $Was = $zeile[0]["Was"];
+        $HelferName = $zeile[0]["Name"];
     } else {
         echo "Es wurde keine Zeile zurueckgegeben.";
     }
@@ -483,7 +487,7 @@ function HelferSchichtZuweisen($HelferID, $SchichtId, $AdminID = 0)
 
     $db->onErrorDie(__METHOD__,'new_einzelschicht');
 
-    LogSchichtEingabe($db_link, $HelferID, $SchichtId, -1, "eingetragen", $AdminID);
+    LogSchichtEingabe($HelferID, $SchichtId, -1, "eingetragen", $AdminID);
 
     return $db_erg;
 }
