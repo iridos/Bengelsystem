@@ -215,13 +215,15 @@ function TestAlleSchichtenImZeitbereich(){
 
 function TestAlleSchichtenEinesHelfers(){
     $dbl = old\ConnectDB();
-    $erg_old = old\AlleSchichtenEinesHelfers($dbl, $HelferID);
-    $erg_new = AlleSchichtenEinesHelfers($HelferID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $erg_old = old\AlleSchichtenEinesHelfers($dbl,$helfer['HelferID']);
+    $erg_new = AlleSchichtenEinesHelfers($helfer['HelferID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleSchichtenEinesHelfers returns".var_export($erg_old, true)."\n";
         echo "New AlleSchichtenEinesHelfers returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleSchichtenEinesHelfers ok";
+    else echo "AlleSchichtenEinesHelfers ok\n";
 }
 
 function TestHelferLoeschen(){
@@ -576,4 +578,5 @@ TestAlleSchichtenCount();
 TestHelferSchichtZuweisen();
 TestAlleBelegteSchichtenCount();
 TestAlleSchichtenImZeitbereich();
+TestAlleSchichtenEinesHelfers();
 ?>

@@ -335,7 +335,8 @@ function AlleSchichtenEinesHelfers($HelferID)
     $db->prepare(__METHOD__,"select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid order by Von");
     $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    $zeilen = $db->fetchAll(__METHOD__);
+    return $zeilen;
 }
 
 // FIXME

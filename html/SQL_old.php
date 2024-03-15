@@ -278,7 +278,9 @@ function AlleSchichtenEinesHelfers($db_link, $HelferID)
     }
 
 
-    return $db_erg;
+    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    array_pop($zeilen);
+    return $zeilen;
 }
 
 function HelferLoeschen($db_link, $HelferID, $AdminID)
