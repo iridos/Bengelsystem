@@ -314,6 +314,7 @@ function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
             "bis" => $Bis
         ],'helferlevel_not_set');
         $db->onErrorDie(__METHOD__,'helferlevel_not_set');
+        $zeilen = $db->fetchAll(__METHOD__,'helferlevel_not_set');
     }
     else {
         $db_erg = $db->execute(__METHOD__,[
@@ -322,9 +323,9 @@ function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
             "helferlevel" => $HelferLevel
         ],'helferlevel_set');
         $db->onErrorDie(__METHOD__,'helferlevel_set');
+        $zeilen = $db->fetchAll(__METHOD__,'helferlevel_set');
     }
-
-    return $db_erg;
+    return $zeilen;
 }
 
 

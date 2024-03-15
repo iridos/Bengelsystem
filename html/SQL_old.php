@@ -237,7 +237,6 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
 
 function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
 {
-    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
     $Von = mysqli_real_escape_string($db_link, $Von);
     $Bis = mysqli_real_escape_string($db_link, $Bis);
@@ -248,7 +247,6 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
     }
 
     $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= '" . $Von . "' and Von <'" . $Bis . "' and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel order by Was,Von";
-    error_log("AlleSchichtenImZeitbereich sql " . $sql);
     $db_erg = mysqli_query($db_link, $sql);
 
     if (! $db_erg) {
@@ -258,7 +256,9 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
     }
 
 
-    return $db_erg;
+    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    array_pop($zeilen);
+    return $zeilen;
 }
 
 

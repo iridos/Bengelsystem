@@ -194,15 +194,23 @@ function TestAlleBelegteSchichtenCount(){
     else echo "AlleBelegteSchichtenCount ok\n";
 }
 
+// ok
 function TestAlleSchichtenImZeitbereich(){
     $dbl = old\ConnectDB();
-    $erg_old = old\AlleSchichtenImZeitbereich($dbl, $Von, $Bis, $HelferLevel = 1);
-    $erg_new = AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1);
+    $erg_old = old\AlleSchichtenImZeitbereich($dbl, "2024-02-01", "2024-03-01", 2);
+    $erg_new = AlleSchichtenImZeitbereich("2024-02-01", "2024-03-01", 2);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleSchichtenImZeitbereich returns".var_export($erg_old, true)."\n";
         echo "New AlleSchichtenImZeitbereich returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleSchichtenImZeitbereich ok";
+    $erg_old = old\AlleSchichtenImZeitbereich($dbl, "2024-03-01", "2024-04-01", 2);
+    $erg_new = AlleSchichtenImZeitbereich("2024-03-01", "2024-04-01", 2);
+    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
+        echo "Old AlleSchichtenImZeitbereich returns".var_export($erg_old, true)."\n";
+        echo "New AlleSchichtenImZeitbereich returns '".var_export($erg_new, true)."'\n";
+    }
+
+    else echo "AlleSchichtenImZeitbereich ok\n";
 }
 
 function TestAlleSchichtenEinesHelfers(){
@@ -567,4 +575,5 @@ TestAlleSchichten();
 TestAlleSchichtenCount();
 TestHelferSchichtZuweisen();
 TestAlleBelegteSchichtenCount();
+TestAlleSchichtenImZeitbereich();
 ?>
