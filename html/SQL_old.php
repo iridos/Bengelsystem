@@ -452,7 +452,6 @@ function HelferSchichtZuweisen($db_link, $HelferID, $SchichtId, $AdminID = 0)
 function HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID, $AdminID = 0)
 {
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
-    $SchichtId = mysqli_real_escape_string($db_link, $SchichtId);
 
 
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann

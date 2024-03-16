@@ -213,6 +213,7 @@ function TestAlleSchichtenImZeitbereich(){
     else echo "AlleSchichtenImZeitbereich ok\n";
 }
 
+// ok
 function TestAlleSchichtenEinesHelfers(){
     $dbl = old\ConnectDB();
     HelferLogin("max2@example.com", "hola234",  0);
@@ -229,7 +230,10 @@ function TestAlleSchichtenEinesHelfers(){
 function TestHelferLoeschen(){
     $dbl = old\ConnectDB();
     $erg_old = old\HelferLoeschen($dbl, $HelferID, $AdminID);
+var_dump($erg_old);
     $erg_new = HelferLoeschen($HelferID, $AdminID);
+var_dump($erg_new);
+die("--\n");
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old HelferLoeschen returns".var_export($erg_old, true)."\n";
         echo "New HelferLoeschen returns '".var_export($erg_new, true)."'\n";
@@ -299,15 +303,22 @@ function TestHelferSchichtZuweisen(){
     else echo "HelferSchichtZuweisen ok\n";
 }
 
+// ok
 function TestHelferVonSchichtLoeschen(){
     $dbl = old\ConnectDB();
-    $erg_old = old\HelferVonSchichtLoeschen($dbl, $HelferID, $EinzelSchichtID, $AdminID = 0);
-    $erg_new = HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID, $AdminID = 0);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer1 = $_SESSION;
+    $schichten1 = AlleSchichtenEinesHelfers($helfer1['HelferID']);
+    HelferLogin("max3@example.com", "hola531",  0);
+    $helfer2 = $_SESSION;
+    $schichten2 = AlleSchichtenEinesHelfers($helfer2['HelferID']);
+    $erg_old = old\HelferVonSchichtLoeschen($dbl, $helfer1['HelferID'], $schichten1[0]['EinzelSchichtID']);
+    $erg_new = HelferVonSchichtLoeschen($helfer2['HelferID'], $schichten2[0]['EinzelSchichtID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old HelferVonSchichtLoeschen returns".var_export($erg_old, true)."\n";
         echo "New HelferVonSchichtLoeschen returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "HelferVonSchichtLoeschen ok";
+    else echo "HelferVonSchichtLoeschen ok\n";
 }
 
 function TestHelferVonSchichtLoeschen_SchichtID(){
@@ -579,4 +590,5 @@ TestHelferSchichtZuweisen();
 TestAlleBelegteSchichtenCount();
 TestAlleSchichtenImZeitbereich();
 TestAlleSchichtenEinesHelfers();
+TestHelferVonSchichtLoeschen();
 ?>
