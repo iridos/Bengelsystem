@@ -762,7 +762,6 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
             // Eintrag löschen
             $sql = "DELETE FROM Schicht where SchichtID=" . $SchichtID;
 
-            echo $sql;
             $db_erg = mysqli_query($db_link, $sql);
             if (! $db_erg) {
                 echo "Fehler Change Dienst";

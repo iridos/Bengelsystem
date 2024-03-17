@@ -532,15 +532,20 @@ function TestNewSchicht(){
     else echo "NewSchicht ok\n";
 }
 
+// ok
 function TestDeleteSchicht(){
     $dbl = old\ConnectDB();
-    $erg_old = old\DeleteSchicht($dbl, $SchichtID, $Rekursiv);
-    $erg_new = DeleteSchicht($SchichtID, $Rekursiv);
+    $dienste = GetDienste();
+    NewSchicht($dienste[0]["DienstID"], "2024-02-17T10:30", "2024-02-17T12:00", 2, "01:30");
+    NewSchicht($dienste[0]["DienstID"], "2024-02-17T10:30", "2024-02-17T12:00", 2, "01:30");
+    $schichten = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
+    $erg_old = old\DeleteSchicht($dbl, $schichten[4]["SchichtID"], false);
+    $erg_new = DeleteSchicht($schichten[5]["SchichtID"], false);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old DeleteSchicht returns".var_export($erg_old, true)."\n";
         echo "New DeleteSchicht returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "DeleteSchicht ok";
+    else echo "DeleteSchicht ok\n";
 }
 
 // ok
@@ -621,4 +626,5 @@ TestDatenbankAufDeutsch();
 TestLastInsertId();
 TestHelferLevel();
 TestHelferVonSchichtLoeschen_SchichtID();
+TestDeleteSchicht();
 ?>
