@@ -241,15 +241,18 @@ die("--\n");
     else echo "HelferLoeschen ok";
 }
 
+// ok
 function TestSchichtIdArrayEinesHelfers(){
     $dbl = old\ConnectDB();
-    $erg_old = old\SchichtIdArrayEinesHelfers($dbl, $HelferID);
-    $erg_new = SchichtIdArrayEinesHelfers($HelferID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $erg_old = old\SchichtIdArrayEinesHelfers($dbl, $helfer['HelferID']);
+    $erg_new = SchichtIdArrayEinesHelfers($helfer['HelferID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old SchichtIdArrayEinesHelfers returns".var_export($erg_old, true)."\n";
         echo "New SchichtIdArrayEinesHelfers returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "SchichtIdArrayEinesHelfers ok";
+    else echo "SchichtIdArrayEinesHelfers ok\n";
 }
 
 function TestAlleSchichtenEinesHelfersVonJetzt(){
@@ -556,7 +559,6 @@ function TestHelferLevel(){
     else echo "HelferLevel ok";
 }
 
-//function HelferLevel($db_link){
 function TestDebugAusgabeDbErgebnis(){
     $dbl = old\ConnectDB();
     $erg_old = old\DebugAusgabeDbErgebnis($dbl);
@@ -591,4 +593,6 @@ TestAlleBelegteSchichtenCount();
 TestAlleSchichtenImZeitbereich();
 TestAlleSchichtenEinesHelfers();
 TestHelferVonSchichtLoeschen();
+TestHelferSchichtZuweisen();
+TestSchichtIdArrayEinesHelfers();
 ?>
