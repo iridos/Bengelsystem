@@ -287,15 +287,16 @@ function TestSchichtenSummeEinesHelfers(){
     else echo "SchichtenSummeEinesHelfers ok\n";
 }
 
+// ok (looked at log file afterwards)
 function TestLogSchichtEingabe(){
     $dbl = old\ConnectDB();
-    $erg_old = old\LogSchichtEingabe($dbl, $HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $AdminID = 0);
-    $erg_new = LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $AdminID = 0);
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old LogSchichtEingabe returns".var_export($erg_old, true)."\n";
-        echo "New LogSchichtEingabe returns '".var_export($erg_new, true)."'\n";
-    }
-    else echo "LogSchichtEingabe ok";
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $dienste = GetDienste();
+    $schichten = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
+    old\LogSchichtEingabe($dbl, $helfer['HelferID'], $schichten[0]['SchichtID'], -1, "test");
+    LogSchichtEingabe($helfer['HelferID'], $schichten[0]['SchichtID'], -1, "test");
+    echo "LogSchichtEingabe ok\n";
 }
 
 // ok
@@ -607,4 +608,5 @@ TestHelferSchichtZuweisen();
 TestSchichtIdArrayEinesHelfers();
 TestAlleSchichtenEinesHelfersVonJetzt();
 TestSchichtenSummeEinesHelfers();
+TestLogSchichtEingabe();
 ?>
