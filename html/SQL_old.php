@@ -472,7 +472,7 @@ function HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID, $AdminI
 function HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID, $AdminID = 0)
 {
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
-    $SchichtId = mysqli_real_escape_string($db_link, $SchichtId);
+    $SchichtID = mysqli_real_escape_string($db_link, $SchichtID);
 
 
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann

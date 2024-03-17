@@ -335,15 +335,23 @@ function TestHelferVonSchichtLoeschen(){
     else echo "HelferVonSchichtLoeschen ok\n";
 }
 
+// ok
 function TestHelferVonSchichtLoeschen_SchichtID(){
     $dbl = old\ConnectDB();
-    $erg_old = old\HelferVonSchichtLoeschen_SchichtID($dbl, $HelferID, $SchichtID, $AdminID = 0);
-    $erg_new = HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0);
+    $schichten = AlleSchichten(1, 2);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer1 = $_SESSION;
+    HelferSchichtZuweisen($helfer1['HelferID'], $schichten[1]['SchichtID'],0);
+    HelferLogin("max3@example.com", "hola531",  0);
+    $helfer2 = $_SESSION;
+    HelferSchichtZuweisen($helfer2['HelferID'], $schichten[1]['SchichtID'],0);
+    $erg_old = old\HelferVonSchichtLoeschen_SchichtID($dbl,$helfer1['HelferID'], $schichten[1]['SchichtID']);
+    $erg_new = HelferVonSchichtLoeschen_SchichtID($helfer2['HelferID'], $schichten[1]['SchichtID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old HelferVonSchichtLoeschen_SchichtID returns".var_export($erg_old, true)."\n";
         echo "New HelferVonSchichtLoeschen_SchichtID returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "HelferVonSchichtLoeschen_SchichtID ok";
+    else echo "HelferVonSchichtLoeschen_SchichtID ok\n";
 }
 
 // ok
@@ -577,17 +585,6 @@ function TestHelferLevel(){
     else echo "HelferLevel ok\n";
 }
 
-function TestDebugAusgabeDbErgebnis(){
-    $dbl = old\ConnectDB();
-    $erg_old = old\DebugAusgabeDbErgebnis($dbl);
-    $erg_new = DebugAusgabeDbErgebnis();
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old DebugAusgabeDbErgebnis returns".var_export($erg_old, true)."\n";
-        echo "New DebugAusgabeDbErgebnis returns '".var_export($erg_new, true)."'\n";
-    }
-    else echo "DebugAusgabeDbErgebnis ok";
-}
-
 TestCreateHelfer();
 TestHelferIstVorhanden();
 TestHelferLogin();
@@ -623,4 +620,5 @@ TestAlleHelferSchichtenUebersicht();
 TestDatenbankAufDeutsch();
 TestLastInsertId();
 TestHelferLevel();
+TestHelferVonSchichtLoeschen_SchichtID();
 ?>

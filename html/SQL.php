@@ -516,7 +516,7 @@ function HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID, $AdminID = 0)
 function HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0)
 {
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann
-    LogSchichtEingabe($db_link, $HelferID, $SchichtID, -1, "entfernt", $AdminID);
+    LogSchichtEingabe($HelferID, $SchichtID, -1, "entfernt", $AdminID);
 
     // Lösche Einzelschicht
     $db = DB::getInstance();
