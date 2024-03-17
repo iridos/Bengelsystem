@@ -550,7 +550,9 @@ function BeteiligteHelfer($InfoSchichtID)
     $db->prepare(__METHOD__,"select  Helfer.HelferID,Name,Handy FROM EinzelSchicht,Helfer where EinzelSchicht.HelferID=Helfer.HelferID And SchichtID=:id");
     $db_erg = $db->execute(__METHOD__,["id" => $InfoSchichtID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+    
+    $zeile = $db->fetchAll(__METHOD__);
+    return $zeile;
 }
 
 // ok

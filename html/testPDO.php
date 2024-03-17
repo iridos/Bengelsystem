@@ -361,15 +361,19 @@ function TestDetailSchicht(){
     else echo "DetailSchicht ok\n";
 }
 
+// ok
 function TestBeteiligteHelfer(){
     $dbl = old\ConnectDB();
-    $erg_old = old\BeteiligteHelfer($dbl, $InfoSchichtID);
-    $erg_new = BeteiligteHelfer($InfoSchichtID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $schichten = AlleSchichtenEinesHelfers($helfer['HelferID']);
+    $erg_old = old\BeteiligteHelfer($dbl, $schichten[0]['SchichtID']);
+    $erg_new = BeteiligteHelfer($schichten[0]['SchichtID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old BeteiligteHelfer returns".var_export($erg_old, true)."\n";
         echo "New BeteiligteHelfer returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "BeteiligteHelfer ok";
+    else echo "BeteiligteHelfer ok\n";
 }
 
 // ok
@@ -614,4 +618,5 @@ TestAlleSchichtenEinesHelfersVonJetzt();
 TestSchichtenSummeEinesHelfers();
 TestLogSchichtEingabe();
 TestDetailSchicht();
+TestBeteiligteHelfer();
 ?>
