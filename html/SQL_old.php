@@ -825,7 +825,10 @@ function HelferLevel($db_link)
         echo "Konnte HelferLevel nicht abfragen";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    return $db_erg;
+
+    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    array_pop($zeilen);
+    return $zeilen;
 }
 // TODO: als Array zurueckgeben (CreateHelfer anpassen)
 // TODO:

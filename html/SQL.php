@@ -811,9 +811,11 @@ function HelferLevel()
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"select HelferLevel,HelferLevelBeschreibung from HelferLevel");
-    $db_erg = $stmt->execute(__METHOD__);
+    $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+
+    $zeilen = $db->fetchAll(__METHOD__);
+    return $zeilen;
 }
 // TODO: als Array zurueckgeben (CreateHelfer anpassen)
 // TODO:

@@ -565,6 +565,7 @@ function TestLastInsertId(){
     echo "LastInsertId ok\n";
 }
 
+// ok
 function TestHelferLevel(){
     $dbl = old\ConnectDB();
     $erg_old = old\HelferLevel($dbl);
@@ -573,7 +574,7 @@ function TestHelferLevel(){
         echo "Old HelferLevel returns".var_export($erg_old, true)."\n";
         echo "New HelferLevel returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "HelferLevel ok";
+    else echo "HelferLevel ok\n";
 }
 
 function TestDebugAusgabeDbErgebnis(){
@@ -621,4 +622,5 @@ TestGetDiensteForDay();
 TestAlleHelferSchichtenUebersicht();
 TestDatenbankAufDeutsch();
 TestLastInsertId();
+TestHelferLevel();
 ?>
