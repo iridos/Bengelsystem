@@ -15,8 +15,8 @@ if ($AdminStatus != 1) {
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
     echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
-    $zeilen = HelferListe($db_link);
-    while ($zeilen as $zeile) {
+    $zeilen = HelferListe();
+    foreach ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
                 echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
@@ -87,7 +87,7 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
+        HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -104,17 +104,17 @@ if (isset($_POST['change'])) {
 ///////////////////////////////////////////////////////////////
 
 if (isset($_POST['del'])) {
-    HelferLoeschen($db_link, $AliasHelferID, $AdminID);
+    HelferLoeschen($AliasHelferID, $AdminID);
 }
 
 ////////////////////////////////////////////////////////////////
 // Helferdate holen
 ///////////////////////////////////////////////////////////////
 
-$db_erg = Helferdaten($db_link, $AliasHelferID);
+$db_erg = Helferdaten($AliasHelferID);
 
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];

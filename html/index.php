@@ -18,7 +18,7 @@ require 'SQL.php';
 
 $pdo = ConnectDB();
 
-DatenbankAufDeutsch($pdo);
+DatenbankAufDeutsch();
 
 require '_login.php';
 
@@ -64,19 +64,19 @@ if ($HelferIsAdmin) {
 ////////////////////////////////////////////////////////
 //$HelferID=72;
 
-$db_erg = AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID);
+$schichten = AlleSchichtenEinesHelfersVonJetzt($HelferID);
 
 
-  $iSQLCount = mysqli_num_rows($db_erg);
+  $iSQLCount = count($schichten);
   //$iSQLCount = 3;
 
 
 $iCount = 0;
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC) and $iCount < 3) {
+foreach ($schichten as $zeile) {
     echo "<li>" . $zeile['Ab'] . " " . $zeile['Was'] . "</li>";
     $iCount++;
+    if(iCount>2) break;
 }
-
 
 ?>
                 </ul>      

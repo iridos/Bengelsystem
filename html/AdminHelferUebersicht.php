@@ -32,7 +32,7 @@ if ($AdminStatus != 1) {
 <?php
 
 
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch();
 
 //$DienstID =$_SESSION["DienstID"];
 //$SchichtID =$_SESSION["SchichtID"];
@@ -73,13 +73,13 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
 </table>
 <table class="commontable">
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
+$db_erg = AlleHelferSchichtenUebersicht();
 $dauer = 0;
 $i = 0;
 $OldHelferName = "";
 $EinzelDienstStunden = "";
 $HelferUeberschrift = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($db_erg as $zeile) {
         $HelferName = $zeile["Name"];
         $AliasHelferID = $zeile["AliasHelferID"];
         //echo $HelferName." ".$AliasHelferID."<br>";

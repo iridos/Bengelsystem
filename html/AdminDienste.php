@@ -27,7 +27,7 @@ if ($AdminStatus != 1) {
 <?php
 
 
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch();
 
 $DienstID = $_SESSION["DienstID"];
 $SchichtID = $_SESSION["SchichtID"];
@@ -54,7 +54,7 @@ if (isset($_POST['ChangeDienst'])) {
     $Leiter = $_POST['Dienst-Leiter'];
     $Gruppe = $_POST['Dienst-Gruppe'];
        $HelferLevel = $_POST['HelferLevel'];
-    ChangeDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
 }
 
 if (isset($_POST['NewDienst'])) {
@@ -64,12 +64,12 @@ if (isset($_POST['NewDienst'])) {
     $Leiter = $_POST['Dienst-Leiter'];
     $Gruppe = $_POST['Dienst-Gruppe'];
        $HelferLevel = $_POST['HelferLevel'];
-    NewDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    NewDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
 }
 
 
 if (isset($_POST['DeleteDienst'])) {
-    if (!DeleteDienst($db_link, $DienstID, false)) {
+    if (!DeleteDienst($DienstID, false)) {
         echo "Erst Schichten des Dienstes Löschen!";
     }
 }
@@ -80,7 +80,7 @@ if (isset($_POST['ChangeSchicht'])) {
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
 
-    ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll);
+    ChangeSchicht($SchichtID, $Von, $Bis, $Soll);
 }
 
 
@@ -89,12 +89,12 @@ if (isset($_POST['NewSchicht'])) {
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
 
-    NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll);
+    NewSchicht($DienstID, $Von, $Bis, $Soll);
 }
 
 
 if (isset($_POST['DeleteSchicht'])) {
-    if (!DeleteSchicht($db_link, $SchichtID, false)) {
+    if (!DeleteSchicht($SchichtID, false)) {
         echo "Erst Helfer aus Schicht austragen<br>";
     }
 }
@@ -131,7 +131,7 @@ if (isset($_POST['DienstSearch'])) {
 <?php
 
 
-$zeilen = GetDienste($db_link);
+$zeilen = GetDienste();
 
 $Was = "";
 $Wo = "";
@@ -140,7 +140,7 @@ $Leiter = "";
 $Gruppe = "";
 $HelferLevel = "";
 
-while ($zeilen as $zeile){
+foreach ($zeilen as $zeile){
     if ($zeile['DienstID'] != $DienstID) {
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
     } else {
@@ -190,8 +190,8 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                <!--  <input name="Dienst-Leiter" type="text" value="<?php echo htmlspecialchars($Leiter ?? '')?>" > -->
                 <?php
                     echo "<select name='Dienst-Leiter'>";
-                    $zeilen = HelferListe($db_link);
-                while ($zeilen as $zeile) {
+                    $zeilen = HelferListe();
+                foreach ($zeilen as $zeile) {
                     if ($zeile['HelferID'] != $Leiter) {
                               echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</option>";
                     } else {
@@ -208,8 +208,8 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                 <?php
                     //echo "#####".$Gruppe."#####";
                     echo "<select name='Dienst-Gruppe'>";
-                    $db_erg = GetDiensteChilds($db_link, 0);
-                while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+                    $dienste = GetDiensteChilds(0);
+                foreach ($dienste as $zeile) {
                     if ($zeile['DienstID'] != $Gruppe) {
                               echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
                     } else {
@@ -251,9 +251,9 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 
 
 $Soll = 1;
-$db_erg = GetSchichtenEinesDienstes($db_link, $DienstID);
+$schichten = GetSchichtenEinesDienstes($DienstID);
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($schichten as $zeile) {
     if ($SchichtID == 0) {
         $SchichtID = $zeile['SchichtID'];
     }

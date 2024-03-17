@@ -11,7 +11,7 @@ function ConnectDB()
         MYSQL_KENNWORT,
         MYSQL_DATENBANK
     );
-    DatenbankAufDeutsch($db_link);
+    DatenbankAufDeutsch();
     return $db_link;
 }
 
@@ -446,7 +446,7 @@ function HelferSchichtZuweisen($db_link, $HelferID, $SchichtId, $AdminID = 0)
         echo $HelferID;
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-        LogSchichtEingabe($db_link, $HelferID, $SchichtId, -1, "eingetragen", $AdminID);
+        LogSchichtEingabe($HelferID, $SchichtId, -1, "eingetragen", $AdminID);
 
     return $db_erg;
 }
@@ -457,7 +457,7 @@ function HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID, $AdminI
 
 
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann
-    LogSchichtEingabe($db_link, $HelferID, -1, $EinzelSchichtID, "entfernt", $AdminID);
+    LogSchichtEingabe($HelferID, -1, $EinzelSchichtID, "entfernt", $AdminID);
 
     // Lösche Einzelschicht
     $sql = "Delete From EinzelSchicht Where EinzelSchichtID =" . $EinzelSchichtID;
@@ -475,7 +475,7 @@ function HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID, $Ad
 
 
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann
-    LogSchichtEingabe($db_link, $HelferID, $SchichtID, -1, "entfernt", $AdminID);
+    LogSchichtEingabe($HelferID, $SchichtID, -1, "entfernt", $AdminID);
 
     // Lösche Einzelschicht
     $sql = "Delete From EinzelSchicht Where SchichtID = $SchichtID and HelferID = $HelferID limit 1;";

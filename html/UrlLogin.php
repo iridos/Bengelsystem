@@ -81,14 +81,14 @@ if ($success == 1 && $email != "") {
     }
     error_log("2email: " . $HelferEmail . ",level: " . $helfer_level . ",success: " . $success);
     // Helfer Anlegen, wenn er nicht existiert
-    if (! HelferIstVorhanden($db_link, $HelferEmail)) {
+    if (! HelferIstVorhanden($HelferEmail)) {
         error_log("Helfer " . $HelferEmail . " nicht vorhanden, lege an");
         error_log("CreateHelfer(db_link,$HelferName,$HelferEmail, $HelferHandy,$HelferPasswort,$HelferLevel);");
-        $db_erg = CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
+        $db_erg = CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
     }
     // Login-Versuch, entweder direkt nach Anlegen oder wenn existiert hat
     // Login und auf Haupt-Seite gehen
-    HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+    HelferLogin($HelferEmail, $HelferPasswort, 0);
     echo '<html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
     exit;
 }

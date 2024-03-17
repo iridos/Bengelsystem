@@ -26,7 +26,7 @@ if ($AdminStatus != 1) {
 
 <?php
 
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch();
 
 $AliasHelferID = 0;
 
@@ -47,8 +47,8 @@ if ($AliasHelferID != 0) {
 }
 //echo "AliasHelfer=$AliasHelferID <br>";
 
-$zeilen = Helferdaten($db_link, $HelferID);
-while ($zeilen as $zeile) {
+$zeilen = Helferdaten($HelferID);
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }
@@ -83,8 +83,8 @@ while ($zeilen as $zeile) {
 
    <th><b>Helfer als Admin &auml;ndern:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;font-size:20" name="AliasHelfer" id="AliasHelfer" onchange="submit()">
 <?php
-    $zeilen = HelferListe($db_link);
-while ($zeilen as $zeile) {
+    $zeilen = HelferListe();
+foreach ($zeilen as $zeile) {
     if ($AliasHelferID != $zeile['HelferID']) {
         echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
     } else {

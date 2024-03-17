@@ -93,7 +93,7 @@ class DB {
     }
 }
 
-// ok
+// ok ok
 function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel = 1)
 {
     // Neuen Helfer anlegen
@@ -118,19 +118,18 @@ function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, 
     return $db_erg;
 }
 
-// ok
+// ok ok
 // testet fuer urllogin, ob Helfer bereits existiert
 function HelferIstVorhanden($Email)
 {
     $db = DB::getInstance();
     $db->prepare(__METHOD__,"SELECT count(HelferID) AS Anzahl FROM Helfer WHERE Email = :email");
     $db->execute(__METHOD__,["email" => $Email]);
-    // TODO Test, that this still works
     $zeile = $db->fetchAll(__METHOD__);
     return $zeile[0]['Anzahl'];
 }
 
-// ok
+// ok ok
 //TODO: pruefen, ob Helfer bereits eingeloggt
 function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
 {
@@ -162,7 +161,7 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
     }
 }
 
-// ok
+// ok ok
 // Liste der Helfer fuer Admin-Seite
 //TODO: HelferLevel
 function HelferListe()
@@ -175,7 +174,7 @@ function HelferListe()
     return $helfer;
 }
 
-// ok
+// ok ok
 function Helferdaten($HelferID)
 {
     $db = DB::getInstance();
@@ -187,7 +186,7 @@ function Helferdaten($HelferID)
 }
 
 
-// ok
+// ok ok
 function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
 {
     $db = DB::getInstance();
@@ -257,6 +256,7 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
     return $db_erg;
 }
 
+// ok ok (but unused?)
 function AlleSchichten($Sort, $HelferLevel = 1)
 {
     $db = DB::getInstance();
@@ -276,6 +276,7 @@ function AlleSchichten($Sort, $HelferLevel = 1)
     return $schichten;
 }
 
+// ok ok
 function AlleSchichtenCount($HelferLevel = 1)
 {
 
@@ -288,7 +289,7 @@ function AlleSchichtenCount($HelferLevel = 1)
     return $zeile[0]['Anzahl'];
 }
 
-
+// ok ok
 function AlleBelegteSchichtenCount($HelferLevel = 1)
 {
     $db = DB::getInstance();
@@ -299,7 +300,7 @@ function AlleBelegteSchichtenCount($HelferLevel = 1)
     return $zeile[0]['Anzahl'];
 }
 
-
+// ok ok
 function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
 {
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
@@ -328,7 +329,7 @@ function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
     return $zeilen;
 }
 
-
+// ok ok
 function AlleSchichtenEinesHelfers($HelferID)
 {
     $db = DB::getInstance();
@@ -339,7 +340,7 @@ function AlleSchichtenEinesHelfers($HelferID)
     return $zeilen;
 }
 
-// FIXME
+// ok ok
 function HelferLoeschen($HelferID, $AdminID)
 {
 
@@ -370,6 +371,7 @@ function HelferLoeschen($HelferID, $AdminID)
     }
 }
 
+// ok ok
 function SchichtIdArrayEinesHelfers($HelferID)
 {
     // Array, um Zeilen mit von mir belegten Schichten in der Schichtuebersicht einfaerben zu koennenn
@@ -384,6 +386,7 @@ function SchichtIdArrayEinesHelfers($HelferID)
     return($schichtIDs);
 }
 
+// ok ok
 function AlleSchichtenEinesHelfersVonJetzt($HelferID)
 {
     // TODO: fix GETDATE() array to string conversion
@@ -402,6 +405,7 @@ function AlleSchichtenEinesHelfersVonJetzt($HelferID)
     return $zeilen;
 }
 
+// ok ok
 function SchichtenSummeEinesHelfers($HelferID)
 {
 
@@ -416,8 +420,7 @@ function SchichtenSummeEinesHelfers($HelferID)
     return $zeilen;
 }
 
-
-// ok (?)
+// ok ok
 function LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $AdminID = 0)
 {
     $db = DB::getInstance();
@@ -458,6 +461,7 @@ function LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $Ad
     }
 }
 
+// ok ok
 function HelferSchichtZuweisen($HelferID, $SchichtId, $AdminID = 0)
 {
     // Abfrage, ob bereits eine Einzelschicht in der selben Schicht vom Helfer existiert
@@ -489,6 +493,7 @@ function HelferSchichtZuweisen($HelferID, $SchichtId, $AdminID = 0)
     return $db_erg;
 }
 
+// ok ok
 function HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID, $AdminID = 0)
 {
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann
@@ -504,6 +509,7 @@ function HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID, $AdminID = 0)
     return $db_erg;
 }
 
+// ok ok
 function HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0)
 {
     // Log vor Löschen, damit Einzelschicht abgefragt werden kann
@@ -521,6 +527,7 @@ function HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0)
     return $db_erg;
 }
 
+// ok ok
 function DetailSchicht($InfoSchichtID)
 {
     $db = DB::getInstance();
@@ -535,6 +542,7 @@ function DetailSchicht($InfoSchichtID)
     return $zeile[0];
 }
 
+// ok ok
 function BeteiligteHelfer($InfoSchichtID)
 {
     $db = DB::getInstance();
@@ -546,7 +554,7 @@ function BeteiligteHelfer($InfoSchichtID)
     return $zeile;
 }
 
-// ok
+// ok ok
 function GetDienste()
 {
     $db = DB::getInstance();
@@ -557,7 +565,7 @@ function GetDienste()
     return $dienste;
 }
 
-// ok
+// ok ok
 function GetDiensteChilds($DienstID)
 {
     $db = DB::getInstance();
@@ -568,7 +576,7 @@ function GetDiensteChilds($DienstID)
     return $dienste;
 }
 
-// ok
+// ok ok
 function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
@@ -586,7 +594,7 @@ function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLeve
     $db->onErrorDie(__METHOD__);
 }
 
-// ok
+// ok ok
 function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
@@ -609,7 +617,7 @@ function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
     }
 }
 
-// ok
+// ok ok
 function DeleteDienst($DienstID, $Rekursiv)
 {
     if ($Rekursiv) {
@@ -635,6 +643,7 @@ function DeleteDienst($DienstID, $Rekursiv)
     }
 }
 
+// ok ok (not used?)
 function GetDiensteForDay($helferlevel, $datestring)
 {
     $db = DB::getInstance();
@@ -653,7 +662,7 @@ function GetDiensteForDay($helferlevel, $datestring)
     return $schichten;
 }
 
-// ok
+// ok ok (unused?)
 function GetSchichtenForDienstForDay($DienstID, $datestring)
 {
     $db = DB::getInstance();
@@ -670,7 +679,7 @@ function GetSchichtenForDienstForDay($DienstID, $datestring)
 }
 
 
-// ok
+// ok ok
 function GetSchichtenEinesDienstes($DienstID)
 {
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
@@ -682,7 +691,7 @@ function GetSchichtenEinesDienstes($DienstID)
     return $schichten;
 }
 
-// ok
+// ok ok
 function ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer)
 {
     $db = DB::getInstance();
@@ -699,7 +708,7 @@ function ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer)
     $db->onErrorDie(__METHOD__);
 }
 
-// ok
+// ok ok
 function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
 {
 
@@ -738,6 +747,7 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
     }
 }
 
+// ok ok
 function DeleteSchicht($SchichtID, $Rekursiv)
 {
     $db = DB::getInstance();
@@ -764,6 +774,7 @@ function DeleteSchicht($SchichtID, $Rekursiv)
 }
 
 
+// ok ok
 function AlleHelferSchichtenUebersicht()
 {
     $db = DB::getInstance();
@@ -779,6 +790,7 @@ function AlleHelferSchichtenUebersicht()
 }
 
 
+// ok ok
 function DatenbankAufDeutsch()
 {
     $db = DB::getInstance();
@@ -787,6 +799,7 @@ function DatenbankAufDeutsch()
     $db->onErrorDie(__METHOD__);
 }
 
+// ok ok (unused?)
 function LastInsertId()
 {
     $db = DB::getInstance();
@@ -798,6 +811,7 @@ function LastInsertId()
     return $zeile['LAST_INSERT_ID()'];
 }
 
+// ok ok
 function HelferLevel()
 {
     $db = DB::getInstance();
@@ -828,7 +842,7 @@ function HelferLevel()
 //    return $results;
 //}
 
-//FIXME
+//FIXME (not in use for production code anyway)
 function DebugAusgabeDbErgebnis($db_erg)
 {
     // Ausgabe auf Browser Console

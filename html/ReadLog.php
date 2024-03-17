@@ -28,10 +28,10 @@ if (!isset($_SESSION["HelferID"]) || ! $_SESSION["HelferID"] > 0) {
   $AdminID = $_SESSION["AdminID"];
   require 'SQL.php';
   $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
-  DatenbankAufDeutsch($db_link);
+  DatenbankAufDeutsch();
 
-  $zeilen = Helferdaten($db_link, $HelferID);
-while ($zeilen as $zeile)) {
+  $zeilen = Helferdaten($HelferID);
+foreach ($zeilen as $zeile)) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }

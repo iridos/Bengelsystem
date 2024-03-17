@@ -42,7 +42,7 @@ if (isset($_POST['InfoMeineSchichtID'])) {
     unset($InfoAlleSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+    $zeile = DetailSchicht($InfoMeineSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -59,7 +59,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     unset($InfoMeineSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+    $zeile = DetailSchicht($InfoAlleSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -72,12 +72,12 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 
 
     // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+    $helfer = BeteiligteHelfer($InfoAlleSchichtID);
 
 
     $x = 0;
 
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($helfer as $zeile) {
         $MitHelferID[$x] = $zeile['HelferID'];
         $MitHelfer[$x] = $zeile['Name'];
         $MitHelferHandy[$x] = $zeile['Handy'];
@@ -94,8 +94,8 @@ if (isset($_GET['ZeitBereich'])) {
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
     echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
-    $zeilen = HelferListe($db_link);
-    while ($zeilen as $zeile) {
+    $zeilen = HelferListe();
+    foreach ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
                 echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
@@ -118,8 +118,8 @@ HelferAuswahlButton($db_link, $AliasHelferID);
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
 
-$zeilen = Helferdaten($db_link, $HelferID);
-while ($zeilen as $zeile) {
+$zeilen = Helferdaten($HelferID);
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
 }
 
@@ -151,7 +151,7 @@ if (isset($_POST['plusschicht'])) {
 
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtId, $AdminID);
+        $db_erg = HelferSchichtZuweisen($AliasHelferID, $SchichtId, $AdminID);
 
         // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
@@ -176,7 +176,7 @@ if (isset($_POST['minusschicht'])) {
 
     if (empty($messages)) {
         // Helfer aus Schicht entfernen
-        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $AliasHelferID, $SchichtID, $AdminID);
+        $db_erg = HelferVonSchichtLoeschen_SchichtID($AliasHelferID, $SchichtID, $AdminID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -190,12 +190,11 @@ if (isset($_POST['minusschicht'])) {
 /// Ausgabe auf Deutsch umstellen
 /////////////////////////////////////////////////////////////////////////
 
-    DatenbankAufDeutsch($db_link);
+    DatenbankAufDeutsch();
 
 
 // Zusammenfassung Eigener Schichten
- $db_erg = SchichtenSummeEinesHelfers($db_link, $AliasHelferID);
- $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+ $zeile = SchichtenSummeEinesHelfers($AliasHelferID);
 
     echo '<table  id="customers"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
     echo " Dienstplan von $HelferName (Zusammenfassung)<br>";
@@ -240,29 +239,29 @@ if ($addschicht != '0') {
     //$db_erg = AlleSchichten($db_link,$dienstsort);
     //$db_erg = AlleSchichtenImZeitbereich($db_link,"2023-05-18 00:00:00","2023-05-19 00:00:00");
     if ($ZeitBereich == 1) {  // Alle
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2000-05-18 00:00:00", "2200-05-19 00:00:00", -1);
     }
     if ($ZeitBereich == 2) {  // Davor
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2023-05-18 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2000-05-18 00:00:00", "2023-05-18 00:00:00", -1);
     }
     if ($ZeitBereich == 3) {  // Do
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-18 00:00:00", "2023-05-19 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2023-05-18 00:00:00", "2023-05-19 00:00:00", -1);
     }
     if ($ZeitBereich == 4) {  // Fr
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-19 00:00:00", "2023-05-20 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2023-05-19 00:00:00", "2023-05-20 00:00:00", -1);
     }
     if ($ZeitBereich == 5) {  // Sa
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-20 00:00:00", "2023-05-21 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2023-05-20 00:00:00", "2023-05-21 00:00:00", -1);
     }
     if ($ZeitBereich == 6) {  // So
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-21 00:00:00", "2023-05-22 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2023-05-21 00:00:00", "2023-05-22 00:00:00", -1);
     }
     if ($ZeitBereich == 7) {  // Danach
-        $db_erg = AlleSchichtenImZeitbereich($db_link, "2023-05-22 00:00:00", "2223-05-22 00:00:00", -1);
+        $db_erg = AlleSchichtenImZeitbereich("2023-05-22 00:00:00", "2223-05-22 00:00:00", -1);
     }
     // fuer Anzahlanzeige in Ueberschrift
-    $iAlleSchichtenCount = AlleSchichtenCount($db_link);
-    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+    $iAlleSchichtenCount = AlleSchichtenCount();
+    $iBelegteSchichtenCount = AlleBelegteSchichtenCount();
 
 
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
@@ -329,13 +328,13 @@ if ($addschicht != '0') {
     $OldTag = "";
     $OldWas = "";
     // um Zeilen mit von mir belegten Schichten hervorzuheben
-    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $AliasHelferID);
+    $MeineDienste = SchichtIdArrayEinesHelfers($AliasHelferID);
     //print_r($MeineDienste);
 
     echo '</table>';
     echo '<table  id="customers">';
 
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($MeineDienste as $zeile) {
         if ($dienstsort == '1') {
             $Tag = $zeile['Tag'];
 
@@ -405,15 +404,6 @@ if ($addschicht != '0') {
     }
     echo "</table>";
 }
-
-
-
-
-
-
-
-mysqli_free_result($db_erg);
-
 
 ?>
  

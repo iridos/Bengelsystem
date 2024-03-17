@@ -27,7 +27,7 @@ $db_link = mysqli_connect(
     MYSQL_KENNWORT,
     MYSQL_DATENBANK
 );
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch();
 
 require '_login.php';
 
@@ -45,14 +45,14 @@ require '_login.php';
 
 echo '<table id="customers" >';
 
-$db_erg = GetDiensteChilds($db_link, 0);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$dienste = GetDiensteChilds(0);
+foreach ($dienste as $zeile) {
     echo "<tr><th>";
     echo $zeile["Was"];
     echo "</th></tr>";
 
-    $db_erg2 = GetDiensteChilds($db_link, $zeile["DienstID"]);
-    while ($zeile = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+    $dienste = GetDiensteChilds($zeile["DienstID"]);
+    foreach ($dienste as $zeile) {
         echo "<tr><td>";
         echo $zeile["Was"];
             echo "</td></tr>";
@@ -64,7 +64,7 @@ echo "</table>";
 
 
 
-$db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00");
+$db_erg = AlleSchichtenImZeitbereich("2000-05-18 00:00:00", "2200-05-19 00:00:00");
 
 $OldWas = "";
 echo "<br><br><table id='customers' style='page-break-before:always'>";
@@ -92,8 +92,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     echo $zeile["Bis"];
     echo "</td><td>";
 
-        $db_erg2 = BeteiligteHelfer($db_link, $zeile["SchichtID"]);
-    while ($zeile = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+        $helfer = BeteiligteHelfer($zeile["SchichtID"]);
+    foreach ($helfer as $zeile) {
             echo $zeile["Name"];
         echo " ";
         echo $zeile["Handy"];
@@ -112,8 +112,8 @@ echo "<br><br><table id='customers' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
   </tr>
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$db_erg = AlleHelferSchichtenUebersicht();
+foreach ($db_erg as $zeile) {
         $HelferName = $zeile["Name"];
 
     if ($HelferName != $OldHelferName) {
