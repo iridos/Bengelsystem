@@ -411,7 +411,7 @@ function AlleSchichtenEinesHelfersVonJetzt($HelferID)
     return $zeilen;
 }
 
-function SchichtenSummeEinesHelfers($db_link, $HelferID)
+function SchichtenSummeEinesHelfers($HelferID)
 {
 
     //$sql = "select count Schicht.Dauer as Anzahl  FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." order by Von";
@@ -420,7 +420,9 @@ function SchichtenSummeEinesHelfers($db_link, $HelferID)
     //echo $sql;
     $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+
+    $zeilen = $db->fetchAll(__METHOD__);
+    return $zeilen;
 }
 
 

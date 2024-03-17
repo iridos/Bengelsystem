@@ -273,15 +273,18 @@ function TestAlleSchichtenEinesHelfersVonJetzt(){
     else echo "AlleSchichtenEinesHelfersVonJetzt ok\n";
 }
 
+// ok
 function TestSchichtenSummeEinesHelfers(){
     $dbl = old\ConnectDB();
-    $erg_old = old\SchichtenSummeEinesHelfers($dbl, $HelferID);
-    $erg_new = SchichtenSummeEinesHelfers($HelferID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $erg_old = old\SchichtenSummeEinesHelfers($dbl, $helfer['HelferID']);
+    $erg_new = SchichtenSummeEinesHelfers($helfer['HelferID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old SchichtenSummeEinesHelfers returns".var_export($erg_old, true)."\n";
         echo "New SchichtenSummeEinesHelfers returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "SchichtenSummeEinesHelfers ok";
+    else echo "SchichtenSummeEinesHelfers ok\n";
 }
 
 function TestLogSchichtEingabe(){
@@ -603,4 +606,5 @@ TestHelferVonSchichtLoeschen();
 TestHelferSchichtZuweisen();
 TestSchichtIdArrayEinesHelfers();
 TestAlleSchichtenEinesHelfersVonJetzt();
+TestSchichtenSummeEinesHelfers();
 ?>
