@@ -1,34 +1,26 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
  <head>
-  <title>Admin Drop am See</title>
+  <title>Meine Schichten <?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
  </head>
  <body>
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button>   
+<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> 
+<?php echo "<b>" . EVENTNAME . "</b>"; ?>
 <div style="width: 100%;">
 <?php
-
-
-SESSION_START();
-
-require_once 'konfiguration.php';
-//require_once ('SQL.php');
-require 'SQL.php';
-
-
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-
-
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
@@ -266,13 +258,13 @@ $schichten = AlleSchichtenEinesHelfers($HelferID);
   $iSQLCount = mysqli_num_rows($schichten);
   //$iSQLCount = 3;
 
-echo '<table id="customers">';
+echo '<table class="commontable">';
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th colspan=4>" . "Meine Schichten (" . $iSQLCount . " Schichten)</th>";
+  echo "<th colspan=4>"  . "Meine Schichten (" . $iSQLCount . " Schichten)  - " . EVENTNAME . "</th>";
   echo "</tr><tr>";
-  echo "<th></th>";
+  echo "<th>Dienst</th>";
   echo "<th style='width:180px'>" . "Von" . "</th>";
   echo "<th style='width:180px'>" . "Bis" . "</th>";
   echo "<th style='width:90px'>" . "Del" . "</th>";
@@ -297,7 +289,7 @@ echo "<br><br>";
 $iAlleSchichtenCount = AlleSchichtenCount();
 $iBelegteSchichtenCount = AlleBelegteSchichtenCount();
 
-echo '<table id="customers" onclick="window.location.href=\'AlleSchichten.php\'">';
+echo '<table class="commontable" onclick="window.location.href=\'AlleSchichten.php\'">';
     echo "<tr>";
         echo "<th>" . '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . " Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th>";
     echo "</tr>";

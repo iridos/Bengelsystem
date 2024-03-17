@@ -1,7 +1,14 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+require 'SQL.php';
+require '_login.php';
+?>
 <!doctype html>
 <html lang=de>
 <head>
-  <title>Helfer Drop am See Home</title>
+  <title>Helfer <?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src=js/helferdb.js></script>
@@ -9,54 +16,38 @@
 <meta charset="utf-8">
 </head>
 <body>
-
-<?php
-SESSION_START();
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$pdo = ConnectDB();
-
-DatenbankAufDeutsch();
-
-require '_login.php';
-
-// wird von _login.php miterledigt
-// TODO: hier wird HelferIsAdmin verwendet, woanders ist es AdminStatus
-//$db_erg = Helferdaten($db_link,$HelferID);
-//while ($zeile = mysqli_fetch_array( $db_erg, MYSQLI_ASSOC))
-//{
-//    $HelferName=$zeile['Name'];
-//    $HelferIsAdmin=$zeile['Admin'];
-//}
-
-?>
-
 <div style="width: 100%;">
 
-<table id="customers" >
+<table class="commontable" >
   <tr onclick="window.location.href='Info.php';">
-    <th><img src="Bilder/Info.jpeg" style="width:30px;height:30px;"> &nbsp; <b>Drop am See 2023</b></th>
+    <th><img src="Bilder/Info.jpeg" style="width:30px;height:30px;"> &nbsp; <b><?php echo EVENTNAME ?></b></th>
   </tr>
   <tr onclick="window.location.href='Userdaten.php';">
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 
     <b>
 <?php
+    echo "Helfer $HelferName";
 if ($HelferIsAdmin) {
-    echo "Admin ";
-} else {
-    echo "Helfer ";
+    echo " (Admin)";
 }
-        echo $HelferName;
 ?> 
     </b>  </td>
   </tr>
+  <?php
+    if ($HelferIsAdmin) {
+        ?>
+  <tr onclick="window.location.href='Admin.php';">
+    <td><img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"><b> Admin Menü</b></td>
+
+  </tr>
+        <?php
+    }
+    ?>
   <tr onclick="window.location.href='MeineSchichten.php';">
     <td>
         <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Nächste Helferschichten:</b>
 
-                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">  
+                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">
 <?php
                     //<li>Fr 08:00 Leitung Halle</li>
                     //<li>So 12:00 Abbau</li>
@@ -79,7 +70,7 @@ foreach ($schichten as $zeile) {
 }
 
 ?>
-                </ul>      
+                </ul>
 
     </td>
   </tr>
@@ -88,31 +79,31 @@ foreach ($schichten as $zeile) {
   <tr onclick="window.location.href='Ereignisse.php';">
     <td>
         <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Nächste Ereignisse:</b>
-      
-                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">        
+ 
+                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">
                     <li>Sa 20:00 Show im Milchwerk</li>
                     <li>So 15:00 Gaukelgames</li>
-                </ul>      
-       
+                </ul>
+ 
     </td>
   </tr>
   <tr onclick="window.location.href='Workshop.php';">
     <td>
         <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Nächste Workshops:</b>
 
-                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">        
+                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">
                     <li>Sa 14:00 8 Bälle für Anfänger</li>
                     <li>Sa 15:00 Devilstick Hubschrauber beidseitig</li>
-                </ul>      
+                </ul>
 
     </td>
   </tr>
   <tr onclick="window.location.href='Wichtig.php';">
     <td>
         <img src="Bilder/PfeilRunter.jpeg" style="width:30px;height:30px;"> <b>Wichtig:</b>
-                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">        
+                <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">
                     <li>Warnung vor Sturm ab 21 Uhr</li>
-                </ul>      
+                </ul>
 
     </td>
   </tr>
@@ -130,23 +121,12 @@ foreach ($schichten as $zeile) {
     <td><img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"><b> Logs</b></td>
 
   </tr>
-  <?php
-    if ($HelferIsAdmin) {
-        ?>    
-  <tr onclick="window.location.href='Admin.php';">
-    <td><img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"><b> Admin</b></td>
-
-  </tr>
-        <?php
-    }
-    ?>  
-
   </tr>
   <tr onclick="window.location.href='index.php?logout=1';">
     <td><img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"><b> Logout</b></td>
 
   </tr>
-    
+ 
 </table>
 
 </body>

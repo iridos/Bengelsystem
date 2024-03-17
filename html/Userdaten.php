@@ -1,7 +1,16 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
  <head>
-  <title>Drop am See Helferdaten ändern</title>
+  <title><?php echo EVENTNAME ?> Helferdaten ändern</title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
@@ -11,23 +20,9 @@
 
 <?php
 
-SESSION_START();
 
 $HelferID = $_SESSION["HelferID"];
 $AdminID = $_SESSION["AdminID"];
-
-require_once 'konfiguration.php';
-//require_once ('SQL.php');
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-
-
 
 
 /// Helferdaten Aendern
@@ -115,9 +110,9 @@ if (isset($_POST['login'])) {
 
 
     
-          <table id="customers">
+          <table class="commontable">
             <tr>
-                <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> Helferdaten</th>
+                <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> Helferdaten <?php echo EVENTNAME; ?></th>
             </tr>
 <form method="post">
             <tr>     

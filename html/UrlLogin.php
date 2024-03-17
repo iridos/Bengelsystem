@@ -1,8 +1,7 @@
-
 <?php
-SESSION_START();
 
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 require '_crypt.php';
 
@@ -10,13 +9,8 @@ require '_crypt.php';
 $head = "<!doctype html>
 <head></head> <body> ";
 $foot = "</body></html>";
+$db_link = ConnectDB();
 
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
 // ist jetzt in _crypt.php, aber aus der anderen Datei, deshalb hier erst
 // nur auskommentiert
 // function Entschluessle($encrypted_data,$secret_verification,$secret_key){

@@ -1,7 +1,7 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
@@ -14,7 +14,7 @@ if ($AdminStatus != 1) {
 
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
+    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
     $zeilen = HelferListe();
     foreach ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
@@ -26,8 +26,8 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
     echo '</select></form>';
 }
 
-if (isset($_POST['AliasHelfer'])) {
-    $AliasHelferID = $_POST['AliasHelfer'];
+if (isset($_POST['AliasHelferID'])) {
+    $AliasHelferID = $_POST['AliasHelferID'];
 } elseif (isset($_SESSION["AliasHelferID"])) {
     $AliasHelferID = $_SESSION["AliasHelferID"];
 } else {
@@ -39,16 +39,14 @@ HelferAuswahlButton($db_link, $AliasHelferID);
 $_SESSION["AliasHelferID"] = $AliasHelferID;
 $AdminID = $_SESSION["AdminID"];
 
-echo "Admin=$AdminID<br>";
-echo "Helfer=$HelferID<br>";
-echo "Alias=$AliasHelferID<br>";
+//debug output: echo "Admin=$AdminID<br>"; echo "Helfer=$HelferID<br>"; echo "Alias=$AliasHelferID<br>";
 
 
 ?>
 <!doctype html>
 <html>
  <head>
-  <title>Drop am See Helferdaten ändern</title>
+  <title><?php echo EVENTNAME ?> Helferdaten ändern</title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
@@ -78,6 +76,7 @@ if (isset($_POST['change'])) {
     $HelferName = $_POST['helfer-name'];
     $HelferEmail = $_POST['helfer-email'];
     $HelferHandy = $_POST['helfer-handy'];
+    $HelferLevel = $_POST['helfer-level'];
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
     if ($_POST['IsAdmin']) {
         $HelferIsAdmin = 1;
@@ -87,7 +86,11 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
+<<<<<<< HEAD
         HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
+=======
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferIsAdmin, $HelferID);
+>>>>>>> main
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -119,6 +122,7 @@ foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];
     $HelferIsAdmin = $zeile['Admin'];
+    $HelferLevel = $zeile['HelferLevel'];
 }
 
 ?>
@@ -126,10 +130,10 @@ foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 
 
     
-          <table id="customers">
+          <table class="commontable">
             <tr>
                 <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> Helferdaten</th>
-            </tr>
+<?php echo "<b>" . EVENTNAME . "</b>"; ?>
 <form method="post">
             <tr>     
               <td>Name</td></tr><tr><td>
@@ -155,11 +159,29 @@ foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
               <td>Neues Helfer Passwort</td></tr><tr><td>     
               <input name="helfer-newpasswort" type="text" value="<?php echo htmlspecialchars($HelferPasswort ?? '')?>" >
               </td>
+            </tr> 
+              <tr><td>Helferlevel </td></tr>
+           <tr><td>    
+              <select name="helfer-level">
+<?php
+$db_erg = HelferLevel($db_link);
+$selected = "";
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $HelferLevel = $zeile['HelferLevel'];
+    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
+    if ($HelferLevel == 1) {
+        $selected = " selected " ;
+    };
+    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
+    $selected = "";
+}
+?>
+              </select>
+              </td>
             </tr>
-             
           </table>
         
-      <table id="customers">
+      <table class="commontable">
       <col style="width:20px">
       <tr>
       <td><input type="checkbox" name="IsAdmin" value=1 align="right" <?php if ($HelferIsAdmin == 1) {

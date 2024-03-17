@@ -1,10 +1,15 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+
+?>
 <!doctype html>
 <html>
 <head></head>
 <body> 
 
 <?php
-require_once 'konfiguration.php';
 
 if (isset($_GET['token'])) {
     // E-Mail-Adresse des Nutzers

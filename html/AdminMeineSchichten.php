@@ -1,7 +1,7 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
@@ -15,7 +15,7 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
  <head>
-  <title>Admin Drop am See - Schichten editieren</title>
+  <title>Admin <?php echo EVENTNAME ?> - Schichten editieren</title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -23,7 +23,9 @@ if ($AdminStatus != 1) {
   <meta name="viewport" content="width=480" />
  </head>
  <body>
-<div><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> <h4 style="display: inline;">Admin: Schichten editieren</h4>  
+<div><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> <h4 style="display: inline;">Admin: Schichten editieren - 
+<?php echo "<b>" . EVENTNAME . "</b>"; ?>
+</h4>
 <div style="width: 100%;">
 <?php
 
@@ -83,7 +85,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelfer" id="AliasHelfer" onchange="submit()">';
+    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
     $zeilen = HelferListe();
     foreach ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
@@ -97,8 +99,8 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
 
 
 
-if (isset($_POST['AliasHelfer'])) {
-    $AliasHelferID = $_POST['AliasHelfer'];
+if (isset($_POST['AliasHelferID'])) {
+    $AliasHelferID = $_POST['AliasHelferID'];
     echo "AliasHelfer: $AliasHelferID<br>";
 } elseif (isset($_SESSION["AliasHelferID"])) {
     $AliasHelferID = $_SESSION["AliasHelferID"];
@@ -207,7 +209,7 @@ $schichten = AlleSchichtenEinesHelfers($AliasHelferID);
   $iSQLCount = count($schichten);
   //$iSQLCount = 3;
 
-echo '<table id="customers">';
+echo '<table class="commontable">';
 
   echo "<thead>";
   echo "<tr>";
@@ -238,7 +240,7 @@ echo "<br><br>";
 $iAlleSchichtenCount = AlleSchichtenCount();
 $iBelegteSchichtenCount = AlleBelegteSchichtenCount();
 
-echo '<table id="customers" onclick="window.location.href=\'AdminAlleSchichten.php\'">';
+echo '<table class="commontable" onclick="window.location.href=\'AdminAlleSchichten.php\'">';
     echo "<tr>";
         echo "<th>" . "Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th>";
     echo "</tr>";

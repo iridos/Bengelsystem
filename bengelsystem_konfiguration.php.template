@@ -1,0 +1,31 @@
+<?php
+
+define('MYSQL_HOST', 'localhost');
+define('MYSQL_BENUTZER', 'bengel'); // database user name
+define('MYSQL_KENNWORT', '');
+define('MYSQL_DATENBANK', 'bengelsystem');
+define('LOGFILE', "/var/log/jonglierconvention/meinetollejonglierconvention.log");
+define('EVENTNAME', "Meine tolle Jonglierconvention");
+define('INFORMATIONS_URL', "https://meine-tolle-jonglierconvention.de");
+define('SECRET_KEY', "irgendwasZufaelliges"); // emails, see below
+define('SECRET_VERIFICATION', "irgendwasanderes,egalwas"); // emails, see below
+define('URLPREFIX', "https://https://meine-tolle-jonglierconvention.de/Bengelsystem/"); // our servername
+
+define('TAGE_DAUER', 4);
+
+date_default_timezone_set('Europe/Berlin');
+setlocale(LC_TIME, "de_DE.UTF-8");
+$start_date = new DateTimeImmutable("2023-05-18");
+// das hier setzen, um mehr als eine Instanz der des Bengelsystems mit separaten Accounts laufen zu lassen
+//session_save_path("/var/lib/php/sessions");
+
+
+// Geheimer Schlüssel für die Verschlüsselung von Tokens
+// das ist das Passwort, mit dem sich aus den Tokens auch wieder der Username/Email extrahieren lässt
+$secret_key = SECRET_KEY;
+// Geheimes Wort, das an die Email angehaengt wird, um zu ueberpruefen, dass die Addresse nicht abgeschnitten ist
+// das Wort darf kein "|" enthalten, das wird als Trenner verwendet
+$secret_verification = SECRET_VERIFICATION;
+// urlprefix: https Addresse des php Scripts, das die Tokens empfaengt und einen Account anlegt
+$urlprefix = URLPREFIX;
+?>

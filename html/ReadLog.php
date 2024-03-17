@@ -1,3 +1,12 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+require_once 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+?>
 <!doctype html>
 <html>
 <head>
@@ -7,26 +16,18 @@
 
 <!--meta name="viewport" content="width=480" /-->
 <?php
-  require_once 'konfiguration.php';
-  SESSION_START();
 
-
-  // if we are not logged in, we redirect in the header back to the main page
-if (!isset($_SESSION["HelferID"]) || ! $_SESSION["HelferID"] > 0) {
-    echo ' <meta http-equiv="Refresh" content="0; URL=index.php" />
-  ';
-}
   // print top of page if we are logged in and not redirecting
   echo " </head> \n <body> \n";
-  echo '<button name="BackHelferdaten" value="1"  onclick="window.location.href = \'index.php\';"><b>&larrhk;</b></button><br>' . "\n";
+  echo '<button name="BackHelferdaten" value="1"  onclick="window.location.href = \'index.php\';"><b>&larrhk;</b></button>' . "\n";
+  echo "<b>" . EVENTNAME . "</b><br>";
   echo '<H1> Helferdaten - Log </H1>';
   echo '<p>Hier werden alle Aktionen, die einen Helfer betreffen aufgelistet</p>';
-  echo '<table id="customers">' . "\n";
+  echo '<table class="commontable">' . "\n";
 
   //check for admin status
   $HelferID = $_SESSION["HelferID"];
   $AdminID = $_SESSION["AdminID"];
-  require 'SQL.php';
   $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
   DatenbankAufDeutsch();
 

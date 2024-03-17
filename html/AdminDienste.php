@@ -1,7 +1,7 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
-SESSION_START();
 require_once 'konfiguration.php';
+SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
@@ -15,14 +15,14 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
  <head>
-  <title>Admin Drop am See</title>
+  <title>Admin <?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-
+  <script src="js/helferdb.js" type="text/javascript"></script>
   <meta name="viewport" content="width=480" />
  </head>
- <body>
+ <body onload="setEndDate();">
 <div style="width: 100%;">
 <?php
 
@@ -30,6 +30,7 @@ if ($AdminStatus != 1) {
 DatenbankAufDeutsch();
 
 $DienstID = $_SESSION["DienstID"];
+$NewDienstID = 0;
 $SchichtID = $_SESSION["SchichtID"];
 
 
@@ -65,6 +66,7 @@ if (isset($_POST['NewDienst'])) {
     $Gruppe = $_POST['Dienst-Gruppe'];
        $HelferLevel = $_POST['HelferLevel'];
     NewDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    $NewDienstID = LastInsertId();
 }
 
 
@@ -79,17 +81,42 @@ if (isset($_POST['ChangeSchicht'])) {
     $Von = $_POST['Schicht-Von'];
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
+    $Dauer = $_POST['Schicht-Dauer'];
 
-    ChangeSchicht($SchichtID, $Von, $Bis, $Soll);
+    ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer);
 }
+
+if (isset($_POST['Schicht-Automatic-Bis'])) {
+    $AutomaticBis = 1;
+} else {
+    $AutomaticBis = 0;
+}
+
+if (isset($_POST['Schicht-Anschlussschicht'])) {
+    $Anschlussschicht = 1;
+} else {
+    $Anschlussschicht = 0;
+}
+
 
 
 if (isset($_POST['NewSchicht'])) {
     $Von = $_POST['Schicht-Von'];
     $Bis = $_POST['Schicht-Bis'];
     $Soll = $_POST['Schicht-Soll'];
+    $Dauer = $_POST['Schicht-Dauer'];
 
-    NewSchicht($DienstID, $Von, $Bis, $Soll);
+    if ($AutomaticBis) {
+        $Temp = new DateTime($Von);
+      //$Temp2 = DateInterval::createFromDateString('3600 seconds');
+        $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
+
+        $Temp = $Temp->add($Temp2);
+        $Bis = $Temp->format('Y-m-d H:i:s');
+    }
+    NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
+    $SchichtID = LastInsertId($db_link);
+    //echo "+".$SchichtID."+";
 }
 
 
@@ -97,6 +124,7 @@ if (isset($_POST['DeleteSchicht'])) {
     if (!DeleteSchicht($SchichtID, false)) {
         echo "Erst Helfer aus Schicht austragen<br>";
     }
+    $SchichtID = 0;
 }
 
 
@@ -104,8 +132,9 @@ if (isset($_POST['DeleteSchicht'])) {
 if (isset($_POST['ShowSchicht'])) {
     $SchichtID = $_POST['SchichtSearch'];
 }
-if (isset($_POST['SchichtSearch'])) {
+if (isset($_POST['SchichtSearch']) && !isset($_POST['NewSchicht']) && !isset($_POST['DeleteSchicht'])) {
     $SchichtID = $_POST['SchichtSearch'];
+    echo "SchichtSearch<br>";
 }
 
 if (isset($_POST['ShowSchichten'])) {
@@ -118,7 +147,9 @@ if (isset($_POST['DienstSearch'])) {
 }
 
 
-
+if ($NewDienstID != 0) {
+    $DienstID = $NewDienstID;
+}
 
 // Dienste Anzeigen
 ////////////////////////////////////////////////////////
@@ -126,7 +157,7 @@ if (isset($_POST['DienstSearch'])) {
 ?>
 <button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
 <form method="post">
-    <table border="0" id='customers'>    
+    <table border="0" class='commontable'>
     <tr><th>  Dienst</th><th><select name="DienstSearch" id="DienstSearch"  onchange="submit()">
 <?php
 
@@ -145,6 +176,7 @@ foreach ($zeilen as $zeile){
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
     } else {
         echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
+
         $Was = $zeile['Was'];
         $Wo = $zeile['Wo'];
         $Info = $zeile['Info'];
@@ -163,30 +195,34 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 // Aktueller Dienst und dessen Schichten Anzeigen
 ////////////////////////////////////////////////////////
 
+if (!isset($DienstID)) {
+    echo "<img src='Bilder/Attention_Sign.svg' width='20px'> Bitte erst Dienst Auswählen </body></html>";
+    exit;
+}
 ?>
 
 
 
 
-          <table border="0" id="customers">
-            <tr>     
+          <table border="0" class="commontable">
+            <tr>
               <td style="border: 0px solid black;">Was</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Was" type="text" value="<?php echo htmlspecialchars($Was ?? '')?>">
               </td>
             </tr>
             <tr>
-              <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Wo" type="text " value="<?php echo htmlspecialchars($Wo ?? '')?>">
               </td>
             </tr>
             </tr>
-              <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;">
               <input name="Dienst-Info" type="text" value="<?php echo htmlspecialchars($Info ?? '')?>" >
               </td>
             </tr>
             <tr>
-              <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;">     
-                
+              <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;">
+               
                <!--  <input name="Dienst-Leiter" type="text" value="<?php echo htmlspecialchars($Leiter ?? '')?>" > -->
                 <?php
                     echo "<select name='Dienst-Leiter'>";
@@ -200,10 +236,10 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                 }
                     echo "</select>";
                 ?>
-                </td>  
+                </td>
               </tr>
               <tr>
-                <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;">     
+                <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;">
                 
                 <?php
                     //echo "#####".$Gruppe."#####";
@@ -213,13 +249,13 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
                     if ($zeile['DienstID'] != $Gruppe) {
                               echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
                     } else {
-                              echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
+                          echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
                     }
                 }
                     echo "</select>";
                 ?>
                 </td>
-                </td>                
+                </td>
             </tr>
             <tr><td style="border: 0px solid black;">HelferLevel</td></tr>
             <tr><td style="border: 0px solid black;"> 
@@ -235,15 +271,18 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
              </td></tr>
           </table>
           
-          <p><button name="ChangeDienst" value="1">Ändern</button><button name="NewDienst" value="1">Neue</button><button name='DeleteDienst' value='1'>Löschen</button></p>
-
+          <p>
+             <button name="NewDienst" value="1">Dienst anlegen</button>
+             <button name="ChangeDienst" value="1">Ändern</button>
+             <button name='DeleteDienst' value='1'>Löschen</button>
+          </p>
 </form>
 
 
 
 
 <form method="post">
-    <table border="0" id='customers'">    
+    <table border="0" class='commontable'>
     <tr><th>Schicht</th><th><select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
     
     
@@ -252,6 +291,7 @@ echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</bu
 
 $Soll = 1;
 $schichten = GetSchichtenEinesDienstes($DienstID);
+echo "+" . $SchichtID . "+";
 
 foreach ($schichten as $zeile) {
     if ($SchichtID == 0) {
@@ -261,9 +301,14 @@ foreach ($schichten as $zeile) {
         echo "<option value='" . $zeile['SchichtID'] . "'>" . $zeile['TagVon'] . "</option>";
     } else {
         echo "<option value='" . $zeile['SchichtID'] . "' selected='selected'>" . $zeile['TagVon'] . "</option>";
-        $Von = $zeile['Von'];
-        $Bis = $zeile['Bis'];
-        $Soll = (int)$zeile['Soll'];
+        if (isset($_POST['NewSchicht']) && $Anschlussschicht) {
+            $Von = $Bis;
+        } else {
+            $Von = $zeile['Von'];
+            $Bis = $zeile['Bis'];
+            $Soll = (int)$zeile['Soll'];
+            $Dauer = $zeile['Dauer'];
+        }
     }
 }
 
@@ -277,28 +322,48 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
 
  
         <!--  <table border="0" style="border: 0px solid black;">  -->
-        <table border="0" id='customers'"> 
-            <tr>     
+        <table border="0" class='commontable'"> 
+            <tr>
               <td style="border: 0px solid black;">Von</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Von" type="datetime-local" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
+              <input id="Schicht-Von" name="Schicht-Von" type="datetime-local" onKeyUp="setEndDate()" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
+              </td>
+            <tr>
+            <tr>
+              <td style="border: 0px solid black;">Dauer</td></tr><tr><td style="border: 0px solid black;">
+              <input id="Schicht-Dauer" name="Schicht-Dauer" type="time" onChange="setEndDate()" value="<?php echo htmlspecialchars($Dauer ?? '01:00')?>" required>
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Bis</td></tr><tr><td style="border: 0px solid black;">     
-              <input name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
+            <tr>
+            </tr>
+              <td style="border: 0px solid black;">Bis </td></tr><tr><td style="border: 0px solid black;">
+              <input id="Schicht-Bis" name="Schicht-Bis" type="datetime-local" value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Soll</td></tr><tr><td style="border: 0px solid black;">     
+              <td style="border: 0px solid black;">Anzahl Helfer (Soll)</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
               </td>
             <tr>
             </tr>
 
           </table>
-          <p><button name="ChangeSchicht" value="1">Ändern</button><button name="NewSchicht" value="1">Neue</button><button name='DeleteSchicht' value='1'>Löschen</button></p>
+               <input  style="width:unset" width=20 id="Schicht-Automatic-Bis" name="Schicht-Automatic-Bis" type="checkbox" onclick="setEndDate()" <?php
+                if ($AutomaticBis) {
+                    echo "checked";
+                }
+                ?>  > Endzeit von Dauer<br>
 
-
+               <input  style="width:unset" width=20 id="Schicht-Anschlussschicht" name="Schicht-Anschlussschicht" type="checkbox" <?php
+                if ($Anschlussschicht) {
+                    echo "checked";
+                }
+                ?>   > Anschlussschicht vorbereiten<br>
+           <p>
+             <button name="NewSchicht" value="1">Schicht anlegen</button>
+             <button name="ChangeSchicht" value="1">Ändern</button>
+             <button name='DeleteSchicht' value='1'>Löschen</button>
+          </p>
  </form>
  
 <button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b><b>&larrhk;</b></b></button> 

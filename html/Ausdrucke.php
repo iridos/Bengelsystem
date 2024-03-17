@@ -1,150 +1,68 @@
+<?php
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+require_once 'konfiguration.php';
+SESSION_START();
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+
+if ($AdminStatus != 1) {
+    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
+    echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
+    exit;
+}
+?>
 <!doctype html>
 <html>
 <head>
-  <title>Admin Drop am See</title>
-
+  <title>Admin <?php echo EVENTNAME ?></title>
+  <link rel="stylesheet" href="css/style_common.css"/>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <link rel="stylesheet" href="css/style_print.css" media="print"/>
 
 <meta name="viewport" content="width=480" />
 </head>
 <body>
+<img src="Bilder/Info.jpeg" width="30px"> Die Ausdrucke sind noch im Aufbau. "Ausdrucke(alles)" versucht alles relevante aus der Datenbank auf einer Seite anzuzeigen, damit auch bei Ausfall der DB noch ein PDF/Ausdruck die Info hat. Ausdrucke Schichten(I) und (II) ist für Papier-Schichten für Teilnehmer mit Abreiss-Zettel gedacht und wurden von 2 Leuten zeitgleich für Tübingen geschrieben und muss noch vereinigt werden. 
+<hr>
+ 
+<?php
 
+$AliasHelferID = 0;
+
+if (isset($_SESSION["AliasHelferID"])) {
+    $AliasHelferID = $_SESSION["AliasHelferID"];
+}
+
+if (isset($_POST["AliasHelferID"])) {
+    $AliasHelferID = $_POST["AliasHelferID"];
+}
+
+if ($AliasHelferID != 0) {
+    $_SESSION["AliasHelferID"] = $AliasHelferID;
+}
+
+$db_erg = Helferdaten($db_link, $HelferID);
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $HelferName = $zeile['Name'];
+    $HelferIsAdmin = $zeile['Admin'];
+}
+
+?>
 
 <div style="width: 100%;">
 
-<?php
-
-SESSION_START();
-
-require_once 'konfiguration.php';
-require 'SQL.php';
-
-$db_link = mysqli_connect(
-    MYSQL_HOST,
-    MYSQL_BENUTZER,
-    MYSQL_KENNWORT,
-    MYSQL_DATENBANK
-);
-DatenbankAufDeutsch();
-
-require '_login.php';
-
-
-?>
-
-<table id="customers" >
-  <tr>
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Dienst DAS 2023</b></th>
-  </tr>
+<table class="commontable">
+    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> &nbsp; <b>Ausdrucke HelferDB</b>
+  </th>
+<tr onclick="window.location.href='Ausdrucke-alles.php';">
+    <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdrucke(alles)</b>  </td> 
+    </tr>
+    <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck.php';">
+    <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdruck Schichten(I)</b>  </td> </tr>
+    <tr onclick="window.location.href='TeilnehmerSchichtenAusdruck2.php';">
+    <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdruck Schichten(II)</b>  </td> </tr>
 </table>
-
-
-<?php
-
-echo '<table id="customers" >';
-
-$dienste = GetDiensteChilds(0);
-foreach ($dienste as $zeile) {
-    echo "<tr><th>";
-    echo $zeile["Was"];
-    echo "</th></tr>";
-
-    $dienste = GetDiensteChilds($zeile["DienstID"]);
-    foreach ($dienste as $zeile) {
-        echo "<tr><td>";
-        echo $zeile["Was"];
-            echo "</td></tr>";
-    }
-}
-
-echo "</table>";
-
-
-
-
-$db_erg = AlleSchichtenImZeitbereich("2000-05-18 00:00:00", "2200-05-19 00:00:00");
-
-$OldWas = "";
-echo "<br><br><table id='customers' style='page-break-before:always'>";
-?>
-  <tr>
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Schichten der Dienste DAS 2023</b></th>
-  </tr>
-<?php
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $Was = $zeile["Was"];
-
-    if ($Was != $OldWas) {
-            echo "</table>";
-        //echo '<table id="customers" style="page-break-before:always">';
-        echo '<table id="customers">';
-        echo "<tr><th colspan=3>";
-            echo $Was;
-        echo "</th></tr>";
-                $OldWas = $Was;
-    }
-
-    echo "<tr><td style='width:100px'>";
-    echo $zeile["Ab"];
-    echo "</td><td style='width:100px'>";
-    echo $zeile["Bis"];
-    echo "</td><td>";
-
-        $helfer = BeteiligteHelfer($zeile["SchichtID"]);
-    foreach ($helfer as $zeile) {
-            echo $zeile["Name"];
-        echo " ";
-        echo $zeile["Handy"];
-            echo ",";
-    }
-    echo "</td></tr>";
-}
-
-echo "</table>";
-
-$OldHelferName = "";
-
-echo "<br><br><table id='customers' style='page-break-before:always'>";
-?>
-  <tr>
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
-  </tr>
-<?php
-$db_erg = AlleHelferSchichtenUebersicht();
-foreach ($db_erg as $zeile) {
-        $HelferName = $zeile["Name"];
-
-    if ($HelferName != $OldHelferName) {
-            echo "</table>";
-            //echo '<table id="customers" style="page-break-before:always">';
-            echo '<table id="customers">';
-            echo "<tr><th colspan=3>";
-            echo $HelferName;
-            echo "</th></tr>";
-            $OldHelferName = $HelferName;
-    }
-
-        echo "<tr><td style='width:100px'>";
-    echo (int)$zeile["Dauer"];
-        echo "</td><td>";
-    echo $zeile["Was"];
-        echo "</td></tr>";
-}
-
-
-echo "</table>";
-
-?>
-  
-
-
-<?php
-
-mysqli_free_result($db_erg);
-?>
-
-
+<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
 </body>
 </html>

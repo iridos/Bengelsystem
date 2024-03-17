@@ -247,9 +247,9 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
           //echo $sql;
         echo "<li>Passwort geändert</li>";
         if ($AdminID != 0) {
-                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Passwort: neu gesetzt\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
         } else {
-                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy Passwort: neu gesetzt\n", 3, LOGFILE);
+                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
         }
     }
 
@@ -303,6 +303,7 @@ function AlleBelegteSchichtenCount($HelferLevel = 1)
 // ok ok
 function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
 {
+    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
 
     $db = DB::getInstance();

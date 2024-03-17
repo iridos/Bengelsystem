@@ -1,55 +1,67 @@
+<?php
+require_once 'konfiguration.php';
+SESSION_START();
+require 'SQL.php';
+$db_link = ConnectDB();
+require '_login.php';
+require '_zeitbereich.php';
+?>
 <!DOCTYPE html>
 <html>
 <head>
-  <title> Helferdienste  </title>
-  <meta charset="utf-8">
-  <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
-  <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
-  <!-- link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8"-->
-  <link href="scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8">
-  <link rel="stylesheet" href="../scheduler/samples/common/controls_styles.css">
-    <style>
+<title> Helferdienste  </title>
+<meta charset="utf-8">
+<!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
+<script src="scheduler/codebase/dhtmlxscheduler.js"></script>
+<!--link href="scheduler/codebase/dhtmlxscheduler.css" rel="stylesheet" type="text/css" charset="utf-8"-->
+<link href="scheduler/codebase/dhtmlxscheduler_contrast_black.css" rel="stylesheet" type="text/css" charset="utf-8">
+<link rel="stylesheet" href="scheduler/samples/common/controls_styles.css">
+<style>
 
-        html, body{
-            margin:0px;
-            padding:0px;
-            height:100%;
-            overflow:hidden;
+html, body{
+margin:0px;
+padding:0px;
+height:100%;
+overflow:hidden;
+}
+.dhx_cal_event_line,.dhx_body,.dhx_cal_event .dhx_footer,.dhx_cal_event .dhx_header,.dhx_cal_event .dhx_title{
+border:none !important; 
+       border-radius:3px 3px 3px 3px !important;
+}
+.dhx_scale_holder {background-image: url('Bilder/calendar_lines1.png') !important; background-blend-mode:color-dodge;}
+
+</style> 
+<!-- darkstyle
+style type="text/css" >
+        .filters_wrapper {
+                background-color: black;
+                color: white;
+                font: 500 14px Roboto;
+                padding-left: 15px;
+                padding-right: 15px;
         }
-
-
-    </style> 
-    <!-- darkstyle
-    style type="text/css" >
-            .filters_wrapper {
-                    background-color: black;
-                    color: white;
-                    font: 500 14px Roboto;
-                    padding-left: 15px;
-                    padding-right: 15px;
-            }
-            .filters_wrapper span {
-                    font-weight: bold;
-                    padding-left: 15px;
-                    padding-right: 15px;
-                    color: rgba(0,0,0,0.7);
-            }
-            .filters_wrapper label {
-                    padding-left: 15px;
-                    padding-right: 15px;
-            }
-    </style-->
+        .filters_wrapper span {
+                font-weight: bold;
+                padding-left: 15px;
+                padding-right: 15px;
+                color: rgba(0,0,0,0.7);
+        }
+        .filters_wrapper label {
+                padding-left: 15px;
+                padding-right: 15px;
+        }
+</style-->
 
 </head> 
 <body> 
 <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button><br>
 <div class="filters_wrapper" id="filters_wrapper">
 &nbsp;
-  Mehrtagesdienste anzeigen: <input id="multidaycheck" class="sch_radio" type="checkbox" checked onchange="toggleMultiday(this)"> 
-  Einfärben: <input type="text" id="colorize"> <!--onchange="markEntries(this.value);" onpaste    = "this.onchange();" onsubmit="markEntries(this.value);"-->
-  Filtern: <input type="text" id="filterWrap">
-  <br/>
-  Achtung: Ende Nachtdienste wird falsch angezeigt (immer Mitternacht) - Popup-Fenster zeigt richtige Zeiten
+Mehrtagesdienste anzeigen: <input id="multidaycheck" class="sch_radio" type="checkbox" checked onchange="toggleMultiday(this)"> 
+Einfärben: <input type="text" id="colorize"> <!--onchange="markEntries(this.value);" onpaste    = "this.onchange();" onsubmit="markEntries(this.value);"-->
+Filtern: <input type="text" id="filterWrap">
+<br/>
+<!--Achtung: Ende Nachtdienste wird falsch angezeigt (immer Mitternacht) - Popup-Fenster zeigt richtige Zeiten-->
 </div>
 
 <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'> 
@@ -133,29 +145,30 @@ function colorize (e){ //KS
 
     });       
     scheduler.config.full_day=false;
+    scheduler.config.readonly_form = true;
     scheduler.config.xml_date="%Y-%m-%d %H:%i"; // deprecated but needed for database format
-    scheduler.config.first_hour = 0;            // only show from this hour on
+    scheduler.config.first_hour = 7;            // only show from this hour on
     scheduler.config.last_hour = 24;            // last hour 
     scheduler.setLoadMode("day");               // dynamic loading loads only current day if needed
     scheduler.config.details_on_create=true;    // ???
     scheduler.config.details_on_dblclick=true;  
     scheduler.i18n.setLocale("de");             // german
     scheduler.config.default_date="%l, %d %F";  // %l long day eg Montag, 
-    //scheduler.config.readonly = true;         // doesnt show lightbox if true so disabled
+    scheduler.config.readonly = true;         // doesnt show lightbox if true so disabled
 
     scheduler.locale.labels.con_tab = "4-Tage"  // for custom time ranges
     scheduler.locale.labels.prep_tab = "2-Tage"
 
     scheduler.attachEvent("onTemplatesReady",function(){  // for custom time ranges
             //Con timeslot
-            scheduler.date.con_start = function(date){return date;}; //new Date(202,5,16);}; // calculates start-day of range from current day
+            scheduler.date.con_start = function(date){return date;};
             scheduler.templates.con_date = scheduler.templates.week_date;
             scheduler.templates.con_scale_date = scheduler.templates.week_scale_date;
             scheduler.date.add_con=function(date,inc){ return scheduler.date.add(date,inc*4,"day"); }//"next" gives you the next 4 days
             scheduler.date.get_con_end=function(date){ return scheduler.date.add(date,4,"day"); }
             
             //preparation phase 2 days
-            function setprep(){scheduler.setCurrentView(new Date(2023,4,16));}
+            function setprep(){scheduler.setCurrentView(new Date(<?php echo KalenderDatum($start_date);?>));}
             scheduler.date.prep_start = function(date){return date};
             scheduler.templates.prep_date = scheduler.templates.week_date;
             scheduler.templates.prep_scale_date = scheduler.templates.week_scale_date;
@@ -170,10 +183,10 @@ function colorize (e){ //KS
     };
 
     scheduler.config.all_timed = "short"; // night events arent multi-day - events under 24h are shown
-    scheduler.config.lightbox.sections=[	
-    	{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
-    	{name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
-    	{name:"Konakt", height:200, type:"textarea", map_to:"Kontakt" },
+    scheduler.config.lightbox.sections=[
+        {name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+        {name:"Dienstbeschreibung", height:90, type:"textarea", map_to:"Info" },
+        {name:"Kontakt", height:200, type:"textarea", map_to:"Kontakt" },
         {name:"time", height:72, type:"time", map_to:"auto"}
     ];
 
@@ -182,7 +195,7 @@ function colorize (e){ //KS
     };
 
     // actual init
-    scheduler.init('scheduler_here', new Date(2023,4,18), "con");
+    scheduler.init('scheduler_here', new Date(<?php echo KalenderDatum($start_date);?>), "con");
     scheduler.load("data/api-helfer.php");
     //https://docs.dhtmlx.com/scheduler/api__scheduler_createdataprocessor.html
     //var dp = scheduler.createDataProcessor("data/api.php");  // this would be for saving 
