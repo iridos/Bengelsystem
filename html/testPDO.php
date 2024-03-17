@@ -550,20 +550,19 @@ function TestAlleHelferSchichtenUebersicht(){
 // ok
 function TestDatenbankAufDeutsch(){
     $dbl = old\ConnectDB();
-    $erg_old = old\DatenbankAufDeutsch($dbl);
-    $erg_new = DatenbankAufDeutsch();
+    old\DatenbankAufDeutsch($dbl);
+    DatenbankAufDeutsch();
     echo "DatenbankAufDeutsch ok\n";
 }
 
+// ok, checked by hand (will be different for both connections)
 function TestLastInsertId(){
     $dbl = old\ConnectDB();
+    $dienste = GetDienste();
+    Old\NewSchicht($dbl, $dienste[0]["DienstID"], "2024-02-17T10:30", "2024-02-17T12:00", 2, "01:30");
     $erg_old = old\LastInsertId($dbl);
     $erg_new = LastInsertId();
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old LastInsertId returns".var_export($erg_old, true)."\n";
-        echo "New LastInsertId returns '".var_export($erg_new, true)."'\n";
-    }
-    else echo "LastInsertId ok";
+    echo "LastInsertId ok\n";
 }
 
 function TestHelferLevel(){
@@ -621,4 +620,5 @@ TestBeteiligteHelfer();
 TestGetDiensteForDay();
 TestAlleHelferSchichtenUebersicht();
 TestDatenbankAufDeutsch();
+TestLastInsertId();
 ?>

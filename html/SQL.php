@@ -796,6 +796,16 @@ function DatenbankAufDeutsch()
     $db->onErrorDie(__METHOD__);
 }
 
+function LastInsertId()
+{
+    $db = DB::getInstance();
+    $db->prepare(__METHOD__,"SELECT LAST_INSERT_ID()");
+    $db_erg = $db->execute(__METHOD__);
+    $db->onErrorDie(__METHOD__);
+
+    $zeile = $db->fetch(__METHOD__);
+    return $zeile['LAST_INSERT_ID()'];
+}
 
 function HelferLevel()
 {
