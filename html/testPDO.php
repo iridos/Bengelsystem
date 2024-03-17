@@ -535,6 +535,7 @@ function TestDeleteSchicht(){
     else echo "DeleteSchicht ok";
 }
 
+// ok
 function TestAlleHelferSchichtenUebersicht(){
     $dbl = old\ConnectDB();
     $erg_old = old\AlleHelferSchichtenUebersicht($dbl);
@@ -543,7 +544,7 @@ function TestAlleHelferSchichtenUebersicht(){
         echo "Old AlleHelferSchichtenUebersicht returns".var_export($erg_old, true)."\n";
         echo "New AlleHelferSchichtenUebersicht returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleHelferSchichtenUebersicht ok";
+    else echo "AlleHelferSchichtenUebersicht ok\n";
 }
 
 function TestDatenbankAufDeutsch(){
@@ -621,4 +622,5 @@ TestLogSchichtEingabe();
 TestDetailSchicht();
 TestBeteiligteHelfer();
 TestGetDiensteForDay();
+TestAlleHelferSchichtenUebersicht();
 ?>

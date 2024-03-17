@@ -776,10 +776,15 @@ function DeleteSchicht($SchichtID, $Rekursiv)
 function AlleHelferSchichtenUebersicht()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select Helfer.HelferID as AliasHelferID,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was");
+    $sql = "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
+    $sql = $sql . " UNION ALL ";
+    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
+    $db->prepare(__METHOD__,$sql);
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+
+    $zeilen = $db->fetchAll(__METHOD__);
+    return $zeilen;
 }
 
 
