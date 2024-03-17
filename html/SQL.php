@@ -541,7 +541,7 @@ function DetailSchicht($InfoSchichtID)
     $db->onErrorDie(__METHOD__);
 
     $zeile = $db->fetchAll(__METHOD__);
-    return $zeile;
+    return $zeile[0];
 }
 
 function BeteiligteHelfer($InfoSchichtID)

@@ -346,15 +346,19 @@ function TestHelferVonSchichtLoeschen_SchichtID(){
     else echo "HelferVonSchichtLoeschen_SchichtID ok";
 }
 
+// ok
 function TestDetailSchicht(){
     $dbl = old\ConnectDB();
-    $erg_old = old\DetailSchicht($dbl, $InfoSchichtID);
-    $erg_new = DetailSchicht($InfoSchichtID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $schichten = AlleSchichtenEinesHelfers($helfer['HelferID']);
+    $erg_old = old\DetailSchicht($dbl, $schichten[0]['SchichtID']);
+    $erg_new = DetailSchicht($schichten[0]['SchichtID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old DetailSchicht returns".var_export($erg_old, true)."\n";
         echo "New DetailSchicht returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "DetailSchicht ok";
+    else echo "DetailSchicht ok\n";
 }
 
 function TestBeteiligteHelfer(){
@@ -609,4 +613,5 @@ TestSchichtIdArrayEinesHelfers();
 TestAlleSchichtenEinesHelfersVonJetzt();
 TestSchichtenSummeEinesHelfers();
 TestLogSchichtEingabe();
+TestDetailSchicht();
 ?>
