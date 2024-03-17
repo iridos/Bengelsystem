@@ -227,18 +227,38 @@ function TestAlleSchichtenEinesHelfers(){
     else echo "AlleSchichtenEinesHelfers ok\n";
 }
 
+// ok
 function TestHelferLoeschen(){
     $dbl = old\ConnectDB();
-    $erg_old = old\HelferLoeschen($dbl, $HelferID, $AdminID);
-var_dump($erg_old);
-    $erg_new = HelferLoeschen($HelferID, $AdminID);
-var_dump($erg_new);
-die("--\n");
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old HelferLoeschen returns".var_export($erg_old, true)."\n";
-        echo "New HelferLoeschen returns '".var_export($erg_new, true)."'\n";
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer1 = $_SESSION;
+    HelferLogin("max3@example.com", "hola531",  0);
+    $helfer2 = $_SESSION;
+    ob_start();
+    $erg_old1 = old\HelferLoeschen($dbl, $helfer1['HelferID'],0);
+    $erg_new1 = HelferLoeschen($helfer2['HelferID'],0);
+    $schichten = AlleSchichtenEinesHelfers($helfer1['HelferID']);
+    foreach($schichten as $schicht)
+    {
+        HelferVonSchichtLoeschen($helfer1['HelferID'], $schicht['EinzelSchichtID']);
     }
-    else echo "HelferLoeschen ok";
+    $schichten = AlleSchichtenEinesHelfers($helfer2['HelferID']);
+    foreach($schichten as $schicht)
+    {
+        HelferVonSchichtLoeschen($helfer2['HelferID'], $schicht['EinzelSchichtID']);
+    }
+    $erg_old2 = old\HelferLoeschen($dbl, $helfer1['HelferID'],0);
+    $erg_new2 = HelferLoeschen($helfer2['HelferID'],0);
+    ob_end_clean();
+    if((gettype($erg_old1) != gettype($erg_new1)) || ($erg_old1 != $erg_new1)){
+        echo "Old HelferLoeschen returns".var_export($erg_old1, true)."\n";
+        echo "New HelferLoeschen returns '".var_export($erg_new1, true)."'\n";
+    }
+    else if((gettype($erg_old2) != gettype($erg_new2)) || ($erg_old2 != $erg_new2)){
+        echo "Old HelferLoeschen returns".var_export($erg_old2, true)."\n";
+        echo "New HelferLoeschen returns '".var_export($erg_new2, true)."'\n";
+    }
+    else echo "HelferLoeschen ok\n";
 }
 
 // ok
@@ -627,4 +647,5 @@ TestLastInsertId();
 TestHelferLevel();
 TestHelferVonSchichtLoeschen_SchichtID();
 TestDeleteSchicht();
+TestHelferLoeschen();
 ?>

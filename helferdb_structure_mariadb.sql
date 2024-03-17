@@ -36,6 +36,10 @@ CREATE TABLE `HelferLevel` (
   `HelferLevel` int(11) DEFAULT NULL,
   `HelferLevelBeschreibung` varchar(255) DEFAULT NULL
 );
+INSERT INTO HelferLevel(HelferLevel, HelferLevelBeschreibung)
+VALUES (1,'Orga');
+INSERT INTO HelferLevel(HelferLevel, HelferLevelBeschreibung)
+VALUES (2,'Teilnehmer');
 DROP TABLE IF EXISTS `Schicht`;
 CREATE TABLE `Schicht` (
   `SchichtID` int(11) NOT NULL AUTO_INCREMENT,

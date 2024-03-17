@@ -340,33 +340,24 @@ function AlleSchichtenEinesHelfers($HelferID)
 }
 
 // FIXME
-function HelferLoeschen($db_link, $HelferID, $AdminID)
+function HelferLoeschen($HelferID, $AdminID)
 {
 
-    $HelferID = mysqli_real_escape_string($db_link, $HelferID);
+    $db = DB::getInstance();
+    $db->prepare(__METHOD__,"Delete from Helfer where HelferID=:id");
 
-    static $stmt = false;
-    static $stmt_prepared = false;
-    if(!$stmt_prepared) {
-        $stmt = $pdo->prepare("Delete from Helfer where HelferID='$HelferID'");
-        $stmt_prepared = true;
+    $helfer = Helferdaten($HelferID);
+    if(count($helfer) == 1){
+        $HelferName = $helfer[0]['Name'];
     }
 
-    $db_erg = Helferdaten($db_link, $HelferID);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $HelferName = $zeile['Name'];
-        //echo "HelferName=$HelferName<br>";
-    }
+    $schichten = AlleSchichtenEinesHelfers($HelferID);
 
-    $db_erg = AlleSchichtenEinesHelfers($db_link, $HelferID);
-
-    $AnzahlHelferschichten = mysqli_num_rows($db_erg);
+    $AnzahlHelferschichten = count($schichten);
     if ($AnzahlHelferschichten == 0) {
-        $sql = "Delete from Helfer where HelferID='$HelferID'";
-        $db_erg = mysqli_query($db_link, $sql);
+        $db_erg = $db->execute(__METHOD__,["id" => $HelferID]);
         if (! $db_erg) {
             echo "Helfer $HelferName konnte nicht gelöscht werden<br>";
-            echo "$sql <br>";
             return -2;
         } else {
             echo "Helfer $HelferName (HelferID:$HelferID) wurde erfolgreich geloescht<br>";

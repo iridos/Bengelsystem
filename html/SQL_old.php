@@ -289,15 +289,14 @@ function HelferLoeschen($db_link, $HelferID, $AdminID)
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
 
 
-    $db_erg = Helferdaten($db_link, $HelferID);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $HelferName = $zeile['Name'];
-        //echo "HelferName=$HelferName<br>";
+    $helfer = Helferdaten($db_link, $HelferID);
+    if(count($helfer) == 1){
+        $HelferName = $helfer[0]['Name'];
     }
 
-    $db_erg = AlleSchichtenEinesHelfers($db_link, $HelferID);
+    $schichten = AlleSchichtenEinesHelfers($db_link, $HelferID);
 
-    $AnzahlHelferschichten = mysqli_num_rows($db_erg);
+    $AnzahlHelferschichten = count($schichten);
     if ($AnzahlHelferschichten == 0) {
         $sql = "Delete from Helfer where HelferID='$HelferID'";
         $db_erg = mysqli_query($db_link, $sql);
