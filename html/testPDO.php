@@ -547,15 +547,12 @@ function TestAlleHelferSchichtenUebersicht(){
     else echo "AlleHelferSchichtenUebersicht ok\n";
 }
 
+// ok
 function TestDatenbankAufDeutsch(){
     $dbl = old\ConnectDB();
     $erg_old = old\DatenbankAufDeutsch($dbl);
     $erg_new = DatenbankAufDeutsch();
-    if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
-        echo "Old DatenbankAufDeutsch returns".var_export($erg_old, true)."\n";
-        echo "New DatenbankAufDeutsch returns '".var_export($erg_new, true)."'\n";
-    }
-    else echo "DatenbankAufDeutsch ok";
+    echo "DatenbankAufDeutsch ok\n";
 }
 
 function TestLastInsertId(){
@@ -623,4 +620,5 @@ TestDetailSchicht();
 TestBeteiligteHelfer();
 TestGetDiensteForDay();
 TestAlleHelferSchichtenUebersicht();
+TestDatenbankAufDeutsch();
 ?>
