@@ -403,10 +403,12 @@ function AlleSchichtenEinesHelfersVonJetzt($HelferID)
 
     $db_erg = $db->execute(__METHOD__,[
         "id" => $HelferID,
-        "bis" => GETDATE()
+        "bis" => date("Y-m-d H:i:s")
     ]);
     $db->onErrorDie(__METHOD__);
-    return $db_erg;
+
+    $zeilen = $db->fetchAll(__METHOD__);
+    return $zeilen;
 }
 
 function SchichtenSummeEinesHelfers($db_link, $HelferID)

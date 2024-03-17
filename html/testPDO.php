@@ -255,15 +255,22 @@ function TestSchichtIdArrayEinesHelfers(){
     else echo "SchichtIdArrayEinesHelfers ok\n";
 }
 
+// ok
 function TestAlleSchichtenEinesHelfersVonJetzt(){
     $dbl = old\ConnectDB();
-    $erg_old = old\AlleSchichtenEinesHelfersVonJetzt($dbl, $HelferID);
-    $erg_new = AlleSchichtenEinesHelfersVonJetzt($HelferID);
+    HelferLogin("max2@example.com", "hola234",  0);
+    $helfer = $_SESSION;
+    $dienste = GetDienste();
+    NewSchicht($dienste[0]["DienstID"], date('Y-m-d H:i',time()+60*60*24), date('Y-m-d H:i',time()+60*60*24+60*60*1.5), 2, "01:30");
+    $schichten = GetSchichtenEinesDienstes($dienste[0]["DienstID"]);
+    HelferSchichtZuweisen($helfer['HelferID'], $schichten[2]['SchichtID'],0);
+    $erg_old = old\AlleSchichtenEinesHelfersVonJetzt($dbl, $helfer['HelferID']);
+    $erg_new = AlleSchichtenEinesHelfersVonJetzt($helfer['HelferID']);
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old AlleSchichtenEinesHelfersVonJetzt returns".var_export($erg_old, true)."\n";
         echo "New AlleSchichtenEinesHelfersVonJetzt returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "AlleSchichtenEinesHelfersVonJetzt ok";
+    else echo "AlleSchichtenEinesHelfersVonJetzt ok\n";
 }
 
 function TestSchichtenSummeEinesHelfers(){
@@ -595,4 +602,5 @@ TestAlleSchichtenEinesHelfers();
 TestHelferVonSchichtLoeschen();
 TestHelferSchichtZuweisen();
 TestSchichtIdArrayEinesHelfers();
+TestAlleSchichtenEinesHelfersVonJetzt();
 ?>

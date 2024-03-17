@@ -1,3 +1,7 @@
 *.pdf
 *.swp
+bengelsystem_konfiguration.php
+convention.log
+*.sql
+*.sqlite3
 etc
