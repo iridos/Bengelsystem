@@ -649,7 +649,10 @@ function GetDiensteForDay($db_link, $helferlevel, $datestring)
         echo "GetDienste ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    return $db_erg;
+
+    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    array_pop($zeilen);
+    return $zeilen;
 }
 
 function GetSchichtenForDienstForDay($db_link, $DienstID, $datestring)

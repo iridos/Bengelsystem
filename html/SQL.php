@@ -644,6 +644,24 @@ function DeleteDienst($DienstID, $Rekursiv)
     }
 }
 
+function GetDiensteForDay($helferlevel, $datestring)
+{
+    $db = DB::getInstance();
+    $db->prepare(__METHOD__,"SELECT DienstId, Was, Wo, Info FROM Dienst INNER JOIN Schicht USING (DienstID) WHERE HelferLevel=" . $helferlevel . " GROUP BY DienstId HAVING MIN(Von)<:date1 AND MAX(Bis)>:date2 ORDER BY MIN(Von) ASC;");
+
+    $unixtime = strtotime($datestring);
+    $date1 = 
+    $date2 = date('Y-m-d', $unixtime);
+
+    $db_erg = $db->execute(__METHOD__,[
+        'date1' => date('Y-m-d', $unixtime + 24 * 60 * 60),
+        'date2' => date('Y-m-d', $unixtime)
+    ]);
+    $db->onErrorDie(__METHOD__);
+    $schichten = $db->fetchAll(__METHOD__);
+    return $schichten;
+}
+
 // ok
 function GetSchichtenForDienstForDay($DienstID, $datestring)
 {

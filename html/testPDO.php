@@ -447,15 +447,16 @@ function TestDeleteDienst(){
     else echo "DeleteDienst ok\n";
 }
 
+// ok
 function TestGetDiensteForDay(){
     $dbl = old\ConnectDB();
-    $erg_old = old\GetDiensteForDay($dbl, $helferlevel, $datestring);
-    $erg_new = GetDiensteForDay($helferlevel, $datestring);
+    $erg_old = old\GetDiensteForDay($dbl, 2, "2024-02-16");
+    $erg_new = GetDiensteForDay(2, "2024-02-16");
     if((gettype($erg_old) != gettype($erg_new)) || ($erg_old != $erg_new)){
         echo "Old GetDiensteForDay returns".var_export($erg_old, true)."\n";
         echo "New GetDiensteForDay returns '".var_export($erg_new, true)."'\n";
     }
-    else echo "GetDiensteForDay ok";
+    else echo "GetDiensteForDay ok\n";
 }
 
 // ok
@@ -619,4 +620,5 @@ TestSchichtenSummeEinesHelfers();
 TestLogSchichtEingabe();
 TestDetailSchicht();
 TestBeteiligteHelfer();
+TestGetDiensteForDay();
 ?>
