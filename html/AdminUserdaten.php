@@ -86,11 +86,7 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
-<<<<<<< HEAD
         HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
-=======
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferIsAdmin, $HelferID);
->>>>>>> main
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -164,9 +160,9 @@ foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
            <tr><td>    
               <select name="helfer-level">
 <?php
-$db_erg = HelferLevel($db_link);
+$db_erg = HelferLevel();
 $selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($db_erg as $zeile) {
     $HelferLevel = $zeile['HelferLevel'];
     $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
     if ($HelferLevel == 1) {

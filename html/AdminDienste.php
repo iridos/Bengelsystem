@@ -115,7 +115,7 @@ if (isset($_POST['NewSchicht'])) {
         $Bis = $Temp->format('Y-m-d H:i:s');
     }
     NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
-    $SchichtID = LastInsertId($db_link);
+    $SchichtID = LastInsertId();
     //echo "+".$SchichtID."+";
 }
 

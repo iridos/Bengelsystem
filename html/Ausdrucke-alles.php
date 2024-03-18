@@ -3,7 +3,6 @@
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
-$db_link = ConnectDB();
 require '_login.php';
 
 ?>
@@ -33,16 +32,16 @@ require '_login.php';
 
 echo '<table class="commontable" >';
 
-$db_erg = GetDiensteChilds($db_link, 0);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$db_erg = GetDiensteChilds(0);
+foreach ($db_erg as $zeile) {
     echo "<tr><th>";
     echo $zeile["Was"];
     echo "</th></tr>";
 
-    $db_erg2 = GetDiensteChilds($db_link, $zeile["DienstID"]);
-    while ($zeile = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+    $db_erg2 = GetDiensteChilds($zeile["DienstID"]);
+    foreach ($db_erg2 as $zeile2) {
         echo "<tr><td>";
-        echo $zeile["Was"];
+        echo $zeile2["Was"];
             echo "</td></tr>";
     }
 }
@@ -52,7 +51,7 @@ echo "</table>";
 
 
 
-$db_erg = AlleSchichtenImZeitbereich($db_link, "2000-05-18 00:00:00", "2200-05-19 00:00:00");
+$db_erg = AlleSchichtenImZeitbereich("2000-05-18 00:00:00", "2200-05-19 00:00:00");
 
 $OldWas = "";
 echo "<br><br><table class='commontable' style='page-break-before:always'>";
@@ -61,7 +60,7 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Schichten der Dienste DAS 2023</b></th>
   </tr>
 <?php
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+while ($db_erg as $zeile) {
     $Was = $zeile["Was"];
 
     if ($Was != $OldWas) {
@@ -80,8 +79,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     echo $zeile["Bis"];
     echo "</td><td>";
 
-        $db_erg2 = BeteiligteHelfer($db_link, $zeile["SchichtID"]);
-    while ($zeile = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+        $db_erg2 = BeteiligteHelfer($zeile["SchichtID"]);
+    while ($db_erg2 as $zeile) {
             echo $zeile["Name"];
         echo " ";
         echo $zeile["Handy"];
@@ -100,8 +99,8 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
   </tr>
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$db_erg = AlleHelferSchichtenUebersicht();
+while ($db_erg as $zeile) {
         $HelferName = $zeile["Name"];
 
     if ($HelferName != $OldHelferName) {

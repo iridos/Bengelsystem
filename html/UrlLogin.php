@@ -77,7 +77,7 @@ if ($success == 1 && $email != "") {
     // Helfer Anlegen, wenn er nicht existiert
     if (! HelferIstVorhanden($HelferEmail)) {
         error_log("Helfer " . $HelferEmail . " nicht vorhanden, lege an");
-        error_log("CreateHelfer(db_link,$HelferName,$HelferEmail, $HelferHandy,$HelferPasswort,$HelferLevel);");
+        error_log("CreateHelfer($HelferName,$HelferEmail, $HelferHandy,$HelferPasswort,$HelferLevel);");
         $db_erg = CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
     }
     // Login-Versuch, entweder direkt nach Anlegen oder wenn existiert hat

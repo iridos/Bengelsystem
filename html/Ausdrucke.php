@@ -42,8 +42,8 @@ if ($AliasHelferID != 0) {
     $_SESSION["AliasHelferID"] = $AliasHelferID;
 }
 
-$db_erg = Helferdaten($db_link, $HelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$db_erg = Helferdaten($HelferID);
+foreach ($db_erg as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }

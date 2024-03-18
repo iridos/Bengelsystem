@@ -3,7 +3,6 @@
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
-$db_link = ConnectDB();
 require '_login.php';
 
 if ($AdminStatus != 1) {
@@ -38,7 +37,7 @@ if (isset($_POST['InfoMeineSchichtID'])) {
     unset($InfoAlleSchichtID);
    //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+    $zeile = DetailSchicht($InfoMeineSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -55,7 +54,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     unset($InfoMeineSchichtID);
    //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+    $zeile = DetailSchicht($InfoAlleSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -68,12 +67,12 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 
 
    // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+    $helfer = BeteiligteHelfer($InfoAlleSchichtID);
 
 
     $x = 0;
 
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($helfer as $zeile) {
         $MitHelferID[$x] = $zeile['HelferID'];
         $MitHelfer[$x] = $zeile['Name'];
         $MitHelferHandy[$x] = $zeile['Handy'];
@@ -114,7 +113,7 @@ if (isset($_POST['plusschicht'])) {
 
     if (empty($messages)) {
        // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
+        $db_erg = HelferSchichtZuweisen($HelferID, $SchichtId);
 
        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
@@ -139,7 +138,7 @@ if (isset($_POST['minusschicht'])) {
 
     if (empty($messages)) {
             // Helfer aus Schicht entfernen
-            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
+            $db_erg = HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID);
     } else {
             // Fehlermeldungen ausgeben:
             echo '<div class="error"><ul>';
@@ -153,20 +152,19 @@ if (isset($_POST['minusschicht'])) {
 /// Ausgabe auf Deutsch umstellen
 /////////////////////////////////////////////////////////////////////////
 
-    DatenbankAufDeutsch($db_link);
+    DatenbankAufDeutsch();
 
 
 // Zusammenfassung Eigener Schichten
- $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
- $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+ $zeile = SchichtenSummeEinesHelfers($HelferID);
 
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
 
 
 // fuer Anzahlanzeige in Ueberschrift
-$iAlleSchichtenCount = AlleSchichtenCount($db_link);
-$iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+$iAlleSchichtenCount = AlleSchichtenCount();
+$iBelegteSchichtenCount = AlleBelegteSchichtenCount();
 
     //echo "<p><button name='addschicht' value='0'><b>&larrhk;</b></button></p>";
     echo '<table  class="commontable">';
@@ -181,13 +179,13 @@ $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch,
 $MeinVon = $Bereich['MeinVon'];
 $MeinBis = $Bereich['MeinBis'];
 
-$db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevel);
+$db_erg = AlleSchichtenImZeitbereich($MeinVon, $MeinBis, $HelferLevel);
 //echo "<tr><th class=header> AlleSchichtenImZeitbereich(db_link,$Von,$Bis,$HelferLevel);</th></tr>"; // debug
 
 $OldTag = "";
 $OldWas = "";
 // um Zeilen mit von mir belegten Schichten hervorzuheben
-$MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+$MeineDienste = SchichtIdArrayEinesHelfers($HelferID);
 //print_r($MeineDienste);
 
 echo "</table>\n";
@@ -206,7 +204,7 @@ echo "<table class='commontable'>\n";
 // $db_erg ist aus AlleSchichtenImZeitbereich
 // und gibt zurueck  Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
 $OldWas = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+while ($db_link as $zeile) {
     $Tag = $zeile['Tag']; //this should be set above, because we only look at one day
     $Ab  = $zeile['Ab'];
     $Bis = $zeile['Bis'];
@@ -222,11 +220,11 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<th colspan=5 style='text-align:center'>$Was ($TagKurz)</th></tr>\n";
     }
     // get the people who are already signed up for this shift
-    $db_erg_helfer = BeteiligteHelfer($db_link, $zeile['SchichtID']);
+    $db_erg_helfer = BeteiligteHelfer($zeile['SchichtID']);
   // Wir geben zwei Helfer pro Zeile fuer die selbe Schicht aus
     while ($Soll > 0) {
         $Soll = $Soll - 1;
-        $HelferZeile = mysqli_fetch_array($db_erg_helfer, MYSQLI_ASSOC);
+        $HelferZeile = array_shift($db_erg_helfer);
         if (isset($HelferZeile['Name'])) {
             $Helfername = $HelferZeile['Name'];
         } else {
@@ -237,7 +235,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<td>$Was <br>$Ab-$Bis</td>";
         if ($Soll > 0) { // zweite Spalte nur ausgeben, wenn noch eine Schicht offen ist
             $Soll = $Soll - 1;
-            $HelferZeile = mysqli_fetch_array($db_erg_helfer, MYSQLI_ASSOC); // get the next person
+            $HelferZeile = array_shift($db_erg_helfer);
             if (isset($HelferZeile['Name'])) {
                 $Helfername = $HelferZeile['Name'];
             } else {
