@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsytem;
+
 require_once 'konfiguration.php';
 require_once 'SQL.php';
 

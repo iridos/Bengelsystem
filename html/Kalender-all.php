@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';

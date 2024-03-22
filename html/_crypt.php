@@ -1,5 +1,7 @@
 <?php
 
+namespace Bengelsystem;
+
 function encode_string($key, $email, $level, $verification)
 {
     // String verification anfuegen am Ende, um abgeschnittene URLs zu verhindern

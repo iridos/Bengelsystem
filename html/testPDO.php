@@ -1,5 +1,7 @@
 <?php
 
+namespace Bengelsytem;
+
 session_start();
 require_once 'SQL_old.php';
 require_once 'SQL.php';

@@ -1,5 +1,7 @@
 <?php
 
+namespace Bengelsytem;
+
 require_once 'konfiguration.php';
 
 class DB

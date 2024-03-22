@@ -1,5 +1,6 @@
 <?php
 
+namespace Bengelsytem;
 namespace old;
 
 require_once 'konfiguration.php';

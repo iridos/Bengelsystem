@@ -1,5 +1,7 @@
 <?php
 
+namespace Bengelsytem;
+
 require_once("Wizard.php");
 
 $wizard = new Wizard("../setupWizard.json");
