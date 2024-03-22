@@ -94,6 +94,11 @@ class DB
             die('Ungueltige Abfrage: ' . self::errorInfo($method, $variant)[2]);
         }
     }
+
+    public function queryString($method, $variant = '')
+    {
+        return $stmts[$method . "::" . $variant]->queryString;
+    }
 }
 
 // ok ok ok
@@ -744,6 +749,7 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName)
     if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         echo "Keine Schicht erstellt";
         //echo $sql;
+        $sql = $db->queryString(__METHOD__);
         error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit $sql  \n", 3, LOGFILE);
         $err = $db->errorInfo(__METHOD__)[2];
         die('Ungueltige Abfrage: ' . $err);
