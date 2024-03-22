@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 class WizardStep
 {

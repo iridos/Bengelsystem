@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 require_once 'WizardStep.php';
 

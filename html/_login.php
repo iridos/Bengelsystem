@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 require_once 'konfiguration.php';
 require_once 'SQL.php';

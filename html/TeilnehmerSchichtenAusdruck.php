@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';

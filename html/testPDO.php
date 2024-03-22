@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 session_start();
 require_once 'SQL_old.php';

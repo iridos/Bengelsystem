@@ -1,6 +1,6 @@
 <?php
 
-namespace Bengelsytem;
+namespace Bengelsystem;
 
 // create the file below from the template:
 require_once  __DIR__ . '/../bengelsystem_konfiguration.php';
