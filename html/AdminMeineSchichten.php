@@ -224,7 +224,7 @@ echo '<table class="commontable">';
 
 
 
-foreach($schichten as $schicht) {
+foreach ($schichten as $schicht) {
     //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$schicht['SchichtID'].'#Info\';" >';
     echo '<tr title="Details anzeigen" onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $schicht['SchichtID'] . '#Info\';" >';
     echo "<td>" . $schicht['Was'] . "</td>";

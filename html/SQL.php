@@ -2,7 +2,8 @@
 
 require_once 'konfiguration.php';
 
-class DB {
+class DB
+{
     private static $instance = null;
     private static $pdo = null;
     private static $stmts = array();
@@ -10,20 +11,20 @@ class DB {
     private function __construct()
     {
         self::$pdo = new PDO(
-                MYSQL_DSN,
-                MYSQL_BENUTZER,
-                MYSQL_KENNWORT,
-                array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING)
-                );
+            MYSQL_DSN,
+            MYSQL_BENUTZER,
+            MYSQL_KENNWORT,
+            array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING)
+        );
     }
 
     public static function getInstance()
     {
-        if(self::$instance == null){
+        if (self::$instance == null) {
             self::$instance = new DB();
-            if(DBTYPE === 'mariadb'){
+            if (DBTYPE === 'mariadb') {
                 // Set database to german (FIXME should be configurable)
-                self::prepare(__METHOD__,"SET lc_time_names = 'de_DE'");
+                self::prepare(__METHOD__, "SET lc_time_names = 'de_DE'");
                 self::execute(__METHOD__);
             }
         }
@@ -42,19 +43,19 @@ class DB {
 
     public function fetch($method, $variant = '', int $mode = PDO::FETCH_BOTH, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0)
     {
-        return self::$stmts[$method . "::" . $variant]->fetch($mode,$cursorOrientation,$cursorOffset);
+        return self::$stmts[$method . "::" . $variant]->fetch($mode, $cursorOrientation, $cursorOffset);
     }
     public function executeScript($method, $filename, $variant = '')
     {
         $sqlFromFile = file_get_contents($filename);
         $sqlStatements = explode(";", $sqlFromFile);
         $statementcounter = 0;
-        foreach($sqlStatements as $sqlStatement){
-            if(self::prepare($method, $sqlStatement.";", $variant) == false){
+        foreach ($sqlStatements as $sqlStatement) {
+            if (self::prepare($method, $sqlStatement . ";", $variant) == false) {
                 return array();
             };
-            $retval[$statementcounter] = self::execute($method,array(),$variant);
-            if(!is_null(self::pdoErrorCode()) && self::pdoErrorCode() != '00000'){
+            $retval[$statementcounter] = self::execute($method, array(), $variant);
+            if (!is_null(self::pdoErrorCode()) && self::pdoErrorCode() != '00000') {
                 return $retval;
             }
             $statementcounter++;
@@ -101,9 +102,9 @@ function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, 
     $PasswortHash = password_hash($HelferPasswort, PASSWORD_DEFAULT);
 
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"INSERT INTO Helfer(Name,Email,Handy,Status,BildFile,DoReport,Passwort,HelferLevel)".
+    $db->prepare(__METHOD__, "INSERT INTO Helfer(Name,Email,Handy,Status,BildFile,DoReport,Passwort,HelferLevel)" .
         " VALUES (:name,:email,:handy,:status,:bildfile,:doreport,:passwort,:helferlevel)");
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "name" => $HelferName,
         "email" => $HelferEmail,
         "handy" => $HelferHandy,
@@ -123,8 +124,8 @@ function CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, 
 function HelferIstVorhanden($Email)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT count(HelferID) AS Anzahl FROM Helfer WHERE Email = :email");
-    $db->execute(__METHOD__,["email" => $Email]);
+    $db->prepare(__METHOD__, "SELECT count(HelferID) AS Anzahl FROM Helfer WHERE Email = :email");
+    $db->execute(__METHOD__, ["email" => $Email]);
     $zeile = $db->fetchAll(__METHOD__);
     return $zeile[0]['Anzahl'];
 }
@@ -136,8 +137,8 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
     //echo "Test<br>";
     // Helfer Suchen
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT HelferID,Admin,Name,Passwort,HelferLevel FROM Helfer WHERE Email=:email");
-    $db_erg = $db->execute(__METHOD__,["email" => $HelferEmail]);
+    $db->prepare(__METHOD__, "SELECT HelferID,Admin,Name,Passwort,HelferLevel FROM Helfer WHERE Email=:email");
+    $db_erg = $db->execute(__METHOD__, ["email" => $HelferEmail]);
     if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         echo "Login ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . $db->errorInfo(__METHOD__)[2]);
@@ -167,7 +168,7 @@ function HelferLogin($HelferEmail, $HelferPasswort, $HelferStatus)
 function HelferListe()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT HelferID,Name FROM Helfer");
+    $db->prepare(__METHOD__, "SELECT HelferID,Name FROM Helfer");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
     $helfer = $db->fetchAll(__METHOD__);
@@ -178,8 +179,8 @@ function HelferListe()
 function Helferdaten($HelferID)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT * FROM Helfer Where HelferID = :helferid");
-    $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
+    $db->prepare(__METHOD__, "SELECT * FROM Helfer Where HelferID = :helferid");
+    $db_erg = $db->execute(__METHOD__, ["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
     $helferdaten = $db->fetchAll(__METHOD__);
     return $helferdaten;
@@ -190,30 +191,30 @@ function Helferdaten($HelferID)
 function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy Where HelferId=:id",'password_empty');
-    $db->prepare(__METHOD__,"UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Admin=:admin Where HelferId=:id",'password_empty_admin');
-    $db->prepare(__METHOD__,"UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort Where HelferId=:id",'password_given');
-    $db->prepare(__METHOD__,"UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort,Admin=:admin Where HelferId=:id",'password_given_admin');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy Where HelferId=:id", 'password_empty');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Admin=:admin Where HelferId=:id", 'password_empty_admin');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort Where HelferId=:id", 'password_given');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort,Admin=:admin Where HelferId=:id", 'password_given_admin');
 
     if ($HelferNewPasswort == "") {
         //$sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' ".($HelferIsAdmin!=-1)?',Admin='$HelferIsAdmin.':'." Where HelferId=".$HelferID;
         if ($HelferIsAdmin == -1) {
-            $db_erg = $db->execute(__METHOD__,[
+            $db_erg = $db->execute(__METHOD__, [
                 "name" => $HelferName,
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "id" => $HelferID
-            ],'password_empty');
-            $db->onErrorDie(__METHOD__,'password_empty');
+            ], 'password_empty');
+            $db->onErrorDie(__METHOD__, 'password_empty');
         } else {
-            $db_erg = $db->execute(__METHOD__,[
+            $db_erg = $db->execute(__METHOD__, [
                 "name" => $HelferName,
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "admin" => $HelferIsAdmin,
                 "id" => $HelferID
-            ],'password_empty_admin'); 
-            $db->onErrorDie(__METHOD__,'password_empty_admin');
+            ], 'password_empty_admin');
+            $db->onErrorDie(__METHOD__, 'password_empty_admin');
         }
         echo "<li>Helferdaten geändert</li>";
         if ($AdminID != 0) {
@@ -225,23 +226,23 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
         $HelferNewPasswort = "€" . $HelferNewPasswort . "ß";
         $PasswortHash = password_hash($HelferNewPasswort, PASSWORD_DEFAULT);
         if ($HelferIsAdmin == -1) {
-            $db_erg = $db->execute(__METHOD__,[
+            $db_erg = $db->execute(__METHOD__, [
                 "name" => $HelferName,
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "passwort" => $PasswortHash,
                 "id" => $HelferID
-            ],'password_given');
+            ], 'password_given');
             $db->onErrorDie(__METHOD__, 'password_given');
         } else {
-            $db_erg = $db->execute(__METHOD__,[
+            $db_erg = $db->execute(__METHOD__, [
                 "name" => $HelferName,
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "passwort" => $PasswortHash,
                 "admin" => $HelferIsAdmin,
                 "id" => $HelferID
-            ],'password_given_admin');
+            ], 'password_given_admin');
             $db->onErrorDie(__METHOD__, 'password_given_admin');
         }
           //echo $sql;
@@ -260,17 +261,17 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
 function AlleSchichten($Sort, $HelferLevel = 1)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=:helferlevel order by Von",'sort_by_von');
-    $db->prepare(__METHOD__,"select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=:helferlevel order by Was,Von",'sort_by_was_von');
+    $db->prepare(__METHOD__, "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=:helferlevel order by Von", 'sort_by_von');
+    $db->prepare(__METHOD__, "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=:helferlevel order by Was,Von", 'sort_by_was_von');
 
     if ($Sort == '1') {
-        $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel],'sort_by_von');
-        $db->onErrorDie(__METHOD__,'sort_by_von');
-        $schichten = $db->fetchAll(__METHOD__,'sort_by_von');
+        $db_erg = $db->execute(__METHOD__, ["helferlevel" => $HelferLevel], 'sort_by_von');
+        $db->onErrorDie(__METHOD__, 'sort_by_von');
+        $schichten = $db->fetchAll(__METHOD__, 'sort_by_von');
     } else {
-        $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel],'sort_by_was_von');
-        $db->onErrorDie(__METHOD__,'sort_by_was_von');
-        $schichten = $db->fetchAll(__METHOD__,'sort_by_was_von');
+        $db_erg = $db->execute(__METHOD__, ["helferlevel" => $HelferLevel], 'sort_by_was_von');
+        $db->onErrorDie(__METHOD__, 'sort_by_was_von');
+        $schichten = $db->fetchAll(__METHOD__, 'sort_by_was_von');
     }
 
     return $schichten;
@@ -282,8 +283,8 @@ function AlleSchichtenCount($HelferLevel = 1)
 
     //$sql = "select SUM(Soll) As Anzahl from SchichtUebersicht where HelferLevel=$HelferLevel";
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
-    $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel]);
+    $db->prepare(__METHOD__, "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
+    $db_erg = $db->execute(__METHOD__, ["helferlevel" => $HelferLevel]);
     $db->onErrorDie(__METHOD__);
     $zeile = $db->fetchAll(__METHOD__);
     return $zeile[0]['Anzahl'];
@@ -293,8 +294,8 @@ function AlleSchichtenCount($HelferLevel = 1)
 function AlleBelegteSchichtenCount($HelferLevel = 1)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
-    $db_erg = $db->execute(__METHOD__,["helferlevel" => $HelferLevel]);
+    $db->prepare(__METHOD__, "select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=:helferlevel");
+    $db_erg = $db->execute(__METHOD__, ["helferlevel" => $HelferLevel]);
     $db->onErrorDie(__METHOD__);
     $zeile = $db->fetchAll(__METHOD__);
     return $zeile[0]['Anzahl'];
@@ -307,25 +308,24 @@ function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
 
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= :von and Von < :bis and Dienst.DienstID=SchichtUebersicht.DienstID order by Was,Von",'helferlevel_not_set');
-    $db->prepare(__METHOD__,"select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= :von and Von < :bis and Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.HelferLevel=:helferlevel order by Was,Von",'helferlevel_set');
+    $db->prepare(__METHOD__, "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= :von and Von < :bis and Dienst.DienstID=SchichtUebersicht.DienstID order by Was,Von", 'helferlevel_not_set');
+    $db->prepare(__METHOD__, "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= :von and Von < :bis and Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.HelferLevel=:helferlevel order by Was,Von", 'helferlevel_set');
 
     if ($HelferLevel == -1) {
-        $db_erg = $db->execute(__METHOD__,[
+        $db_erg = $db->execute(__METHOD__, [
             "von" => $Von,
             "bis" => $Bis
-        ],'helferlevel_not_set');
-        $db->onErrorDie(__METHOD__,'helferlevel_not_set');
-        $zeilen = $db->fetchAll(__METHOD__,'helferlevel_not_set');
-    }
-    else {
-        $db_erg = $db->execute(__METHOD__,[
+        ], 'helferlevel_not_set');
+        $db->onErrorDie(__METHOD__, 'helferlevel_not_set');
+        $zeilen = $db->fetchAll(__METHOD__, 'helferlevel_not_set');
+    } else {
+        $db_erg = $db->execute(__METHOD__, [
             "von" => $Von,
             "bis" => $Bis,
             "helferlevel" => $HelferLevel
-        ],'helferlevel_set');
-        $db->onErrorDie(__METHOD__,'helferlevel_set');
-        $zeilen = $db->fetchAll(__METHOD__,'helferlevel_set');
+        ], 'helferlevel_set');
+        $db->onErrorDie(__METHOD__, 'helferlevel_set');
+        $zeilen = $db->fetchAll(__METHOD__, 'helferlevel_set');
     }
     return $zeilen;
 }
@@ -334,8 +334,8 @@ function AlleSchichtenImZeitbereich($Von, $Bis, $HelferLevel = 1)
 function AlleSchichtenEinesHelfers($HelferID)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid order by Von");
-    $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
+    $db->prepare(__METHOD__, "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid order by Von");
+    $db_erg = $db->execute(__METHOD__, ["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
     $zeilen = $db->fetchAll(__METHOD__);
     return $zeilen;
@@ -346,10 +346,10 @@ function HelferLoeschen($HelferID, $AdminID)
 {
 
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"Delete from Helfer where HelferID=:id");
+    $db->prepare(__METHOD__, "Delete from Helfer where HelferID=:id");
 
     $helfer = Helferdaten($HelferID);
-    if(count($helfer) == 1){
+    if (count($helfer) == 1) {
         $HelferName = $helfer[0]['Name'];
     }
 
@@ -357,7 +357,7 @@ function HelferLoeschen($HelferID, $AdminID)
 
     $AnzahlHelferschichten = count($schichten);
     if ($AnzahlHelferschichten == 0) {
-        $db_erg = $db->execute(__METHOD__,["id" => $HelferID]);
+        $db_erg = $db->execute(__METHOD__, ["id" => $HelferID]);
         if (! $db_erg) {
             echo "Helfer $HelferName konnte nicht gelöscht werden<br>";
             return -2;
@@ -377,8 +377,8 @@ function SchichtIdArrayEinesHelfers($HelferID)
 {
     // Array, um Zeilen mit von mir belegten Schichten in der Schichtuebersicht einfaerben zu koennenn
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT SchichtID FROM EinzelSchicht WHERE HelferID = :id");
-    $db_erg = $db->execute(__METHOD__,["id" => $HelferID]);
+    $db->prepare(__METHOD__, "SELECT SchichtID FROM EinzelSchicht WHERE HelferID = :id");
+    $db_erg = $db->execute(__METHOD__, ["id" => $HelferID]);
 
     $schichtIDs = array();
     while ($zeile = $db->fetch(__METHOD__)) {
@@ -392,11 +392,11 @@ function AlleSchichtenEinesHelfersVonJetzt($HelferID)
 {
     // TODO: fix GETDATE() array to string conversion
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:id and Bis>:bis order by Von");
+    $db->prepare(__METHOD__, "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:id and Bis>:bis order by Von");
 
     //$sql = "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." and Bis>'2023-05-20' order by Von";
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "id" => $HelferID,
         "bis" => date("Y-m-d H:i:s")
     ]);
@@ -412,9 +412,9 @@ function SchichtenSummeEinesHelfers($HelferID)
 
     //$sql = "select count Schicht.Dauer as Anzahl  FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." order by Von";
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select count(*) as Anzahl, SUM(TIME_TO_SEC(Schicht.Dauer)) as Dauer FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid");
+    $db->prepare(__METHOD__, "select count(*) as Anzahl, SUM(TIME_TO_SEC(Schicht.Dauer)) as Dauer FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=:helferid");
     //echo $sql;
-    $db_erg = $db->execute(__METHOD__,["helferid" => $HelferID]);
+    $db_erg = $db->execute(__METHOD__, ["helferid" => $HelferID]);
     $db->onErrorDie(__METHOD__);
 
     $zeilen = $db->fetchAll(__METHOD__);
@@ -426,7 +426,7 @@ function LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $Ad
 {
     $db = DB::getInstance();
 
-    $db->prepare(__METHOD__,"SELECT Schicht.Von, Schicht.Bis, Dienst.Was, Helfer.Name
+    $db->prepare(__METHOD__, "SELECT Schicht.Von, Schicht.Bis, Dienst.Was, Helfer.Name
         FROM EinzelSchicht 
         JOIN Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID 
         JOIN Dienst ON Schicht.DienstID = Dienst.DienstID 
@@ -435,7 +435,7 @@ function LogSchichtEingabe($HelferID, $SchichtId, $EinzelSchichtId, $Aktion, $Ad
         AND ( Schicht.SchichtID = :schichtid OR EinzelSchicht.EinzelSchichtID = :einzelschichtid)
         ");
         //error_log(date('Y-m-d H:i') . "  " . $sql ."\n",3,LOGFILE);
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "helferid" => $HelferID,
         "schichtid" => $SchichtId,
         "einzelschichtid" => $EinzelSchichtId
@@ -467,27 +467,27 @@ function HelferSchichtZuweisen($HelferID, $SchichtId, $AdminID = 0)
 {
     // Abfrage, ob bereits eine Einzelschicht in der selben Schicht vom Helfer existiert
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT EinzelSchichtID from EinzelSchicht WHERE SchichtID=:schichtid and HelferID=:helferid",'einzelschicht_exists');
-    $db->prepare(__METHOD__,"INSERT INTO EinzelSchicht(SchichtID,HelferID) VALUES (:schichtid,:helferid)",'new_einzelschicht');
+    $db->prepare(__METHOD__, "SELECT EinzelSchichtID from EinzelSchicht WHERE SchichtID=:schichtid and HelferID=:helferid", 'einzelschicht_exists');
+    $db->prepare(__METHOD__, "INSERT INTO EinzelSchicht(SchichtID,HelferID) VALUES (:schichtid,:helferid)", 'new_einzelschicht');
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "schichtid" => $SchichtId,
         "helferid" => $HelferID
-    ],'einzelschicht_exists');
+    ], 'einzelschicht_exists');
 
-    if($db->fetch(__METHOD__,'einzelschicht_exists')){
+    if ($db->fetch(__METHOD__, 'einzelschicht_exists')) {
          echo "HelferSchichtZuweisen: Schicht existiert bereits!";
          return false;
     }
 
     // Helfer Schicht zuweisen
     //echo '<script> console.log("Schicht zuweiweisen: '.$sql.'")</script>';
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "schichtid" => $SchichtId,
         "helferid" => $HelferID
-    ],'new_einzelschicht');
+    ], 'new_einzelschicht');
 
-    $db->onErrorDie(__METHOD__,'new_einzelschicht');
+    $db->onErrorDie(__METHOD__, 'new_einzelschicht');
 
     LogSchichtEingabe($HelferID, $SchichtId, -1, "eingetragen", $AdminID);
 
@@ -502,10 +502,10 @@ function HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID, $AdminID = 0)
 
     // Lösche Einzelschicht
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"Delete From EinzelSchicht Where EinzelSchichtID = :id");
+    $db->prepare(__METHOD__, "Delete From EinzelSchicht Where EinzelSchichtID = :id");
 
     //echo $sql;
-    $db_erg = $db->execute(__METHOD__,["id" => $EinzelSchichtID]);
+    $db_erg = $db->execute(__METHOD__, ["id" => $EinzelSchichtID]);
 
     return $db_erg;
 }
@@ -518,9 +518,9 @@ function HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0)
 
     // Lösche Einzelschicht
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"Delete From EinzelSchicht Where SchichtID = :schichtid and HelferID = :helferid limit 1;");
+    $db->prepare(__METHOD__, "Delete From EinzelSchicht Where SchichtID = :schichtid and HelferID = :helferid limit 1;");
     //echo $sql;
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "schichtid" => $SchichtID,
         "helferid" => $HelferID
     ]);
@@ -532,10 +532,10 @@ function HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID, $AdminID = 0)
 function DetailSchicht($InfoSchichtID)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select  Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Dienst,Schicht,Helfer where Dienst.DienstID=Schicht.DienstID AND Helfer.HelferID=Dienst.Leiter And SchichtID=:id");
+    $db->prepare(__METHOD__, "select  Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Dienst,Schicht,Helfer where Dienst.DienstID=Schicht.DienstID AND Helfer.HelferID=Dienst.Leiter And SchichtID=:id");
 
     //echo $sql;
-    $db_erg = $db->execute(__METHOD__,["id" => $InfoSchichtID]);
+    $db_erg = $db->execute(__METHOD__, ["id" => $InfoSchichtID]);
 
     $db->onErrorDie(__METHOD__);
 
@@ -547,10 +547,10 @@ function DetailSchicht($InfoSchichtID)
 function BeteiligteHelfer($InfoSchichtID)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select  Helfer.HelferID,Name,Handy FROM EinzelSchicht,Helfer where EinzelSchicht.HelferID=Helfer.HelferID And SchichtID=:id");
-    $db_erg = $db->execute(__METHOD__,["id" => $InfoSchichtID]);
+    $db->prepare(__METHOD__, "select  Helfer.HelferID,Name,Handy FROM EinzelSchicht,Helfer where EinzelSchicht.HelferID=Helfer.HelferID And SchichtID=:id");
+    $db_erg = $db->execute(__METHOD__, ["id" => $InfoSchichtID]);
     $db->onErrorDie(__METHOD__);
-    
+
     $zeile = $db->fetchAll(__METHOD__);
     return $zeile;
 }
@@ -559,7 +559,7 @@ function BeteiligteHelfer($InfoSchichtID)
 function GetDienste()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel FROM Dienst order By Was");
+    $db->prepare(__METHOD__, "SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel FROM Dienst order By Was");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
     $dienste = $db->fetchAll(__METHOD__);
@@ -570,8 +570,8 @@ function GetDienste()
 function GetDiensteChilds($DienstID)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID=:id order by Was");
-    $db_erg = $db->execute(__METHOD__,["id" => $DienstID]);
+    $db->prepare(__METHOD__, "SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID=:id order by Was");
+    $db_erg = $db->execute(__METHOD__, ["id" => $DienstID]);
     $db->onErrorDie(__METHOD__);
     $dienste = $db->fetchAll(__METHOD__);
     return $dienste;
@@ -581,9 +581,9 @@ function GetDiensteChilds($DienstID)
 function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"UPDATE Dienst SET Was=:was, Wo=:wo, Info=:info, Leiter=:leiter, ElternDienstID=:elterndienstid where DienstID=:dienstid");
+    $db->prepare(__METHOD__, "UPDATE Dienst SET Was=:was, Wo=:wo, Info=:info, Leiter=:leiter, ElternDienstID=:elterndienstid where DienstID=:dienstid");
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         "was" => $Was,
         "wo" => $Wo,
         "info" => $Info,
@@ -599,8 +599,8 @@ function ChangeDienst($DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLeve
 function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"INSERT INTO Dienst (Was, Wo, Info, Leiter, ElternDienstID, HelferLevel) values (:was,:wo,:info,:leiter,:elterndienstid,:helferlevel)");
-    $db_erg = $db->execute(__METHOD__,[
+    $db->prepare(__METHOD__, "INSERT INTO Dienst (Was, Wo, Info, Leiter, ElternDienstID, HelferLevel) values (:was,:wo,:info,:leiter,:elterndienstid,:helferlevel)");
+    $db_erg = $db->execute(__METHOD__, [
         "was" => $Was,
         "wo" => $Wo,
         "info" => $Info,
@@ -609,7 +609,7 @@ function NewDienst($Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel)
         "helferlevel" => $HelferLevel
     ]);
 
-    if  (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000'){
+    if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         $err =  $db->errorInfo(__METHOD__)[2];
         error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht konnte nicht angelegt werden  Grund: $err  \n", 3, LOGFILE);
         die('Ungueltige Abfrage: ' . $err);
@@ -626,17 +626,17 @@ function DeleteDienst($DienstID, $Rekursiv)
     } else {
         // Pruefen ob noch Schichten eingetragen sind
         $db = DB::getInstance();
-        $db->prepare(__METHOD__,"SELECT SchichtID FROM Schicht where DienstID=:id",'check_schicht');
-        $db->prepare(__METHOD__,"DELETE FROM Dienst where DienstID=:id",'delete_dienst');
-        
-        $db_erg = $db->execute(__METHOD__,['id' => $DienstID],'check_schicht');
+        $db->prepare(__METHOD__, "SELECT SchichtID FROM Schicht where DienstID=:id", 'check_schicht');
+        $db->prepare(__METHOD__, "DELETE FROM Dienst where DienstID=:id", 'delete_dienst');
 
-        $db->onErrorDie(__METHOD__,'check_schicht');
+        $db_erg = $db->execute(__METHOD__, ['id' => $DienstID], 'check_schicht');
 
-        if (!$db->fetch(__METHOD__,'check_schicht')){
+        $db->onErrorDie(__METHOD__, 'check_schicht');
+
+        if (!$db->fetch(__METHOD__, 'check_schicht')) {
             // Eintrag löschen
-            $db_erg = $db->execute(__METHOD__,['id' => $DienstID],'delete_dienst');
-            $db->onErrorDie(__METHOD__,'delete_dienst');
+            $db_erg = $db->execute(__METHOD__, ['id' => $DienstID], 'delete_dienst');
+            $db->onErrorDie(__METHOD__, 'delete_dienst');
             return true;
         } else {
             return false;
@@ -648,13 +648,13 @@ function DeleteDienst($DienstID, $Rekursiv)
 function GetDiensteForDay($helferlevel, $datestring)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT DienstId, Was, Wo, Info FROM Dienst INNER JOIN Schicht USING (DienstID) WHERE HelferLevel=" . $helferlevel . " GROUP BY DienstId HAVING MIN(Von)<:date1 AND MAX(Bis)>:date2 ORDER BY MIN(Von) ASC;");
+    $db->prepare(__METHOD__, "SELECT DienstId, Was, Wo, Info FROM Dienst INNER JOIN Schicht USING (DienstID) WHERE HelferLevel=" . $helferlevel . " GROUP BY DienstId HAVING MIN(Von)<:date1 AND MAX(Bis)>:date2 ORDER BY MIN(Von) ASC;");
 
     $unixtime = strtotime($datestring);
-    $date1 = 
+    $date1 =
     $date2 = date('Y-m-d', $unixtime);
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         'date1' => date('Y-m-d', $unixtime + 24 * 60 * 60),
         'date2' => date('Y-m-d', $unixtime)
     ]);
@@ -667,9 +667,9 @@ function GetDiensteForDay($helferlevel, $datestring)
 function GetSchichtenForDienstForDay($DienstID, $datestring)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select Von, Bis, Soll, Name, Handy from Schicht left join EinzelSchicht using (SchichtId) left join Helfer using (HelferId) where DienstId=:id and Von<:von and Bis>:bis order by Von;");
+    $db->prepare(__METHOD__, "select Von, Bis, Soll, Name, Handy from Schicht left join EinzelSchicht using (SchichtId) left join Helfer using (HelferId) where DienstId=:id and Von<:von and Bis>:bis order by Von;");
     $unixtime = strtotime($datestring);
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         'id' => $DienstID,
         'von' => date('Y-m-d', $unixtime + 24 * 60 * 60),
         'bis' => date('Y-m-d', $unixtime)
@@ -684,8 +684,8 @@ function GetSchichtenEinesDienstes($DienstID)
 {
     //$sql = "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon FROM Schicht where DienstID=".$DienstID;
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis, DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Schicht where DienstID=:id");
-    $db_erg = $db->execute(__METHOD__,['id' => $DienstID]);
+    $db->prepare(__METHOD__, "SELECT SchichtID,Von,Bis,Soll,DATE_FORMAT(Von,'%a %H:%i') AS TagVon, DATE_FORMAT(Von,'%H:%i') AS ZeitVon, DATE_FORMAT(Bis,'%H:%i') AS ZeitBis, DATE_FORMAT(Dauer,'%H:%i') AS Dauer FROM Schicht where DienstID=:id");
+    $db_erg = $db->execute(__METHOD__, ['id' => $DienstID]);
     $db->onErrorDie(__METHOD__);
     $schichten = $db->fetchAll(__METHOD__);
     return $schichten;
@@ -695,9 +695,9 @@ function GetSchichtenEinesDienstes($DienstID)
 function ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"UPDATE Schicht SET Von=:von, Bis=:bis, Soll=:soll, Dauer=:dauer where SchichtID=:id");
+    $db->prepare(__METHOD__, "UPDATE Schicht SET Von=:von, Bis=:bis, Soll=:soll, Dauer=:dauer where SchichtID=:id");
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         'von' => $Von,
         'bis' => $Bis,
         'soll' => $Soll,
@@ -725,9 +725,9 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
     }
     */
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values (:id,:von,:bis,:soll,:dauer)");
+    $db->prepare(__METHOD__, "INSERT INTO Schicht (DienstID, Von, Bis, Soll, Dauer) values (:id,:von,:bis,:soll,:dauer)");
 
-    $db_erg = $db->execute(__METHOD__,[
+    $db_erg = $db->execute(__METHOD__, [
         'id' => $DienstID,
         'von' => $Von,
         'bis' => $Bis,
@@ -751,21 +751,21 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
 function DeleteSchicht($SchichtID, $Rekursiv)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT Name FROM EinzelSchicht,Helfer where SchichtID=:id and Helfer.HelferID=EinzelSchicht.HelferID",'check_einzelschicht');
-    $db->prepare(__METHOD__,"DELETE FROM Schicht where SchichtID=:id",'delete_einzelschicht');
+    $db->prepare(__METHOD__, "SELECT Name FROM EinzelSchicht,Helfer where SchichtID=:id and Helfer.HelferID=EinzelSchicht.HelferID", 'check_einzelschicht');
+    $db->prepare(__METHOD__, "DELETE FROM Schicht where SchichtID=:id", 'delete_einzelschicht');
 
     if ($Rekursiv) {
         return false;
     } else {
         // Pruefen ob noch Helfer auf der Schicht eingetragen sind
-        $db_erg = $db->execute(__METHOD__,["id" => $SchichtID ],'check_einzelschicht');
+        $db_erg = $db->execute(__METHOD__, ["id" => $SchichtID ], 'check_einzelschicht');
 
-        $db->onErrorDie(__METHOD__,'check_einzelschicht');
+        $db->onErrorDie(__METHOD__, 'check_einzelschicht');
 
-        if (!$db->fetch(__METHOD__,'check_einzelschicht')) {
+        if (!$db->fetch(__METHOD__, 'check_einzelschicht')) {
             // Eintrag löschen
-            $db_erg = $db->execute(__METHOD__,["id" => $SchichtID ],'delete_einzelschicht');
-            $db->onErrorDie(__METHOD__,'delete_einzelschicht');
+            $db_erg = $db->execute(__METHOD__, ["id" => $SchichtID ], 'delete_einzelschicht');
+            $db->onErrorDie(__METHOD__, 'delete_einzelschicht');
             return true;
         } else {
             return false;
@@ -780,7 +780,7 @@ function AlleHelferSchichtenUebersicht()
     $sql = "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
     $sql = $sql . " UNION ALL ";
     $sql = $sql . "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
-    $db->prepare(__METHOD__,$sql);
+    $db->prepare(__METHOD__, $sql);
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
 
@@ -792,7 +792,7 @@ function AlleHelferSchichtenUebersicht()
 function DatenbankAufDeutsch()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SET lc_time_names = 'de_DE'");
+    $db->prepare(__METHOD__, "SET lc_time_names = 'de_DE'");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
 }
@@ -801,7 +801,7 @@ function DatenbankAufDeutsch()
 function LastInsertId()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"SELECT LAST_INSERT_ID()");
+    $db->prepare(__METHOD__, "SELECT LAST_INSERT_ID()");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
 
@@ -813,7 +813,7 @@ function LastInsertId()
 function HelferLevel()
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__,"select HelferLevel,HelferLevelBeschreibung from HelferLevel");
+    $db->prepare(__METHOD__, "select HelferLevel,HelferLevelBeschreibung from HelferLevel");
     $db_erg = $db->execute(__METHOD__);
     $db->onErrorDie(__METHOD__);
 

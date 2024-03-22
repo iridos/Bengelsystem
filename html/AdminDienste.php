@@ -171,7 +171,7 @@ $Leiter = "";
 $Gruppe = "";
 $HelferLevel = "";
 
-foreach ($zeilen as $zeile){
+foreach ($zeilen as $zeile) {
     if ($zeile['DienstID'] != $DienstID) {
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
     } else {

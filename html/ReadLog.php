@@ -30,7 +30,7 @@ require '_login.php';
   $AdminID = $_SESSION["AdminID"];
 
   $zeilen = Helferdaten($HelferID);
-foreach ($zeilen as $zeile)) {
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }

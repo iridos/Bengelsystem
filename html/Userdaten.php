@@ -67,7 +67,7 @@ if (isset($_POST['change'])) {
 $zeilen = Helferdaten($HelferID);
 
 
-foreach ($zeilen as $zeile)) {
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];

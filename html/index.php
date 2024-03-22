@@ -66,7 +66,9 @@ $iCount = 0;
 foreach ($schichten as $zeile) {
     echo "<li>" . $zeile['Ab'] . " " . $zeile['Was'] . "</li>";
     $iCount++;
-    if(iCount>2) break;
+    if (iCount > 2) {
+        break;
+    }
 }
 
 ?>

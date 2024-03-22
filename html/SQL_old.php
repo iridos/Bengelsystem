@@ -1,4 +1,5 @@
 <?php
+
 namespace old;
 
 require_once 'konfiguration.php';
@@ -92,7 +93,7 @@ function HelferListe($db_link)
         die('Unueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -111,7 +112,7 @@ function Helferdaten($db_link, $HelferID)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -191,7 +192,7 @@ function AlleSchichten($db_link, $Sort, $HelferLevel = 1)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -256,7 +257,7 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
     }
 
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -278,7 +279,7 @@ function AlleSchichtenEinesHelfers($db_link, $HelferID)
     }
 
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -290,7 +291,7 @@ function HelferLoeschen($db_link, $HelferID, $AdminID)
 
 
     $helfer = Helferdaten($db_link, $HelferID);
-    if(count($helfer) == 1){
+    if (count($helfer) == 1) {
         $HelferName = $helfer[0]['Name'];
     }
 
@@ -350,7 +351,7 @@ function AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -373,7 +374,7 @@ function SchichtenSummeEinesHelfers($db_link, $HelferID)
     }
 
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -524,7 +525,7 @@ function BeteiligteHelfer($db_link, $InfoSchichtID)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -537,7 +538,7 @@ function GetDienste($db_link)
         echo "GetDienste ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -552,7 +553,7 @@ function GetDiensteChilds($db_link, $DienstID)
         echo "GetDienste ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -649,7 +650,7 @@ function GetDiensteForDay($db_link, $helferlevel, $datestring)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -665,7 +666,7 @@ function GetSchichtenForDienstForDay($db_link, $DienstID, $datestring)
         echo "GetDienste ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -684,7 +685,7 @@ function GetSchichtenEinesDienstes($db_link, $DienstID)
         echo $sql;
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -784,7 +785,7 @@ function AlleHelferSchichtenUebersicht($db_link)
         echo "AlleHelferSchichtenUebersicht ungueltige Abfrage";
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
@@ -824,7 +825,7 @@ function HelferLevel($db_link)
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    while($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
+    while ($zeilen[] = mysqli_fetch_array($db_erg, MYSQLI_ASSOC));
     array_pop($zeilen);
     return $zeilen;
 }
