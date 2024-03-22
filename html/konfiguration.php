@@ -15,6 +15,6 @@ $TageNamenDeutsch = array("So","Mo","Di","Mi","Do","Fr","Sa");
 //Kalender-Konfiguration
 $dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK . ";charset=utf8mb4"; // dsn fuer Kalender
 $options = array(
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 );
