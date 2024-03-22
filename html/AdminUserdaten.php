@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -15,8 +18,8 @@ if ($AdminStatus != 1) {
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
     echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $zeilen = HelferListe();
+    foreach ($zeilen as $zeile) {
         if ($AliasHelferID != $zeile['HelferID']) {
                 echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
@@ -86,7 +89,7 @@ if (isset($_POST['change'])) {
     }
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferIsAdmin, $HelferID);
+        HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferIsAdmin, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -103,17 +106,17 @@ if (isset($_POST['change'])) {
 ///////////////////////////////////////////////////////////////
 
 if (isset($_POST['del'])) {
-    HelferLoeschen($db_link, $AliasHelferID, $AdminID);
+    HelferLoeschen($AliasHelferID, $AdminID);
 }
 
 ////////////////////////////////////////////////////////////////
 // Helferdate holen
 ///////////////////////////////////////////////////////////////
 
-$db_erg = Helferdaten($db_link, $AliasHelferID);
+$db_erg = Helferdaten($AliasHelferID);
 
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];
@@ -160,9 +163,9 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
            <tr><td>    
               <select name="helfer-level">
 <?php
-$db_erg = HelferLevel($db_link);
+$db_erg = HelferLevel();
 $selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($db_erg as $zeile) {
     $HelferLevel = $zeile['HelferLevel'];
     $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
     if ($HelferLevel == 1) {

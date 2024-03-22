@@ -1,9 +1,11 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
-$db_link = ConnectDB();
 require '_login.php';
 ?>
 <!doctype html>
@@ -56,19 +58,21 @@ if ($HelferIsAdmin) {
 ////////////////////////////////////////////////////////
 //$HelferID=72;
 
-$db_erg = AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID);
+$schichten = AlleSchichtenEinesHelfersVonJetzt($HelferID);
 
 
-  $iSQLCount = mysqli_num_rows($db_erg);
+  $iSQLCount = count($schichten);
   //$iSQLCount = 3;
 
 
 $iCount = 0;
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC) and $iCount < 3) {
+foreach ($schichten as $zeile) {
     echo "<li>" . $zeile['Ab'] . " " . $zeile['Was'] . "</li>";
     $iCount++;
+    if (iCount > 2) {
+        break;
+    }
 }
-
 
 ?>
                 </ul>

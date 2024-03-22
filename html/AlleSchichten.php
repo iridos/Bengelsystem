@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -38,7 +41,7 @@ if (isset($_POST['InfoMeineSchichtID'])) {
     unset($InfoAlleSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+    $zeile = DetailSchicht($InfoMeineSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -55,7 +58,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     unset($InfoMeineSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+    $zeile = DetailSchicht($InfoAlleSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -68,12 +71,12 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 
 
     // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+    $helfer = BeteiligteHelfer($InfoAlleSchichtID);
 
 
     $x = 0;
 
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($helfer as $zeile) {
         $MitHelferID[$x] = $zeile['HelferID'];
         $MitHelfer[$x] = $zeile['Name'];
         $MitHelferHandy[$x] = $zeile['Handy'];
@@ -110,7 +113,7 @@ if (isset($_POST['plusschicht'])) {
     $_SESSION["SchichtIdAktiv"] = $SchichtID;
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtID);
+        $db_erg = HelferSchichtZuweisen($HelferID, $SchichtId);
 
         $HelferName = '';
         $HelferEmail = '';
@@ -134,8 +137,8 @@ if (isset($_POST['minusschicht'])) {
         $_SESSION["SchichtIdAktiv"] = $SchichtID;
 
     if (empty($messages)) {
-        // Helfer aus Schicht entfernen
-        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
+            // Helfer aus Schicht entfernen
+            $db_erg = HelferVonSchichtLoeschen_SchichtID($HelferID, $SchichtID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -149,12 +152,11 @@ if (isset($_POST['minusschicht'])) {
 /// Ausgabe auf Deutsch umstellen
 /////////////////////////////////////////////////////////////////////////
 
-    DatenbankAufDeutsch($db_link);
+    DatenbankAufDeutsch();
 
 
 // Zusammenfassung Eigener Schichten
- $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
- $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+ $zeile = SchichtenSummeEinesHelfers($HelferID);
 
     //"Mein Dienstplan"
     echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
@@ -201,11 +203,11 @@ if ($addschicht != '0') {
     $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "AlleSchichten.php");
     $MeinVon = $Bereich['MeinVon'];
     $MeinBis = $Bereich['MeinBis'];
-    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, -1);
+    $db_erg = AlleSchichtenImZeitbereich($MeinVon, $MeinBis, -1);
 
     // fuer Anzahlanzeige in Ueberschrift
-    $iAlleSchichtenCount = AlleSchichtenCount($db_link);
-    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+    $iAlleSchichtenCount = AlleSchichtenCount();
+    $iBelegteSchichtenCount = AlleBelegteSchichtenCount();
     echo '</table>';
         echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
 
@@ -219,13 +221,13 @@ if ($addschicht != '0') {
     $OldTag = "";
     $OldWas = "";
     // um Zeilen mit von mir belegten Schichten hervorzuheben
-    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+    $MeineDienste = SchichtIdArrayEinesHelfers($HelferID);
     //print_r($MeineDienste);
 
     echo '</table>';
     // Tabelle mit allen Diensten und Schichten
     echo '<table  class="commontable collapsible">';
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($MeineDienste as $zeile) {
         if ($dienstsort == '1') {
             $Tag = $zeile['Tag'];
 
@@ -298,15 +300,6 @@ if ($addschicht != '0') {
     }
     echo "</table>";
 }
-
-
-
-
-
-
-
-mysqli_free_result($db_erg);
-
 
 ?>
 

@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -28,11 +31,9 @@ require '_login.php';
   //check for admin status
   $HelferID = $_SESSION["HelferID"];
   $AdminID = $_SESSION["AdminID"];
-  $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
-  DatenbankAufDeutsch($db_link);
 
-  $db_erg = Helferdaten($db_link, $HelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+  $zeilen = Helferdaten($HelferID);
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }

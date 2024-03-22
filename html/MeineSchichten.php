@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -33,7 +36,7 @@ if (isset($_POST['InfoMeineSchichtID'])) {
     unset($InfoAlleSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
+    $zeile = DetailSchicht($InfoMeineSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -50,7 +53,7 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     unset($InfoMeineSchichtID);
     //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+    $zeile = DetailSchicht($InfoAlleSchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -63,12 +66,12 @@ if (isset($_GET['InfoAlleSchichtID'])) {
 
 
     // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+    $helfer = BeteiligteHelfer($InfoAlleSchichtID);
 
 
     $x = 0;
 
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($helfer as $zeile) {
         $MitHelferID[$x] = $zeile['HelferID'];
         $MitHelfer[$x] = $zeile['Name'];
         $MitHelferHandy[$x] = $zeile['Handy'];
@@ -98,7 +101,7 @@ if (isset($_POST['login'])) {
     $HelferPasswort = $_POST['helfer-passwort'];
 
     if (empty($messages)) {
-        HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+        HelferLogin($HelferEmail, $HelferPasswort, 0);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -187,7 +190,7 @@ if (isset($_POST['Del'])) {
 
 
     if (empty($messages)) {
-        $db_erg = HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID);
+        $db_erg = HelferVonSchichtLoeschen($HelferID, $EinzelSchichtID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -227,7 +230,7 @@ if (isset($_POST['sent'])) {
 
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
+        $db_erg = HelferSchichtZuweisen($HelferID, $SchichtId);
 
         // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
@@ -247,20 +250,15 @@ if (isset($_POST['sent'])) {
 /// Ausgabe auf Deutsch umstellen
 /////////////////////////////////////////////////////////////////////////
 
-    DatenbankAufDeutsch($db_link);
+    DatenbankAufDeutsch();
 
 /// Alle Schichten Des Helfers Anzeigen
 ////////////////////////////////////////////////////////
 
 
-$db_erg = AlleSchichtenEinesHelfers($db_link, $HelferID);
+$schichten = AlleSchichtenEinesHelfers($HelferID);
 
-if (! $db_erg) {
-    echo "AlleSchichten des Helfes ungültige Abfrage";
-    die('Ungültige Abfrage: ' . mysqli_error());
-}
-
-  $iSQLCount = mysqli_num_rows($db_erg);
+  $iSQLCount = count($schichten);
   //$iSQLCount = 3;
 
 echo '<table class="commontable">';
@@ -278,31 +276,27 @@ echo '<table class="commontable">';
 
 
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
-    echo '<tr title="Details anzeigen" onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $zeile['SchichtID'] . '#Info\';" >';
-    echo "<td>" . $zeile['Was'] . "</td>";
-    echo "<td>" . $zeile['Ab'] . "</td>";
-    echo "<td>" . $zeile['Bis'] . "</td>";
-    echo "<td>" . "<button title='Schicht entfernen' name='Del' value='" . $zeile['EinzelSchichtID'] . "'>-</button>" . "</td>";
+foreach ($schichten as $schicht) {
+    //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$schicht['SchichtID'].'#Info\';" >';
+    echo '<tr title="Details anzeigen" onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $schicht['SchichtID'] . '#Info\';" >';
+    echo "<td>" . $schicht['Was'] . "</td>";
+    echo "<td>" . $schicht['Ab'] . "</td>";
+    echo "<td>" . $schicht['Bis'] . "</td>";
+    echo "<td>" . "<button title='Schicht entfernen' name='Del' value='" . $schicht['EinzelSchichtID'] . "'>-</button>" . "</td>";
     echo "</tr>";
 }
 echo "</table>";
 
 echo "<br><br>";
 
-$iAlleSchichtenCount = AlleSchichtenCount($db_link);
-$iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+$iAlleSchichtenCount = AlleSchichtenCount();
+$iBelegteSchichtenCount = AlleBelegteSchichtenCount();
 
 echo '<table class="commontable" onclick="window.location.href=\'AlleSchichten.php\'">';
     echo "<tr>";
         echo "<th>" . '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . " Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th>";
     echo "</tr>";
 echo "</table>";
-
-
-mysqli_free_result($db_erg);
-
 
 ?>
  

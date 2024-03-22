@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 require_once 'konfiguration.php';
 require_once 'SQL.php';
 
@@ -29,7 +32,7 @@ if (isset($_POST['login'])) {
     $HelferPasswort = $_POST['helfer-passwort'];
 
     if (empty($messages)) {
-        HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+        HelferLogin($HelferEmail, $HelferPasswort, 0);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';

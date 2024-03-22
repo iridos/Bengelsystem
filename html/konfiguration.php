@@ -1,5 +1,7 @@
- 
 <?php
+
+namespace Bengelsystem;
+
 // create the file below from the template:
 require_once  __DIR__ . '/../bengelsystem_konfiguration.php';
 
@@ -11,9 +13,8 @@ define('ZEITBEREICHWERTE', $ZeitBereichWerte);
 $TageNamenDeutsch = array("So","Mo","Di","Mi","Do","Fr","Sa");
 
 //Kalender-Konfiguration
-$dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK; // dsn fuer Kalender
+$dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK . ";charset=utf8mb4"; // dsn fuer Kalender
 $options = array(
-    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 );

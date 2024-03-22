@@ -1,5 +1,7 @@
 <?php
 
+namespace Bengelsystem;
+
 function KalenderDatum($start_date)
 {
     $format = 'Y,m,d';

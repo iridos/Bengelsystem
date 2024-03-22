@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -26,7 +29,7 @@ if ($AdminStatus != 1) {
 
 <?php
 
-DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch();
 
 $AliasHelferID = 0;
 
@@ -42,8 +45,8 @@ if ($AliasHelferID != 0) {
     $_SESSION["AliasHelferID"] = $AliasHelferID;
 }
 
-$db_erg = Helferdaten($db_link, $HelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+$zeilen = Helferdaten($HelferID);
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }
@@ -91,8 +94,8 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
       <form style="display:inline-block;" method=post>
       <select style="height:33px;width:350px;font-size:20" name="AliasHelferID" id="AliasHelferID" onchange="submit()">
 <?php
-    $db_erg = HelferListe($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $zeilen = HelferListe();
+foreach ($zeilen as $zeile) {
     if ($AliasHelferID != $zeile['HelferID']) {
         echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
     } else {

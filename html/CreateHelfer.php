@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -64,7 +67,7 @@ if (isset($_POST['sent'])) {
 
 
     if (empty($messages)) {
-        $db_erg = CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
+        $db_erg = CreateHelfer($HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel);
         if ($db_erg) {
             //$insertID = mysql_insert_id();
             //echo "InserId = ".$insertID;
@@ -135,9 +138,9 @@ if (isset($_POST['sent'])) {
            <tr><td>    
               <select name="helfer-level">
 <?php
-$db_erg = HelferLevel($db_link);
+$db_erg = HelferLevel();
 $selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($db_erg as $zeile) {
     $HelferLevel = $zeile['HelferLevel'];
     $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
     if ($HelferLevel == 1) {
@@ -158,12 +161,5 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
   
 </form>
 
-
-  
-<?php
-
-mysqli_free_result($db_erg);
-?>
-  
  </body>
 </html>

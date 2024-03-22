@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -34,15 +37,15 @@ $unixtime = strtotime('2023-09-15');
 for ($day = 0; $day < 3; $day++) {
     $datestring = date('Y-m-d', $unixtime + $day * 24 * 60 * 60);
     echo "<h1>" . strftime('%A, %e. %B %Y', $unixtime + $day * 24 * 60 * 60) . "</h1>";
-    $db_erg = GetDiensteForDay($db_link, 2, $datestring);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $db_erg2 = GetSchichtenForDienstForDay($db_link, $zeile["DienstId"], $datestring);
+    $db_erg = GetDiensteForDay(2, $datestring);
+    foreach ($db_erg as $zeile) {
+        $db_erg2 = GetSchichtenForDienstForDay($zeile["DienstId"], $datestring);
         echo "<table id='customers'>";
         echo "<tr><th colspan=3>" . $zeile["Was"] . "</th></tr>";
         $schichten = 0;
         $OldVon = 0;
         $OldSoll = 0;
-        while ($zeile2 = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+        foreach ($db_erg2 as $zeile2) {
             if ($zeile2["Von"] != $OldVon && $schichten != 0) {
                 while ($schichten < $OldSoll) {
                     $schichten++;
@@ -92,15 +95,15 @@ $unixtime = strtotime('2023-09-15');
 for ($day = 0; $day < 3; $day++) {
     $datestring = date('Y-m-d', $unixtime + $day * 24 * 60 * 60);
     echo "<h1>" . strftime('%A, %e. %B %Y', $unixtime + $day * 24 * 60 * 60) . "</h1>";
-    $db_erg = GetDiensteForDay($db_link, 1, $datestring);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $db_erg2 = GetSchichtenForDienstForDay($db_link, $zeile["DienstId"], $datestring);
+    $db_erg = GetDiensteForDay(1, $datestring);
+    while ($db_erg as $zeile) {
+        $db_erg2 = GetSchichtenForDienstForDay($zeile["DienstId"], $datestring);
         echo "<table id='customers'>";
         echo "<tr><th colspan=3>" . $zeile["Was"] . "</th></tr>";
         $schichten = 0;
         $OldVon = 0;
         $OldSoll = 0;
-        while ($zeile2 = mysqli_fetch_array($db_erg2, MYSQLI_ASSOC)) {
+        foreach ($db_erg2 as $zeile2) {
             if ($zeile2["Von"] != $OldVon && $schichten != 0) {
                 while ($schichten < $OldSoll) {
                     $schichten++;

@@ -1,4 +1,7 @@
 <?php
+
+namespace Bengelsystem;
+
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
@@ -47,7 +50,7 @@ if (isset($_POST['change'])) {
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID);
+        HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -64,10 +67,10 @@ if (isset($_POST['change'])) {
 // Helferdate holen
 ///////////////////////////////////////////////////////////////
 
-$db_erg = Helferdaten($db_link, $HelferID);
+$zeilen = Helferdaten($HelferID);
 
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];
@@ -94,7 +97,7 @@ if (isset($_POST['login'])) {
     $HelferPasswort = $_POST['helfer-passwort'];
 
     if (empty($messages)) {
-        HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+        HelferLogin($HelferEmail, $HelferPasswort, 0);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
