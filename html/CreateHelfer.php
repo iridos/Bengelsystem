@@ -158,12 +158,5 @@ foreach ($db_erg as $zeile) {
   
 </form>
 
-
-  
-<?php
-
-mysqli_free_result($db_erg);
-?>
-  
  </body>
 </html>

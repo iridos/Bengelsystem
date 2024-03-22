@@ -136,17 +136,6 @@ while ($x < $arrayLength) {
 
     echo "</table>";
 
-
-
-
-
-
-
-
-
-mysqli_free_result($db_erg);
-
-
 ?>
  
  </form> 

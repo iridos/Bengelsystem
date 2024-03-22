@@ -372,9 +372,6 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
 <?php
 
 
-mysqli_free_result($db_erg);
-
-
 $_SESSION["DienstID"] = $DienstID;
 $_SESSION["SchichtID"] = $SchichtID;
 

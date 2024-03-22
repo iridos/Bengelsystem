@@ -28,8 +28,6 @@ require '_login.php';
   //check for admin status
   $HelferID = $_SESSION["HelferID"];
   $AdminID = $_SESSION["AdminID"];
-  $db_link = mysqli_connect(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
-  DatenbankAufDeutsch();
 
   $zeilen = Helferdaten($HelferID);
 foreach ($zeilen as $zeile)) {

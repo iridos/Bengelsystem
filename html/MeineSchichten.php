@@ -255,7 +255,7 @@ if (isset($_POST['sent'])) {
 
 $schichten = AlleSchichtenEinesHelfers($HelferID);
 
-  $iSQLCount = mysqli_num_rows($schichten);
+  $iSQLCount = count($schichten);
   //$iSQLCount = 3;
 
 echo '<table class="commontable">';

@@ -113,7 +113,7 @@ if (isset($_POST['del'])) {
 $db_erg = Helferdaten($AliasHelferID);
 
 
-foreach ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+foreach ($zeilen as $zeile) {
     $HelferName = $zeile['Name'];
     $HelferEmail = $zeile['Email'];
     $HelferHandy = $zeile['Handy'];

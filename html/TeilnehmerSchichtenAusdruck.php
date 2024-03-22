@@ -251,12 +251,6 @@ while ($db_link as $zeile) {
 }
 echo "</table>\n";
 
-
-// old table, remove later
-
-mysqli_free_result($db_erg);
-
-
 ?>
 
  <!--/form--> 
