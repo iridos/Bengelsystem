@@ -190,13 +190,13 @@ function Helferdaten($HelferID)
 
 
 // ok ok ok
-function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferIsAdmin = -1, $AdminID = 0)
+function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)
 {
     $db = DB::getInstance();
-    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy Where HelferId=:id", 'password_empty');
-    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Admin=:admin Where HelferId=:id", 'password_empty_admin');
-    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort Where HelferId=:id", 'password_given');
-    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Passwort=:passwort,Admin=:admin Where HelferId=:id", 'password_given_admin');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,HelferLevel=:helferlevel Where HelferId=:id", 'password_empty');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,Admin=:admin,HelferLevel=:helferlevel Where HelferId=:id", 'password_empty_admin');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,HelferLevel=:helferlevel,Passwort=:passwort Where HelferId=:id", 'password_given');
+    $db->prepare(__METHOD__, "UPDATE Helfer SET Name=:name,Email=:email,Handy=:handy,HelferLevel=:helferlevel,Passwort=:passwort,Admin=:admin Where HelferId=:id", 'password_given_admin');
 
     if ($HelferNewPasswort == "") {
         //$sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' ".($HelferIsAdmin!=-1)?',Admin='$HelferIsAdmin.':'." Where HelferId=".$HelferID;
@@ -205,6 +205,7 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
                 "name" => $HelferName,
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
+                "helferlevel" => $HelferLevel,
                 "id" => $HelferID
             ], 'password_empty');
             $db->onErrorDie(__METHOD__, 'password_empty');
@@ -214,6 +215,7 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "admin" => $HelferIsAdmin,
+                "helferlevel" => $HelferLevel,
                 "id" => $HelferID
             ], 'password_empty_admin');
             $db->onErrorDie(__METHOD__, 'password_empty_admin');
@@ -233,6 +235,7 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
                 "email" => $HelferEmail,
                 "handy" => $HelferHandy,
                 "passwort" => $PasswortHash,
+                "helferlevel" => $HelferLevel,
                 "id" => $HelferID
             ], 'password_given');
             $db->onErrorDie(__METHOD__, 'password_given');
@@ -243,6 +246,7 @@ function HelferdatenAendern($HelferName, $HelferEmail, $HelferHandy, $HelferNewP
                 "handy" => $HelferHandy,
                 "passwort" => $PasswortHash,
                 "admin" => $HelferIsAdmin,
+                "helferlevel" => $HelferLevel,
                 "id" => $HelferID
             ], 'password_given_admin');
             $db->onErrorDie(__METHOD__, 'password_given_admin');
@@ -711,7 +715,7 @@ function ChangeSchicht($SchichtID, $Von, $Bis, $Soll, $Dauer)
 }
 
 // ok ok ok
-function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
+function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName)
 {
 
     /*
@@ -740,12 +744,12 @@ function NewSchicht($DienstID, $Von, $Bis, $Soll, $Dauer)
     if (!is_null($db->errorCode(__METHOD__)) && $db->errorCode(__METHOD__) != '00000') {
         echo "Keine Schicht erstellt";
         //echo $sql;
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht konnte nicht angelegt werden mit $sql  \n", 3, LOGFILE);
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName   konnte Schicht nicht angelegt mit $sql  \n", 3, LOGFILE);
         $err = $db->errorInfo(__METHOD__)[2];
         die('Ungueltige Abfrage: ' . $err);
     } else {
         //TODO: DienstID aufloesen
-        error_log(date('Y-m-d H:i') . "  NeueSchicht: Schicht wurde angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
+        error_log(date('Y-m-d H:i') . "  NeueSchicht: $HelferName  hat Schicht angelegt mit DienstID $DienstID, Von $Von Bis $Bis Soll $Soll  \n", 3, LOGFILE);
     }
 }
 
