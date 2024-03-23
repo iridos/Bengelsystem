@@ -59,7 +59,7 @@ if (isset($_POST['email-cc'])) {
 
 $email_text = "
 Lieber Teilnehmer,
-trage dich bitte mit folgendem Link für eine Stunde pro Person als Helfer bei uns ein.Wir verschicken eine Mail pro Emailaddresse, also bitte für alle, die mit dieser Emailaddresse angemeldet sind. 
+trage dich bitte mit folgendem Link für eine Stunde pro Person bei uns ein.Wir verschicken eine Mail pro Emailaddresse, also bitte für alle, die mit dieser Emailaddresse angemeldet sind. 
 
 Danke für deine Mithilfe!
 
@@ -84,7 +84,7 @@ if (isset($_POST['sendmail'])) {
 ?>
 <!doctype html>
  <head>
-  <title>Helfer <?php echo EVENTNAME ?>: Email Tokens generieren</title>
+  <title><?php echo EVENTNAME ?>: Email Tokens generieren</title>
   
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>

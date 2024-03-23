@@ -243,12 +243,6 @@ if ($addschicht != '0') {
                 echo "<tr class='header'><th  colspan='7' style='width:100%'><span>+</span> ";
                 echo $Was;
                 echo "</th>";
-                /*
-                echo "<th style='width:100px'>". "Von" . "</th>";
-                echo "<th style='width:130px'>". "Bis" . "</th>";
-                echo "<th style='width:90px'>". "Ist/Soll" . "</th>";
-                echo "<th style='width:90px'>". "Add" . "</th>";
-                */
                 echo "</tr>";
                 $OldWas = $Was;
             }

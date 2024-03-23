@@ -10,7 +10,7 @@ require '_login.php';
 <!doctype html>
 <html>
  <head>
-  <title>Helfer <?php echo EVENTNAME ?></title>
+  <title><?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>

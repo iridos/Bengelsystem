@@ -57,7 +57,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
        <button name="BackHelferdaten" value="1" onclick="window.location.href = 'index.php';">
           <b>&larrhk;</b>
        </button> &nbsp; 
-       <b>Admin HelferDB <?php echo  EVENTNAME; ?></b>
+       <b>Admin <?php echo  EVENTNAME; ?></b>
   </th>
   <tr> 
 
@@ -71,11 +71,11 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     </td>
   </tr>
     <tr onclick="window.location.href='CreateHelfer.php';"> <td>
-    <img src="Bilder/More.jpeg" style="width:30px;height:30px;"><b>Seite zur Helfer selbst-Registrierung</b>
+    <img src="Bilder/More.jpeg" style="width:30px;height:30px;"><b>Seite zur selbst-Registrierung</b>
     </td> </tr>
 
     <tr onclick="window.location.href='EmailZuToken.php';"> <td>
-    <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>Helfer per Link einladen</b>
+    <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>persönliche Einladungslink(s) generieren</b>
     </td> </tr>
   <tr onclick="window.location.href='AdminHelferUebersicht.php';">
     <td>
@@ -87,7 +87,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
   </tr>
 
    <th>
-      <b>Helfer als Admin &auml;ndern:<b> 
+      <b>Als Admin &auml;ndern:<b> 
       <form style="display:inline-block;" method=post>
       <select style="height:33px;width:350px;font-size:20" name="AliasHelferID" id="AliasHelferID" onchange="submit()">
 <?php
@@ -114,7 +114,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     <td>
       <img src="Bilder/dot.png" width="30px" height="2px">
       <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
-      <b> Helferdaten &auml;ndern</b>
+      <b> Personendaten &auml;ndern</b>
     </td>
   </tr>
   <tr onclick="window.location.href='AdminMeineSchichten.php';">

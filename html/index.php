@@ -9,7 +9,7 @@ require '_login.php';
 <!doctype html>
 <html lang=de>
 <head>
-  <title>Helfer <?php echo EVENTNAME ?> Home</title>
+  <title><?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src=js/helferdb.js></script>
@@ -27,7 +27,7 @@ require '_login.php';
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 
     <b>
 <?php
-    echo "Helfer $HelferName";
+    echo "$HelferName";
 if ($HelferIsAdmin) {
     echo " (Admin)";
 }
@@ -46,7 +46,7 @@ if ($HelferIsAdmin) {
     ?>
   <tr onclick="window.location.href='MeineSchichten.php';">
     <td>
-        <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Nächste Helferschichten:</b>
+        <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> <b>Meine nächsten Schichten</b>
 
                 <ul style="display: block; list-style-type: none; margin-left: 20px;margin-top: 0px;margin-bottom: 0px">
 <?php
