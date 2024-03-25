@@ -1,31 +1,33 @@
 <?php
-// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
+// Login
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
+// zeigt login-Seite an, wenn keine Session besteht
 require '_login.php';
 ?>
 <!doctype html>
 <html>
- <head>
-  <title>Helfer <?php echo EVENTNAME ?> Alle Schichten</title>
+<head>
+  <title><?php echo EVENTNAME ?> Alle Schichten</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
- 
+
   <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script>
   <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>
- 
- </head>
- <body>
- <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button>   
-<?php echo "<b>" . EVENTNAME . "</b>"; ?>
- <h1> Alle Schichten / Schichten hinzuf&uuml;gen </h1>
-<div style="width: 100%;">
-<?php
+</head>
+<body>
+  <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';">
+  <b>&larrhk;</b>
+  </button>
+  <?php echo "<b>" . EVENTNAME . "</b>"; ?>
+  <h1> Alle Schichten / Schichten hinzuf&uuml;gen </h1>
+  <div style="width: 100%;">
+  <?php
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
@@ -33,29 +35,13 @@ if (isset($_POST['CloseInfo'])) {
     unset($InfoMeineSchichtID);
     unset($InfoAlleSchichtID);
 }
-if (isset($_POST['InfoMeineSchichtID'])) {
-    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
-    unset($InfoAlleSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
+// wird nie gesetzt
+//if (isset($_POST['InfoMeineSchichtID'])) {
+function SchichtInfo($SchichtID,&$Was,&$Wo,&$Dauer,&$Leiter,&$LeiterHandy,&$LeiterEmail,&$Info){
+      $db_link = ConnectDB();
+//    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
 
-    $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
-
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-}
-
-
-if (isset($_GET['InfoAlleSchichtID'])) {
-    $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
-    unset($InfoMeineSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
-
-    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+    $zeile = DetailSchicht($db_link, $SchichtID);
 
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
@@ -64,23 +50,42 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     $LeiterHandy =  $zeile['Handy'];
     $LeiterEmail =  $zeile['Email'];
     $Info = $zeile['Info'];
-
-
-
-    // Beteiligte Helfer Holen
-    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
-
-
-    $x = 0;
-
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $MitHelferID[$x] = $zeile['HelferID'];
-        $MitHelfer[$x] = $zeile['Name'];
-        $MitHelferHandy[$x] = $zeile['Handy'];
-        $x++;
+    $db_link->close();
     }
-}
 
+// wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier
+//if (isset($_GET['InfoAlleSchichtID'])) {
+//    $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
+//    unset($InfoMeineSchichtID);
+//    //echo "<b>". $SchichtID . "</b><br>";
+//
+//    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
+//
+//    $Was = $zeile['Was'];
+//    $Wo = $zeile['Wo'];
+//    $Dauer = $zeile['Dauer'];
+//    $Leiter = $zeile['Name'];
+//    $LeiterHandy =  $zeile['Handy'];
+//    $LeiterEmail =  $zeile['Email'];
+//    $Info = $zeile['Info'];
+//
+//
+//
+//    // Beteiligte Helfer Holen
+//    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
+//
+//
+//    $x = 0;
+//
+//    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+//        $MitHelferID[$x] = $zeile['HelferID'];
+//        $MitHelfer[$x] = $zeile['Name'];
+//        $MitHelferHandy[$x] = $zeile['Handy'];
+//        $x++;
+//    }
+//}
+
+// Auswahl Tag oberhalb der Dienstetabelle 
 if (isset($_GET['ZeitBereich'])) {
     $ZeitBereich = $_GET['ZeitBereich'];
 } else {
@@ -126,7 +131,7 @@ if (isset($_POST['plusschicht'])) {
 }
 
 if (isset($_POST['minusschicht'])) {
-    // Mich aus Schicht entfernen
+        // Mich aus Schicht entfernen
         $messages = [];
 
         $SchichtID = $_POST['minusschicht'];
@@ -142,7 +147,6 @@ if (isset($_POST['minusschicht'])) {
         foreach ($messages as $message) {
                 echo '<li>' . htmlspecialchars($message) . '</li>';
         }
-        echo '</ul></div>';
     }
 }
 
@@ -170,7 +174,8 @@ $addschicht = $_SESSION["addschicht"];
 $dienstsort = $_SESSION["dienstsort"];
 
 
-
+//addschicht und dienst-sort sollten wohl nach Diensten bzw Tagen sortieren
+//addschicht wird gerade nie gesetzt, dienst-sort damit auch nicht
 if (isset($_POST['addschicht']) && $_POST['addschicht'] == '1') {
     $addschicht = '1';
     $dienstsort = '1';
@@ -195,13 +200,13 @@ if ($addschicht == '0') {
 }
 
 
-if ($addschicht != '0') {
+if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Diensten sortieren, macht es aber nicht
     echo '<table class="commontable">';
     require('_zeitbereich.php');
     $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "AlleSchichten.php");
     $MeinVon = $Bereich['MeinVon'];
     $MeinBis = $Bereich['MeinBis'];
-    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, -1);
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevel);
 
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);
@@ -212,9 +217,17 @@ if ($addschicht != '0') {
     // "Alle Schichten der Con"
     echo '<table  class="commontable">';
     echo "<tr class='header'>";
-    echo "<th colspan='7'>Alle Schichten der Con (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")</th></tr>";
+    echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
+    $alleHelferLevel = array(1, 2);
 
-    echo "</tr>";
+    foreach ($alleHelferLevel as $HelferLevelIteration) {
+       $meine = "";
+       if($HelferLevelIteration == $HelferLevel) { $meine = " &leftarrow; mein Level";}
+       $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+       $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevelIteration);
+       echo "<tr><th colspan='5'>&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>"; 
+    }
+
 
     $OldTag = "";
     $OldWas = "";
@@ -226,7 +239,7 @@ if ($addschicht != '0') {
     // Tabelle mit allen Diensten und Schichten
     echo '<table  class="commontable collapsible">';
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($dienstsort == '1') {
+        if ($dienstsort == '1') { // dienst-sort wird momentan nie gesetzt, also immer else-Teil ausgeführt
             $Tag = $zeile['Tag'];
 
             if ($Tag != $OldTag) {
@@ -238,12 +251,27 @@ if ($addschicht != '0') {
         } else {
             $Was = $zeile['Was'];
 
-            if ($Was != $OldWas) {
+            if ($Was != $OldWas) { // Header ausgeben, wenn der Dienst nicht mehr der selbe ist
                 // + in <span> becomes - when rows are opened
-                echo "<tr class='header'><th  colspan='7' style='width:100%'><span>+</span> ";
-                echo $Was;
+                echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
+                $SchichtID=$zeile['SchichtID'];
+                $DienstID=$zeile['DienstID'];
+                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevel,$DienstID);
+                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevel,$DienstID);
+                echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
                 echo "</th>";
                 echo "</tr>";
+                SchichtInfo($SchichtID,$InfoWas,$InfoWo,$InfoDauer,$Leiter,$LeiterHandy,$LeiterEmail,$Info);
+                if(true){
+                echo "<tr><td colspan=5 style='background:lightblue'>";
+                echo "<b>Beschreibung:</b> $Info <br><br>"; 
+                echo "<b>Ort:</b> $InfoWo <br>";
+                //echo "<b>Dauer:</b> $InfoDauer<br>"; // verschieden je nach Einzelschicht
+                echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
+                echo $LeiterHandy . ", ";
+                echo "$LeiterEmail";
+                echo "</td></td></tr>\n";
+                }
                 $OldWas = $Was;
             }
         }
@@ -264,13 +292,13 @@ if ($addschicht != '0') {
               // Meine Schichten gruen einfaerben
         if (in_array($zeile['SchichtID'], $MeineDienste)) {
              $rowstyle = ' style="background-color:lightgreen" ';
-             $regtext  = 'Meine!';
+             $regtext  = '<br><center>Meine!</center>';
         } else {
             // dummy-style, um SchichtID unsichtbar im Tag anzuzeigen
             $rowstyle = 'dbinfo="SchichtID:' . $zeile['SchichtID'] . ';helferlvl:' . $HelferLevel . '" ';
             $regtext  = '';
         }
-        if ($_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
+        if (isset($_SESSION["SchichtIdAktiv"]) && $_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
             $rowstyle = $rowstyle . " target='active' "; // dont collapse when the user did something
         }
 
@@ -285,9 +313,11 @@ if ($addschicht != '0') {
         echo "<td>" . $Bis . "</td>";
         echo "<td bgcolor='" . $Color . "'>" . $zeile['Ist'] . "/";
         echo "" . $zeile['Soll'] . "</td>";
-                // buttons sind in der selben Zelle
-        echo "<td width='30px'>" . "<button width='20px' name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>" . "";
-        echo "&nbsp;&nbsp;<button width='120px' name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
+        // durch space:nowrap wird ein Umbruch zwischen den Buttons verhindert
+        // in Kombi mit width:1% wird immer der minimale Platz für die Spalte belegt
+        // width:200px oder max-width:200px hat zu viel weissem Platz rechts und enge links gefuehrt
+        echo "<td style='width:10%;white-space:nowrap'><button name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>";
+        echo "&nbsp;&nbsp;<button name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
         echo "</tr>\n";
     }
     echo "</table>";
