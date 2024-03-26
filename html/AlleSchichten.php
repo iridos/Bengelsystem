@@ -216,7 +216,7 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
 
     // "Alle Schichten der Con"
     echo '<table  class="commontable">';
-    echo "<tr class='header'>";
+    echo "<tr class='infoheader'>";
     echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
     $alleHelferLevel = array(1, 2);
 
@@ -225,7 +225,8 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
        if($HelferLevelIteration == $HelferLevel) { $meine = " &leftarrow; mein Level";}
        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevelIteration);
-       echo "<tr><th colspan='5'>&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>"; 
+       // $HelferLevelName wird in konfiguration.php gesetzt. TODO: Array aus Datenbank mit bestehender Funktion in _login.php oder SQL.php auslesen. 
+       echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>"; 
     }
 
 
