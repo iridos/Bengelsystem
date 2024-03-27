@@ -27,7 +27,7 @@ if ($AdminStatus != 1) {
  </script>
 </head>
 <body>
-  <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';">
+  <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'AdminHelferUebersicht.php';">
   <b>&larrhk;</b>
   </button>
   <?php echo "<b>" . EVENTNAME . "</b>"; ?>
@@ -37,28 +37,29 @@ if ($AdminStatus != 1) {
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-if (isset($_POST['CloseInfo'])) {
-    unset($InfoMeineSchichtID);
-    unset($InfoAlleSchichtID);
-}
+    if (isset($_POST['CloseInfo'])) {
+        unset($InfoMeineSchichtID);
+        unset($InfoAlleSchichtID);
+    }
 // wird nie gesetzt
 //if (isset($_POST['InfoMeineSchichtID'])) {
-function SchichtInfo($SchichtID,&$Was,&$Wo,&$Dauer,&$Leiter,&$LeiterHandy,&$LeiterEmail,&$Info){
-      $db_link = ConnectDB();
-//    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
-    unset($InfoAlleSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
+    function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
+    {
+          $db_link = ConnectDB();
+    //    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
+        unset($InfoAlleSchichtID);
+        //echo "<b>". $SchichtID . "</b><br>";
 
-    $zeile = DetailSchicht($db_link, $SchichtID);
+        $zeile = DetailSchicht($db_link, $SchichtID);
 
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-    $db_link->close();
+        $Was = $zeile['Was'];
+        $Wo = $zeile['Wo'];
+        $Dauer = $zeile['Dauer'];
+        $Leiter = $zeile['Name'];
+        $LeiterHandy =  $zeile['Handy'];
+        $LeiterEmail =  $zeile['Email'];
+        $Info = $zeile['Info'];
+        $db_link->close();
     }
 
 // wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier
@@ -93,51 +94,51 @@ function SchichtInfo($SchichtID,&$Was,&$Wo,&$Dauer,&$Leiter,&$LeiterHandy,&$Leit
 //    }
 //}
 
-// Auswahl Tag oberhalb der Dienstetabelle 
-if (isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 0;
-}
-
-function HelferAuswahlButton($db_link, $AliasHelferID)
-{
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($AliasHelferID != $zeile['HelferID']) {
-                echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
-        } else {
-                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
-        }
+// Auswahl Tag oberhalb der Dienstetabelle
+    if (isset($_GET['ZeitBereich'])) {
+        $ZeitBereich = $_GET['ZeitBereich'];
+    } else {
+        $ZeitBereich = 0;
     }
-    echo '</select></form>';
-}
 
-if (isset($_POST['AliasHelferID'])) {
-    $AliasHelferID = $_POST['AliasHelferID'];
-} elseif (isset($_SESSION["AliasHelferID"])) {
-    $AliasHelferID = $_SESSION["AliasHelferID"];
-} else {
+    function HelferAuswahlButton($db_link, $AliasHelferID)
+    {
+        echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
+        $db_erg = HelferListe($db_link);
+        while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+            if ($AliasHelferID != $zeile['HelferID']) {
+                echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
+            } else {
+                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
+            }
+        }
+        echo '</select></form>';
+    }
+
+    if (isset($_POST['AliasHelferID'])) {
+        $AliasHelferID = $_POST['AliasHelferID'];
+    } elseif (isset($_SESSION["AliasHelferID"])) {
+        $AliasHelferID = $_SESSION["AliasHelferID"];
+    } else {
+        HelferAuswahlButton($db_link, $AliasHelferID);
+        echo "<p>Erst Helfer auswählen</p>";
+        exit;
+    }
     HelferAuswahlButton($db_link, $AliasHelferID);
-    echo "<p>Erst Helfer auswählen</p>";
-    exit;
-}
-HelferAuswahlButton($db_link, $AliasHelferID);
 
-$_SESSION["AliasHelferID"] = $AliasHelferID;
-$AdminID = $_SESSION["AdminID"];
+    $_SESSION["AliasHelferID"] = $AliasHelferID;
+    $AdminID = $_SESSION["AdminID"];
 
-$db_erg = Helferdaten($db_link, $AliasHelferID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $HelferName = $zeile['Name'];
-    $AliasHelferLevel = $zeile['HelferLevel'];
-}
+    $db_erg = Helferdaten($db_link, $AliasHelferID);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferName = $zeile['Name'];
+        $AliasHelferLevel = $zeile['HelferLevel'];
+    }
 
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
 
-?>
+    ?>
 
 
 <form method="post" action="AdminAlleSchichten.php#Info">  
@@ -263,11 +264,13 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     $alleHelferLevel = array(1, 2);
 
     foreach ($alleHelferLevel as $HelferLevelIteration) {
-       $meine = "";
-       if($HelferLevelIteration == $AliasHelferLevel) { $meine = " &leftarrow; mein Level";}
-       $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
-       $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevelIteration);
-       echo "<tr><th colspan='5'>&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>"; 
+        $meine = "";
+        if ($HelferLevelIteration == $AliasHelferLevel) {
+            $meine = " &leftarrow; mein Level";
+        }
+        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
+        echo "<tr><th colspan='5'>&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
     }
 
 
@@ -296,23 +299,23 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
             if ($Was != $OldWas) { // Header ausgeben, wenn der Dienst nicht mehr der selbe ist
                 // + in <span> becomes - when rows are opened
                 echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
-                $SchichtID=$zeile['SchichtID'];
-                $DienstID=$zeile['DienstID'];
-                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $AliasHelferLevel,$DienstID);
-                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$AliasHelferLevel,$DienstID);
+                $SchichtID = $zeile['SchichtID'];
+                $DienstID = $zeile['DienstID'];
+                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $AliasHelferLevel, $DienstID);
+                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $AliasHelferLevel, $DienstID);
                 echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $AliasHelferLevel, $DienstID -->";
                 echo "</th>";
                 echo "</tr>";
-                SchichtInfo($SchichtID,$InfoWas,$InfoWo,$InfoDauer,$Leiter,$LeiterHandy,$LeiterEmail,$Info);
-                if(true){
-                echo "<tr><td colspan=5 style='background:lightblue'>";
-                echo "<b>Beschreibung:</b> $Info <br><br>"; 
-                echo "<b>Ort:</b> $InfoWo <br>";
+                SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+                if (true) {
+                    echo "<tr><td colspan=5 style='background:lightblue'>";
+                    echo "<b>Beschreibung:</b> $Info <br><br>";
+                    echo "<b>Ort:</b> $InfoWo <br>";
                 //echo "<b>Dauer:</b> $InfoDauer<br>"; // verschieden je nach Einzelschicht
-                echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
-                echo $LeiterHandy . ", ";
-                echo "$LeiterEmail";
-                echo "</td></td></tr>\n";
+                    echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
+                    echo $LeiterHandy . ", ";
+                    echo "$LeiterEmail";
+                    echo "</td></td></tr>\n";
                 }
                 $OldWas = $Was;
             }

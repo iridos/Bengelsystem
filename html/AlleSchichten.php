@@ -31,26 +31,27 @@ require '_login.php';
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-if (isset($_POST['CloseInfo'])) {
-    unset($InfoMeineSchichtID);
-    unset($InfoAlleSchichtID);
-}
+    if (isset($_POST['CloseInfo'])) {
+        unset($InfoMeineSchichtID);
+        unset($InfoAlleSchichtID);
+    }
 // wird nie gesetzt
 //if (isset($_POST['InfoMeineSchichtID'])) {
-function SchichtInfo($SchichtID,&$Was,&$Wo,&$Dauer,&$Leiter,&$LeiterHandy,&$LeiterEmail,&$Info){
-      $db_link = ConnectDB();
-//    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
+    function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
+    {
+          $db_link = ConnectDB();
+    //    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
 
-    $zeile = DetailSchicht($db_link, $SchichtID);
+        $zeile = DetailSchicht($db_link, $SchichtID);
 
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-    $db_link->close();
+        $Was = $zeile['Was'];
+        $Wo = $zeile['Wo'];
+        $Dauer = $zeile['Dauer'];
+        $Leiter = $zeile['Name'];
+        $LeiterHandy =  $zeile['Handy'];
+        $LeiterEmail =  $zeile['Email'];
+        $Info = $zeile['Info'];
+        $db_link->close();
     }
 
 // wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier
@@ -85,19 +86,19 @@ function SchichtInfo($SchichtID,&$Was,&$Wo,&$Dauer,&$Leiter,&$LeiterHandy,&$Leit
 //    }
 //}
 
-// Auswahl Tag oberhalb der Dienstetabelle 
-if (isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 0;
-}
+// Auswahl Tag oberhalb der Dienstetabelle
+    if (isset($_GET['ZeitBereich'])) {
+        $ZeitBereich = $_GET['ZeitBereich'];
+    } else {
+        $ZeitBereich = 0;
+    }
 
 
 
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
 
-?>
+    ?>
 
 
 <form method="post" action="AlleSchichten.php">
@@ -221,12 +222,14 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     $alleHelferLevel = array(1, 2);
 
     foreach ($alleHelferLevel as $HelferLevelIteration) {
-       $meine = "";
-       if($HelferLevelIteration == $HelferLevel) { $meine = " &leftarrow; mein Level";}
-       $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
-       $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevelIteration);
-       // $HelferLevelName wird in konfiguration.php gesetzt. TODO: Array aus Datenbank mit bestehender Funktion in _login.php oder SQL.php auslesen. 
-       echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>"; 
+        $meine = "";
+        if ($HelferLevelIteration == $HelferLevel) {
+            $meine = " &leftarrow; mein Level";
+        }
+        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
+       // $HelferLevelName wird in konfiguration.php gesetzt. TODO: Array aus Datenbank mit bestehender Funktion in _login.php oder SQL.php auslesen.
+        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
     }
 
 
@@ -255,23 +258,23 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
             if ($Was != $OldWas) { // Header ausgeben, wenn der Dienst nicht mehr der selbe ist
                 // + in <span> becomes - when rows are opened
                 echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
-                $SchichtID=$zeile['SchichtID'];
-                $DienstID=$zeile['DienstID'];
-                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevel,$DienstID);
-                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link,$HelferLevel,$DienstID);
+                $SchichtID = $zeile['SchichtID'];
+                $DienstID = $zeile['DienstID'];
+                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevel, $DienstID);
+                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevel, $DienstID);
                 echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
                 echo "</th>";
                 echo "</tr>";
-                SchichtInfo($SchichtID,$InfoWas,$InfoWo,$InfoDauer,$Leiter,$LeiterHandy,$LeiterEmail,$Info);
-                if(true){
-                echo "<tr><td colspan=5 style='background:lightblue'>";
-                echo "<b>Beschreibung:</b> $Info <br><br>"; 
-                echo "<b>Ort:</b> $InfoWo <br>";
+                SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+                if (true) {
+                    echo "<tr><td colspan=5 style='background:lightblue'>";
+                    echo "<b>Beschreibung:</b> $Info <br><br>";
+                    echo "<b>Ort:</b> $InfoWo <br>";
                 //echo "<b>Dauer:</b> $InfoDauer<br>"; // verschieden je nach Einzelschicht
-                echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
-                echo $LeiterHandy . ", ";
-                echo "$LeiterEmail";
-                echo "</td></td></tr>\n";
+                    echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
+                    echo $LeiterHandy . ", ";
+                    echo "$LeiterEmail";
+                    echo "</td></td></tr>\n";
                 }
                 $OldWas = $Was;
             }

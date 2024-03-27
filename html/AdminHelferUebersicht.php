@@ -92,7 +92,7 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
     echo "</div></th>";
     echo "$EinzelDienstStundenZeile</td></tr>\n ";
 }
-
+echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten</th><th>Schichten Ändern</th></tr>";
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferName = $zeile["Name"];
         $HelferLevel = $zeile["HelferLevel"];
@@ -103,7 +103,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         }
             $dauer = 0;
             $EinzelDienstStundenZeile = "";
-            $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>$HelferName (Lvl:$HelferLevel) </div></form>";
+            $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>&nbsp;$HelferName (Lvl:$HelferLevel) </div></form>";
             $OldHelferName = $HelferName;
             $OldAliasHelferID = $AliasHelferID;
             $i += 1;

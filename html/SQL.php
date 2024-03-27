@@ -193,16 +193,16 @@ function AlleSchichten($db_link, $Sort, $HelferLevel = 1)
 
 function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)
 {
-    $nurDienst="";
-    if( $DienstID != -1 ) {
+    $nurDienst = "";
+    if ($DienstID != -1) {
         $nurDienst = " and Dienst.DienstID = $DienstID";
     }
-    $nurHelferLevel="";
-    if( $HelferLevel != -1 ) {
+    $nurHelferLevel = "";
+    if ($HelferLevel != -1) {
         $nurHelferLevel = " and HelferLevel = $HelferLevel ";
     }
 
-$sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID $nurHelferLevel $nurDienst";
+    $sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID $nurHelferLevel $nurDienst";
 
 
     $db_erg = mysqli_query($db_link, $sql);
@@ -220,12 +220,12 @@ $sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst W
 
 function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)
 {
-    $nurDienst="";
-    if( $DienstID != -1 ) {
+    $nurDienst = "";
+    if ($DienstID != -1) {
         $nurDienst = " and Dienst.DienstID = $DienstID";
     }
-    $nurHelferLevel="";
-    if( $HelferLevel != -1 ) {
+    $nurHelferLevel = "";
+    if ($HelferLevel != -1) {
         $nurHelferLevel = " and HelferLevel = $HelferLevel ";
     }
 
@@ -771,9 +771,27 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 
 function AlleHelferSchichtenUebersicht($db_link)
 {
-    $sql = "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
-    $sql = $sql . " UNION ALL ";
-    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
+    $sql = '
+SELECT 
+    Helfer.HelferID AS AliasHelferID, -- Alias für HelferID
+    Helfer.HelferLevel,
+    Name,
+    Email,
+    Handy,
+    Was,
+    COALESCE(SUM(Dauer)/10000, 0) AS Dauer
+FROM 
+    Helfer
+LEFT JOIN 
+    EinzelSchicht ON Helfer.HelferID = EinzelSchicht.HelferID
+LEFT JOIN 
+    Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
+LEFT JOIN 
+    Dienst ON Schicht.DienstID = Dienst.DienstID
+GROUP BY 
+    Helfer.HelferID, 
+    Was';
+
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "AlleHelferSchichtenUebersicht ungueltige Abfrage";
