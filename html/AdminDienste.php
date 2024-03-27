@@ -122,7 +122,7 @@ if (isset($_POST['NewSchicht'])) {
 
 if (isset($_POST['DeleteSchicht'])) {
     if (!DeleteSchicht($db_link, $SchichtID, false)) {
-        echo "Erst Helfer aus Schicht austragen<br>";
+        echo "Erst Schicht leeren<br>";
     }
     $SchichtID = 0;
 }
@@ -342,7 +342,7 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Anzahl Helfer (Soll)</td></tr><tr><td style="border: 0px solid black;">
+              <td style="border: 0px solid black;">Anzahl (Soll)</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
               </td>
             <tr>

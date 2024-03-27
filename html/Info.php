@@ -7,7 +7,7 @@ SESSION_START();
 <!doctype html>
 <html>
 <head>
-  <title>Helfer <?php echo EVENTNAME ?> Home</title>
+  <title><?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
 <meta http-equiv="Refresh" content="0; url=<?php echo INFORMATIONS_URL;?>" />

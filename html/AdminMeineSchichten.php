@@ -23,7 +23,7 @@ if ($AdminStatus != 1) {
   <meta name="viewport" content="width=480" />
  </head>
  <body>
-<div><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> <h4 style="display: inline;">Admin: Schichten editieren - 
+<div><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'AdminHelferUebersicht.php';"><b>&larrhk;</b></button> <h4 style="display: inline;">Admin: Schichten editieren - 
 <?php echo "<b>" . EVENTNAME . "</b>"; ?>
 </h4>
 <div style="width: 100%;">

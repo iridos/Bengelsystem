@@ -9,7 +9,7 @@ require '_zeitbereich.php';
 <!DOCTYPE html>
 <html>
 <head>
-<title> Helferdienste  </title>
+<title> Dienste  </title>
 <meta charset="utf-8">
 <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
 <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
@@ -147,7 +147,7 @@ function colorize (e){ //KS
     scheduler.config.full_day=false;
     scheduler.config.readonly_form = true;
     scheduler.config.xml_date="%Y-%m-%d %H:%i"; // deprecated but needed for database format
-    scheduler.config.first_hour = 7;            // only show from this hour on
+    scheduler.config.first_hour = 0;            // only show from this hour on
     scheduler.config.last_hour = 24;            // last hour 
     scheduler.setLoadMode("day");               // dynamic loading loads only current day if needed
     scheduler.config.details_on_create=true;    // ???
