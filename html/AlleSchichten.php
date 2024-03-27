@@ -219,12 +219,13 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     echo '<table  class="commontable">';
     echo "<tr class='infoheader'>";
     echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
+
     $alleHelferLevel = array(1, 2);
 
     foreach ($alleHelferLevel as $HelferLevelIteration) {
         $meine = "";
         if ($HelferLevelIteration == $HelferLevel) {
-            $meine = " &leftarrow; mein Level";
+            $meine = " &leftarrow; mein Level, Schichten werden unten angezeigt";
         }
         $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
         $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
