@@ -191,7 +191,7 @@ function colorize (e){ //KS
     ];
 
     scheduler.templates.tooltip_text = function(start,end,event) {
-       return "<b></b> <pre>"+event.Name+"</pre><br/></b> ";
+       return "<pre>"+event.Name+"</pre><br/></b> ";
     };
 
     // actual init

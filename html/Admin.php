@@ -81,7 +81,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     <td>
        <a class="fallbacklink" href='AdminHelferUebersicht.php'>
           <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
-          <b>Helferübersicht und als Admin &auml;ndern</b>
+          <b>Helferübersicht und als Admin &auml;ndern <br>(Anm: dieses Menü soll die Punkte unterhalb ablösen)</b>
        </a>
     </td>
   </tr>

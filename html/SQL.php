@@ -143,7 +143,7 @@ function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $
         if ($HelferIsAdmin == -1) {
             $sql = "UPDATE Helfer SET Name='" . $HelferName . "',Email='" . $HelferEmail . "',Handy='" . $HelferHandy . "',HelferLevel='$HelferLevel',Passwort='" . $PasswortHash . "' Where HelferId=" . $HelferID;
         } else {
-            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',$HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
         }
           //echo $sql;
         $db_erg = mysqli_query($db_link, $sql);
