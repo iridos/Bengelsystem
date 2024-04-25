@@ -35,6 +35,10 @@ font-size: inherit ;
   color: white;
 }
 
+/*.infoheader th, .infoheader td, .infoheader tr{*/
+.infoheader th{
+  background-color: #9090AF;
+}
 
 #selected th {
   padding-top: 12px;

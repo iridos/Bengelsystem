@@ -9,7 +9,7 @@ require '_zeitbereich.php';
 <!DOCTYPE html>
 <html>
 <head>
-<title> Helferdienste  </title>
+<title> Dienste  </title>
 <meta charset="utf-8">
 <!--meta name="viewport" content="width=device-width, initial-scale=1 ,user-scalable=1"-->
 <script src="scheduler/codebase/dhtmlxscheduler.js"></script>
@@ -191,7 +191,7 @@ function colorize (e){ //KS
     ];
 
     scheduler.templates.tooltip_text = function(start,end,event) {
-       return "<b>Helfer:</b> <pre>"+event.Name+"</pre><br/></b> ";
+       return "<pre>"+event.Name+"</pre><br/></b> ";
     };
 
     // actual init

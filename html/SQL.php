@@ -143,7 +143,7 @@ function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $
         if ($HelferIsAdmin == -1) {
             $sql = "UPDATE Helfer SET Name='" . $HelferName . "',Email='" . $HelferEmail . "',Handy='" . $HelferHandy . "',HelferLevel='$HelferLevel',Passwort='" . $PasswortHash . "' Where HelferId=" . $HelferID;
         } else {
-            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',$HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
         }
           //echo $sql;
         $db_erg = mysqli_query($db_link, $sql);
@@ -191,11 +191,18 @@ function AlleSchichten($db_link, $Sort, $HelferLevel = 1)
     return $db_erg;
 }
 
-function AlleSchichtenCount($db_link, $HelferLevel = 1)
+function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)
 {
+    $nurDienst = "";
+    if ($DienstID != -1) {
+        $nurDienst = " and Dienst.DienstID = $DienstID";
+    }
+    $nurHelferLevel = "";
+    if ($HelferLevel != -1) {
+        $nurHelferLevel = " and HelferLevel = $HelferLevel ";
+    }
 
-    //$sql = "select SUM(Soll) As Anzahl from SchichtUebersicht where HelferLevel=$HelferLevel";
-    $sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID and HelferLevel=$HelferLevel";
+    $sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID $nurHelferLevel $nurDienst";
 
 
     $db_erg = mysqli_query($db_link, $sql);
@@ -211,11 +218,19 @@ function AlleSchichtenCount($db_link, $HelferLevel = 1)
 }
 
 
-function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
+function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)
 {
+    $nurDienst = "";
+    if ($DienstID != -1) {
+        $nurDienst = " and Dienst.DienstID = $DienstID";
+    }
+    $nurHelferLevel = "";
+    if ($HelferLevel != -1) {
+        $nurHelferLevel = " and HelferLevel = $HelferLevel ";
+    }
 
-    $sql = "select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=$HelferLevel";
 
+    $sql = "select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID $nurHelferLevel $nurDienst";
 
     $db_erg = mysqli_query($db_link, $sql);
 
@@ -242,7 +257,7 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
         $sql_helferlevel = "";
     }
 
-    $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= '" . $Von . "' and Von <'" . $Bis . "' and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel order by Was,Von";
+    $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll, Dienst.DienstID from Dienst,SchichtUebersicht where Von >= '" . $Von . "' and Von <'" . $Bis . "' and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel order by Was,Von";
     error_log("AlleSchichtenImZeitbereich sql " . $sql);
     $db_erg = mysqli_query($db_link, $sql);
 
@@ -754,11 +769,30 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 }
 
 
-function AlleHelferSchichtenUebersicht($db_link)
+function AlleHelferSchichtenUebersicht($db_link,$HelferLevel)
 {
-    $sql = "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,Was,SUM(Dauer)/10000 as Dauer from Helfer,EinzelSchicht INNER JOIN Schicht INNER JOIN Dienst where Helfer.HelferID=EinzelSchicht.HelferID and EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID group by Helfer.HelferID,Was";
-    $sql = $sql . " UNION ALL ";
-    $sql = $sql . "select Helfer.HelferID as AliasHelferID,Helfer.HelferLevel,Name,Email,Handy,'-' as Was,0 as Dauer from Helfer,EinzelSchicht where not exists(select 1 from EinzelSchicht where Helfer.HelferID=EinzelSchicht.HelferID)";
+    $sql = "
+SELECT 
+    Helfer.HelferID AS AliasHelferID, -- Alias für HelferID
+    Helfer.HelferLevel,
+    Name,
+    Email,
+    Handy,
+    Was,
+    COALESCE(SUM(Dauer)/10000, 0) AS Dauer
+FROM 
+    Helfer
+LEFT JOIN 
+    EinzelSchicht ON Helfer.HelferID = EinzelSchicht.HelferID
+LEFT JOIN 
+    Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
+LEFT JOIN 
+    Dienst ON Schicht.DienstID = Dienst.DienstID
+WHERE Helfer.HelferLevel = $HelferLevel
+GROUP BY 
+    Helfer.HelferID, 
+    Was";
+
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
         echo "AlleHelferSchichtenUebersicht ungueltige Abfrage";
@@ -803,6 +837,21 @@ function HelferLevel($db_link)
     }
     return $db_erg;
 }
+
+function alleHelferLevel($db_link)
+{
+$alleHelferLevel = array();
+$db_erg=HelferLevel($db_link);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferLevel = $zeile['HelferLevel'];
+        $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung']; 
+        $alleHelferLevel[$HelferLevel] = $HelferLevelBeschreibung;
+    };
+return $alleHelferLevel;
+}
+
+
+
 // TODO: als Array zurueckgeben (CreateHelfer anpassen)
 // TODO:
 //function HelferLevel($db_link){

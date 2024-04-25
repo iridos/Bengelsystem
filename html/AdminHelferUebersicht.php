@@ -73,13 +73,6 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
 </table>
 <table class="commontable collapsible">
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
-$dauer = 0;
-$i = 0;
-$OldAliasHelferID = "-1";
-$EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
-$HelferUeberschrift = "";
-
 // Function to output helper information
 function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile)
 {
@@ -93,31 +86,45 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
     echo "$EinzelDienstStundenZeile</td></tr>\n ";
 }
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $HelferName = $zeile["Name"];
-        $HelferLevel = $zeile["HelferLevel"];
-        $AliasHelferID = $zeile["AliasHelferID"];
-    if ($AliasHelferID != $OldAliasHelferID) {
-        if ($EinzelDienstStundenZeile != "") {
-             outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
+// Helferlevel holen, wir listen die Level nacheinander auf
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
+{ 
+    echo "<tr class='header infoheader'><th colspan=3>($HelferLevelIteration) $HelferLevelBeschreibung</th></tr>";
+    $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
+    $dauer = 0;
+    $i = 0;
+    $OldAliasHelferID = "-1";
+    $EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
+    $HelferUeberschrift = "";
+    
+    
+    echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten</th><th>Schichten Ändern</th></tr>";
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+            $HelferName = $zeile["Name"];
+            $HelferLevel = $zeile["HelferLevel"];
+            $AliasHelferID = $zeile["AliasHelferID"];
+        if ($AliasHelferID != $OldAliasHelferID) {
+            if ($EinzelDienstStundenZeile != "") {
+                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
+            }
+                $dauer = 0;
+                $EinzelDienstStundenZeile = "";
+                $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>&nbsp;$HelferName (Lvl:$HelferLevel) </div></form>";
+                $OldHelferName = $HelferName;
+                $OldAliasHelferID = $AliasHelferID;
+                $i += 1;
         }
-            $dauer = 0;
-            $EinzelDienstStundenZeile = "";
-            $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>$HelferName (Lvl:$HelferLevel) </div></form>";
-            $OldHelferName = $HelferName;
-            $OldAliasHelferID = $AliasHelferID;
-            $i += 1;
+            $EinzelDienstStundenZeile .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
+            $EinzelDienstStundenZeile .= $zeile["Was"];
+            $EinzelDienstStundenZeile .= "</td></tr>";
+            $dauer = $dauer + (int)$zeile["Dauer"];
     }
-        $EinzelDienstStundenZeile .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
-        $EinzelDienstStundenZeile .= $zeile["Was"];
-        $EinzelDienstStundenZeile .= "</td></tr>";
-        $dauer = $dauer + (int)$zeile["Dauer"];
+    if ($EinzelDienstStundenZeile != "") {
+                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
+    }
+    
 }
-if ($EinzelDienstStundenZeile != "") {
-             outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
-}
-
-
 echo "</table>";
 
 ?>

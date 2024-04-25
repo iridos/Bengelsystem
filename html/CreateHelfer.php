@@ -70,7 +70,7 @@ if (isset($_POST['sent'])) {
             //echo "InserId = ".$insertID;
 
             // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-            echo "Helfer mit Emailadresse " . $HelferEmail . " Angelegt.<br><br>";
+            echo "Account mit Emailadresse " . $HelferEmail . " Angelegt.<br><br>";
             $HelferName = '';
             $HelferEmail = '';
             $HelferHandy = '';
@@ -79,7 +79,7 @@ if (isset($_POST['sent'])) {
 
             //die('<div class="Helfer wurde angelegt.</div>');
         } else {
-            echo "Helfer konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse " . $HelferEmail . " bereits.<br><br>";
+            echo "Account konnte nicht Angelegt werden, möglichweise exisistiert die Emailadresse " . $HelferEmail . " bereits.<br><br>";
         }
     } else {
         // Fehlermeldungen ausgeben:
