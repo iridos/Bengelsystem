@@ -160,17 +160,11 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
            <tr><td>    
               <select name="helfer-level">
 <?php
-$db_erg = HelferLevel($db_link);
-$selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $HelferLevel = $zeile['HelferLevel'];
-    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
-    if ($HelferLevel == 1) {
-        $selected = " selected " ;
-    };
-    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
-    $selected = "";
-}
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    $selected = ($HelferLevelIteration == $HelferLevel) ? "selected" : "";
+    echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
+}  
 ?>
               </select>
               </td>

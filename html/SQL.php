@@ -769,9 +769,9 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 }
 
 
-function AlleHelferSchichtenUebersicht($db_link)
+function AlleHelferSchichtenUebersicht($db_link,$HelferLevel)
 {
-    $sql = '
+    $sql = "
 SELECT 
     Helfer.HelferID AS AliasHelferID, -- Alias für HelferID
     Helfer.HelferLevel,
@@ -788,9 +788,10 @@ LEFT JOIN
     Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
 LEFT JOIN 
     Dienst ON Schicht.DienstID = Dienst.DienstID
+WHERE Helfer.HelferLevel = $HelferLevel
 GROUP BY 
     Helfer.HelferID, 
-    Was';
+    Was";
 
     $db_erg = mysqli_query($db_link, $sql);
     if (! $db_erg) {
@@ -836,6 +837,21 @@ function HelferLevel($db_link)
     }
     return $db_erg;
 }
+
+function alleHelferLevel($db_link)
+{
+$alleHelferLevel = array();
+$db_erg=HelferLevel($db_link);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferLevel = $zeile['HelferLevel'];
+        $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung']; 
+        $alleHelferLevel[$HelferLevel] = $HelferLevelBeschreibung;
+    };
+return $alleHelferLevel;
+}
+
+
+
 // TODO: als Array zurueckgeben (CreateHelfer anpassen)
 // TODO:
 //function HelferLevel($db_link){

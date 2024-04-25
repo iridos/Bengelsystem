@@ -220,9 +220,9 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     echo "<tr class='infoheader'>";
     echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
 
-    $alleHelferLevel = array(1, 2);
+    $alleHelferLevel = alleHelferLevel($db_link);
 
-    foreach ($alleHelferLevel as $HelferLevelIteration) {
+    foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
         $meine = "";
         if ($HelferLevelIteration == $HelferLevel) {
             $meine = " &leftarrow; mein Level, Schichten werden unten angezeigt";
@@ -230,7 +230,7 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
         $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
         $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
        // $HelferLevelName wird in konfiguration.php gesetzt. TODO: Array aus Datenbank mit bestehender Funktion in _login.php oder SQL.php auslesen.
-        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelName[$HelferLevelIteration] (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
+        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
     }
 
 
