@@ -47,7 +47,7 @@ if (isset($_POST['change'])) {
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID);
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
