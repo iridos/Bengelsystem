@@ -99,9 +99,9 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
         $selectedSet = true;
     }
-    if( !$selectedSet ) {
-      echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
-    }
+}
+if( !$selectedSet ) {
+  echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
 }
 
 
