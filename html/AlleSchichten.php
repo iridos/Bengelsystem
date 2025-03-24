@@ -13,8 +13,7 @@ require '_login.php';
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
- 
-  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script>
+  <script src="<?php echo JQUERY ?>" type="text/javascript"></script> 
   <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>

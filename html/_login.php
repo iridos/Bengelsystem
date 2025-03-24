@@ -49,10 +49,20 @@ if (!isset($_SESSION["HelferID"])) {
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src="js/helferdb.js" type="text/javascript"></script>
+  <script src="<?php echo JQUERY ?>" type="text/javascript"></script>
+  <script>
+  console.log("log","<?php echo JQUERY ?>");
+  window.onload = function() {
+    if (!window.jQuery) {
+       document.getElementById("jquerywarn").innerHTML = "<font size=+2 color=red><b>You have not installed the jquery library!</b></font>";
+    }
+}
+</script>
   <meta name="viewport" content="width=480" />
   <meta charset="utf-8">
 </head>
 <body>
+<div id=jquerywarn></div>
 <form method="post" action="#Info">
 
   <fieldset>

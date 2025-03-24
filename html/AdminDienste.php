@@ -28,10 +28,9 @@ if ($AdminStatus != 1) {
 
 
 DatenbankAufDeutsch($db_link);
-
-$DienstID = $_SESSION["DienstID"];
+isset($_SESSION["DienstID"]) && $DienstID = $_SESSION["DienstID"];
 $NewDienstID = 0;
-$SchichtID = $_SESSION["SchichtID"];
+isset($_SESSION["SchichtID"]) && $SchichtID = $_SESSION["SchichtID"];
 
 
 $HelferID = $_SESSION["HelferID"];
@@ -172,8 +171,9 @@ $Gruppe = "";
 $HelferLevel = "";
 
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    if ($zeile['DienstID'] != $DienstID) {
+    if (isset ($DienstID) && $zeile['DienstID'] != $DienstID) {
         echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
+        $selectedset = true ;
     } else {
         echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
 
@@ -184,6 +184,9 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $Gruppe = $zeile['ElternDienstID'];
         $HelferLevel = $zeile['HelferLevel'];
     }
+}
+if( ! $selectedset ) { 
+echo "<option value='none' selected='selected'>Bitte auswählen</option>";
 }
 
 echo "</select>";

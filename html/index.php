@@ -13,11 +13,20 @@ require '_login.php';
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src=js/helferdb.js></script>
+  <script src="<?php echo JQUERY ?>" type="text/javascript"></script>
+  <script>
+  window.onload = function() {
+    if (!window.jQuery) {
+       document.getElementById("jquerywarn").innerHTML = "<font size=+2 color=red><b>You have not installed the jquery library!</b></font>";
+    }
+}
+</script>
 <meta name="viewport" content="width=480" />
 <meta charset="utf-8">
 </head>
 <body>
 <div style="width: 100%;">
+<div id=jquerywarn></div>
 
 <table class="commontable" >
   <tr onclick="window.location.href='Info.php';">

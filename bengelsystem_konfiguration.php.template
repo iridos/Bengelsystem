@@ -10,6 +10,8 @@ define('INFORMATIONS_URL', "https://meine-tolle-jonglierconvention.de");
 define('SECRET_KEY', "irgendwasZufaelliges"); // emails, see below
 define('SECRET_VERIFICATION', "irgendwasanderes,egalwas"); // emails, see below
 define('URLPREFIX', "https://https://meine-tolle-jonglierconvention.de/Bengelsystem/"); // our servername
+// local copy of jquery
+define('JQUERY', 'js/jquery-3.7.1.min.js');
 
 define('TAGE_DAUER', 4);
 

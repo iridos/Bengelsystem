@@ -21,8 +21,13 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
                 echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
                 echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
+        $selectedSet = true;
         }
     }
+    if( !$selectedSet ) {
+      echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
+    }
+
     echo '</select></form>';
 }
 
