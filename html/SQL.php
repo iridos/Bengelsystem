@@ -16,16 +16,14 @@ function ConnectDB()
 
 function CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel = 1)
 {
-        $HelferName = mysqli_real_escape_string($db_link, $HelferName);
-        $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
-        $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
-        // level: Teilnehmer/Dauerhelfer/(Teamleiter)
-        $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
+    $HelferName = mysqli_real_escape_string($db_link, $HelferName);
+    $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
+    $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
+    // level: Teilnehmer/Dauerhelfer/(Teamleiter)
+    $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
 
-        //$HelferName=mysqli_real_escape($db_link,$HelferName);
-        $HelferPasswort = "€" . $HelferPasswort . "ß";
-        //echo "<b>".$HelferPasswort."</b>";
-        $PasswortHash = password_hash($HelferPasswort, PASSWORD_DEFAULT);
+    $HelferPasswort = "€" . $HelferPasswort . "ß";
+    $PasswortHash = password_hash($HelferPasswort, PASSWORD_DEFAULT);
 
 
     // Neuen Helfer anlegen
