@@ -88,8 +88,7 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
 
 // Helferlevel holen, wir listen die Level nacheinander auf
 $alleHelferLevel = alleHelferLevel($db_link);
-foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
-{ 
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
     echo "<tr class='header infoheader'><th colspan=3>($HelferLevelIteration) $HelferLevelBeschreibung</th></tr>";
     $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
     $dauer = 0;
@@ -97,8 +96,8 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung)
     $OldAliasHelferID = "-1";
     $EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
     $HelferUeberschrift = "";
-    
-    
+
+
     echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten</th><th>Schichten Ändern</th></tr>";
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
             $HelferName = $zeile["Name"];
@@ -123,7 +122,6 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung)
     if ($EinzelDienstStundenZeile != "") {
                  outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile);
     }
-    
 }
 echo "</table>";
 

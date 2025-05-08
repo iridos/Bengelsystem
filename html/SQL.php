@@ -769,7 +769,7 @@ function DeleteSchicht($db_link, $SchichtID, $Rekursiv)
 }
 
 
-function AlleHelferSchichtenUebersicht($db_link,$HelferLevel)
+function AlleHelferSchichtenUebersicht($db_link, $HelferLevel)
 {
     $sql = "
 SELECT 
@@ -840,14 +840,14 @@ function HelferLevel($db_link)
 
 function alleHelferLevel($db_link)
 {
-$alleHelferLevel = array();
-$db_erg=HelferLevel($db_link);
+    $alleHelferLevel = array();
+    $db_erg = HelferLevel($db_link);
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferLevel = $zeile['HelferLevel'];
-        $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung']; 
+        $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
         $alleHelferLevel[$HelferLevel] = $HelferLevelBeschreibung;
     };
-return $alleHelferLevel;
+    return $alleHelferLevel;
 }
 
 

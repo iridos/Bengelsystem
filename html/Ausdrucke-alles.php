@@ -100,27 +100,30 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
   </tr>
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $HelferName = $zeile["Name"];
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    echo "<tr class='header infoheader'><th colspan=3>$HelferLevelBeschreibung</th>";
+    $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+            $HelferName = $zeile["Name"];
 
-    if ($HelferName != $OldHelferName) {
-            echo "</table>";
-            //echo '<table class="commontable" style="page-break-before:always">';
-            echo '<table class="commontable">';
-            echo "<tr><th colspan=3>";
-            echo $HelferName;
-            echo "</th></tr>";
-            $OldHelferName = $HelferName;
+        if ($HelferName != $OldHelferName) {
+                echo "</table>";
+                //echo '<table class="commontable" style="page-break-before:always">';
+                echo '<table class="commontable">';
+                echo "<tr><th colspan=3>";
+                echo $HelferName;
+                echo "</th></tr>";
+                $OldHelferName = $HelferName;
+        }
+
+            echo "<tr><td style='width:100px'>";
+        echo (int)$zeile["Dauer"];
+            echo "</td><td>";
+        echo $zeile["Was"];
+            echo "</td></tr>";
     }
-
-        echo "<tr><td style='width:100px'>";
-    echo (int)$zeile["Dauer"];
-        echo "</td><td>";
-    echo $zeile["Was"];
-        echo "</td></tr>";
 }
-
 
 echo "</table>";
 

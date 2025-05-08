@@ -164,7 +164,7 @@ $alleHelferLevel = alleHelferLevel($db_link);
 foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
     $selected = ($HelferLevelIteration == $HelferLevel) ? "selected" : "";
     echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
-}  
+}
 ?>
               </select>
               </td>
