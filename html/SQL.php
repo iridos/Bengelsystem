@@ -14,348 +14,297 @@ function ConnectDB()
     return $db_link;
 }
 
-function CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel = 1) #stmt
+function CreateHelfer($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferPasswort, $HelferLevel = 1)
 {
+    $HelferName = mysqli_real_escape_string($db_link, $HelferName);
+    $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
+    $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
+    // level: Teilnehmer/Dauerhelfer/(Teamleiter)
+    $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
 
     $HelferPasswort = "€" . $HelferPasswort . "ß";
     $PasswortHash = password_hash($HelferPasswort, PASSWORD_DEFAULT);
 
-    // Prepared Statement erstellen
-    $sql = "INSERT INTO Helfer (Name, Email, Handy, Status, BildFile, DoReport, Passwort, HelferLevel) 
-            VALUES (?, ?, ?, 1, '', 0, ?, ?)";
-    $stmt = mysqli_prepare($db_link, $sql);
 
-    if (!$stmt) {
-        error_log("Fehler beim Vorbereiten des Statements: " . mysqli_error($db_link));
-        return false;
-    }
-    // Parameter binden (ssssi = 4 Strings + 1 Integer)
-    mysqli_stmt_bind_param($stmt, "ssssi", $HelferName, $HelferEmail, $HelferHandy, $PasswortHash, $HelferLevel);
-
-    // Query ausführen
-    $success = mysqli_stmt_execute($stmt);
-
-    if (!$success) {
-        error_log("Fehler beim Einfügen: " . mysqli_stmt_error($stmt));
-    }
-
-    $db_erg = $success ? $stmt : false;
-    mysqli_stmt_close($stmt);
+    // Neuen Helfer anlegen
+    $sql = "INSERT INTO Helfer(Name,Email,Handy,Status,BildFile,DoReport,Passwort,HelferLevel) VALUES ('$HelferName','$HelferEmail','$HelferHandy',1,'',0,'$PasswortHash','$HelferLevel')";
+    $db_erg = mysqli_query($db_link, $sql);
     error_log(date('Y-m-d H:i') . "  CreateHelfer: $HelferName angelegt mit Email $HelferEmail Handy $HelferHandy \n", 3, LOGFILE);
-
     return $db_erg;
 }
 
-
-// Testet fuer urllogin, ob Helfer bereits existiert
-function HelferIstVorhanden($db_link, $Email)#stmt
+// testet fuer urllogin, ob Helfer bereits existiert
+function HelferIstVorhanden($db_link, $Email)
 {
-    $sql = "SELECT COUNT(HelferID) AS Anzahl FROM Helfer WHERE Email = ?";
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        error_log("Fehler beim Vorbereiten des Statements: " . mysqli_error($db_link));
-        return false;
-    }
-    mysqli_stmt_bind_param($stmt, "s", $Email);
-    mysqli_stmt_execute($stmt);
-
-    $result = mysqli_stmt_get_result($stmt);
-    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    mysqli_stmt_close($stmt);
-    return $zeile['Anzahl'] ?? 0;
+    $Email = mysqli_real_escape_string($db_link, $Email);
+    $sql = "SELECT count(HelferID) as Anzahl FROM Helfer Where Email = '" . $Email . "'";
+    $db_erg = mysqli_query($db_link, $sql);
+    $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    return $zeile['Anzahl'];
 }
 
-
 //TODO: pruefen, ob Helfer bereits eingeloggt
-function HelferLogin($db_link, $HelferEmail, $HelferPasswort, $HelferStatus)#stmt
+function HelferLogin($db_link, $HelferEmail, $HelferPasswort, $HelferStatus)
 {
-    $sql = "SELECT HelferID, Admin, Name, Passwort, HelferLevel FROM Helfer WHERE Email = ?";
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        error_log("Fehler beim Vorbereiten des Statements: " . mysqli_error($db_link));
-        die('Login ungültige Abfrage');
-    }
-    mysqli_stmt_bind_param($stmt, "s", $HelferEmail);
-    if (!mysqli_stmt_execute($stmt)) {
-        error_log("Login execute fehlgeschlagen: " . mysqli_stmt_error($stmt));
-        die('Login: Fehler beim Ausführen der Abfrage.');
-    }
-    mysqli_stmt_execute($stmt);
+        $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
+        $HelferStatus = mysqli_real_escape_string($db_link, $HelferStatus);
 
-    $result = mysqli_stmt_get_result($stmt);
-
-    while ($zeile = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+    //echo "Test<br>";
+    // Helfer Suchen
+    $sql = "Select HelferID,Admin,Name,Passwort,HelferLevel From Helfer Where Email='" . $HelferEmail . "'";
+    //echo $sql;
+    $db_erg = mysqli_query($db_link, $sql);
+    if (! $db_erg) {
+        echo "Login ungueltige Abfrage";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferPasswort = "€" . $HelferPasswort . "ß";
-
+        //echo "<b>".$HelferPasswort."</b><br>";
+        //echo "<b>".$zeile['Passwort']."</b><br>";
         if (password_verify($HelferPasswort, $zeile['Passwort'])) {
             $_SESSION["HelferID"] = $zeile['HelferID'];
             $_SESSION["HelferName"] = $zeile['Name'];
-            // TODO: das sollte nur gesetzt werden, wenn der Helfer Admin ist
-            // TODO done - test ob nichts kaputt geht
-            $_SESSION["AdminStatus"] = $zeile['Admin'];
-            if( $_SESSION["AdminStatus"] == 1) {
-                $_SESSION["AdminID"] = $zeile['HelferID'];
-            }
-            $_SESSION["HelferLevel"] = $zeile['HelferLevel'];
-
-            mysqli_stmt_close($stmt);
-            return 1;
+                                //TODO: das sollte nur gesetzt werden, wenn der Helfer Admin ist
+                                $_SESSION["AdminID"] = $zeile['HelferID'];
+                                $_SESSION["AdminStatus"] = $zeile['Admin'];
+                                $_SESSION["HelferLevel"] = $zeile['HelferLevel'];
+                return 1;
         } else {
             echo "Falsches Passwort<br>";
-            mysqli_stmt_close($stmt);
-            return 0;
+                return 0;
         }
     }
-
-    mysqli_stmt_close($stmt);
-    return 0;
 }
-
 
 // Liste der Helfer fuer Admin-Seite
 //TODO: HelferLevel
-
-function HelferListe($db_link)#stmt
-{
-    $sql = "SELECT HelferID, Name FROM Helfer";
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        echo "Helferliste ungültige Abfrage";
-        die('Ungültige Abfrage: ' . mysqli_error($db_link));
-    }
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    // Ergebniszeiger zurückgeben, um kompatibel zu bleiben
-    return $result;
-}
-
-
-function Helferdaten($db_link, $HelferID)#stmt
+function HelferListe($db_link)
 {
 
-    $sql = "SELECT * FROM Helfer Where HelferID = ?";
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        echo "Helferdaten: Fehler beim Vorbereiten des Statements<br>\n";
-        die('Prepare failed: ' . mysqli_error($db_link));
+    $sql = "SELECT HelferID,Name FROM Helfer";
+    $db_erg = mysqli_query($db_link, $sql);
+    if (! $db_erg) {
+        echo "Helferliste ungueltige Abfrage";
+        die('Unueltige Abfrage: ' . mysqli_error($db_link));
     }
-    mysqli_stmt_bind_param($stmt, "i", $HelferID);
-    if (!mysqli_stmt_execute($stmt)) {
-        echo "Helferdaten: Fehler bei der Ausführung<br>\n";
-        die('Execution failed: ' . mysqli_stmt_error($stmt));
-    }
-    $db_erg = mysqli_stmt_get_result($stmt);
+
     return $db_erg;
 }
 
 
-
-function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)#stmt
-{
-    $result = false;
-
-    if ($HelferNewPasswort == "") {
-        if ($HelferIsAdmin == -1) {
-            $sql = "UPDATE Helfer SET Name = ?, Email = ?, Handy = ?, HelferLevel = ? WHERE HelferId = ?";
-            $stmt = mysqli_prepare($db_link, $sql);
-            if (!$stmt) {
-                die("Prepare failed: " . mysqli_error($db_link));
-            }
-            mysqli_stmt_bind_param($stmt, "ssssi", $HelferName, $HelferEmail, $HelferHandy, $HelferLevel, $HelferID);
-        } else {
-            $sql = "UPDATE Helfer SET Name = ?, Email = ?, Handy = ?, Admin = ?, HelferLevel = ? WHERE HelferId = ?";
-            $stmt = mysqli_prepare($db_link, $sql);
-            if (!$stmt) {
-                die("Prepare failed: " . mysqli_error($db_link));
-            }
-            mysqli_stmt_bind_param($stmt, "ssssii", $HelferName, $HelferEmail, $HelferHandy, $HelferIsAdmin, $HelferLevel, $HelferID);
-        }
-
-        if (!mysqli_stmt_execute($stmt)) {
-            die("Execute failed: " . mysqli_stmt_error($stmt));
-        }
-
-        $result = true;
-        echo "<li>Helferdaten geändert</li>";
-
-        $log_prefix = ($AdminID != 0) ? "(Admin $AdminID) " : "";
-        error_log(date('Y-m-d H:i') . " {$log_prefix}Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Admin: $HelferIsAdmin\n", 3, LOGFILE);
-
-        mysqli_stmt_close($stmt);
-    } else {
-        $HelferNewPasswort = "€" . $HelferNewPasswort . "ß";
-        $PasswortHash = password_hash($HelferNewPasswort, PASSWORD_DEFAULT);
-
-        if ($HelferIsAdmin == -1) {
-            $sql = "UPDATE Helfer SET Name = ?, Email = ?, Handy = ?, HelferLevel = ?, Passwort = ? WHERE HelferId = ?";
-            $stmt = mysqli_prepare($db_link, $sql);
-            if (!$stmt) {
-                die("Prepare failed: " . mysqli_error($db_link));
-            }
-            mysqli_stmt_bind_param($stmt, "sssssi", $HelferName, $HelferEmail, $HelferHandy, $HelferLevel, $PasswortHash, $HelferID);
-        } else {
-            $sql = "UPDATE Helfer SET Name = ?, Email = ?, Handy = ?, HelferLevel = ?, Passwort = ?, Admin = ? WHERE HelferId = ?";
-            $stmt = mysqli_prepare($db_link, $sql);
-            if (!$stmt) { die("Prepare failed: " . mysqli_error($db_link)); }
-            mysqli_stmt_bind_param($stmt, "ssssssi", $HelferName, $HelferEmail, $HelferHandy, $HelferLevel, $PasswortHash, $HelferIsAdmin, $HelferID);
-        }
-
-        if (!mysqli_stmt_execute($stmt)) { die("HelferdatenAendern failed: " . mysqli_stmt_error($stmt)); }
-
-        $result = true;
-        echo "<li>Passwort geändert</li>";
-
-        $log_prefix = ($AdminID != 0) ? "(Admin $AdminID) " : "";
-        error_log(date('Y-m-d H:i') . " {$log_prefix}Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
-
-        mysqli_stmt_close($stmt);
-    }
-
-    return $result;
-}
-
-function AlleSchichten($db_link, $Sort, $HelferLevel = 1)#stmt
-{
-    $sql =  "SELECT SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,";
-    $sql .= "DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') AS Tag,Soll ";
-    $sql .= "FROM Dienst,SchichtUebersicht WHERE Dienst.DienstID=SchichtUebersicht.DienstID AND Dienst.Helferlevel=? ";
-    $sql .= ($Sort == '1')
-        ? " ORDER BY Von"
-        : " ORDER BY Was,Von";
-
-    $stmt = mysqli_prepare($db_link,$sql);
-    if (!$stmt) { die("Alleschichten prepare failed " .  mysqli_error($db_link)); }
-
-    mysqli_stmt_bind_param($stmt, "i", $HelferLevel);
-    if(!mysqli_stmt_execute($stmt)){die ( "AlleSchichten fehlgeschlagen. sort: $Sort  err: " . mysqli_stmt_error($stmt));}
-
-    $result = mysqli_stmt_get_result($stmt);
-    return $result;
-}
-
-function AlleSchichtenCount($db_link, $HelferLevel = 1)#stmt
-{
-    $sql =  "SELECT SUM(Soll) as Anzahl, HelferLevel 
-             FROM SchichtUebersicht,Dienst 
-             WHERE SchichtUebersicht.DienstID=Dienst.DienstID AND HelferLevel=?";
-
-    $stmt = mysqli_prepare($db_link,$sql);
-    if(!$stmt) { die("AlleSchichtenCount prepare failed: " . mysqli_error($db_link)); }
-
-    mysqli_stmt_bind_param($stmt, "i", $HelferLevel);
-    if(!mysqli_stmt_execute($stmt)){die("AlleSchichtenCount execute failed: " . mysqli_error($db_link));}
-
-    $result = mysqli_stmt_get_result($stmt);
-
-    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    return $zeile['Anzahl'];
-}
-
-
-function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)#stmt
-{
-    $sql = "SELECT Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst ";
-    $sql .= "Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=?";
-
-    $stmt = mysqli_prepare($db_link,$sql);
-    if(!$stmt){ die("AlleBelegteSchichtenCount prepare failed " . mysqli_error($db_link)); }
-
-    mysqli_stmt_bind_param($stmt, "i", $HelferLevel);
-    if(!mysqli_stmt_execute($stmt)){ die("AlleBelegteSchichtenCount execute failed: " . mysqli_stmt_error($stmt)); }
-    $result = mysqli_stmt_get_result($stmt);
-
-    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    return $zeile['Anzahl'];
-}
-
-
-function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)#stmt
-{
-    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
-    // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
-    # bei -1 nicht in Suche einschliessen
-    $sql_helferlevel = ($HelferLevel == -1)
-        ? ""
-        : "and Dienst.HelferLevel=?";
-
-    $sql =  "SELECT SchichtID,Was,
-                DATE_FORMAT(Von,'%a %H:%i') AS Ab,
-                DATE_FORMAT(Bis,'%a %H:%i') AS Bis,
-                C AS Ist,
-                DATE_FORMAT(Von,'%W %d %M') As Tag, Soll
-             FROM Dienst,SchichtUebersicht
-             WHERE Von >= ? and Von < ? and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel
-             ORDER BY Was,Von";
-    $stmt = mysqli_prepare($db_link, $sql);
-    error_log("AlleSchichtenImZeitbereich sql " . $sql);
-    if(!$stmt) { die("AlleSchichtenImZeitbereich prepare failed " . mysqli_error($db_link)); }
-
-    if ($Helferlevel == -1)
-    {
-        mysqli_stmt_bind_param($stmt, "ii", $Von, $Bis);
-    } else {
-         mysqli_stmt_bind_param($stmt, "iii", $Von, $Bis, $HelferLevel);
-    }
-    if(!mysqli_stmt_execute($stmt)) { die ( "AlleSchichtenImZeitbereich query failed: " . mysqli_stmt_error($stmt));}
-
-    $result = mysqli_stmt_get_result($stmt);
-    return $result ?: null;
-}
-
-
-function AlleSchichtenEinesHelfers($db_link, $HelferID)#stmt
+function Helferdaten($db_link, $HelferID)
 {
 
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
 
-    $sql =  "SELECT EinzelSchicht.SchichtID ,EinzelSchichtID,Was,
-                    DATE_FORMAT(Von,'%a %H:%i') AS Ab,
-                    DATE_FORMAT(Bis,'%a %H:%i') AS Bis
-             FROM   EinzelSchicht,Schicht,Dienst 
-             WHERE  EinzelSchicht.SchichtID=Schicht.SchichtID and
-                    Schicht.DienstID = Dienst.DienstID and HelferID=? 
-             ORDER BY Von";
-    $stmt = mysqli_prepare($db_link,$sql);
-    if(!$stmt) { die("AlleSchichtenEinesHelfers prepare failed " . mysqli_error($db_link));}
-    mysqli_stmt_bind_param($stmt, "i", $HelferID);
-    if(!mysqli_stmt_execute($stmt){ die("AlleSchichtenEinesHelfers execute failed HelferId $HelferID" . mysqli_stmt_error($stmt));}
-    $result = mysqli_smt_get_result($stmt);
-    return $result;
-}
-
-function HelferLoeschen($db_link, $HelferID, $AdminID)#stmt
-{
-    $result = Helferdaten($db_link, $HelferID);
-    $HelferName = "(unbekannt)";
-    while ($zeile = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-        $HelferName = $zeile['Name'];
+    $sql = "SELECT * FROM Helfer Where HelferID =" . $HelferID;
+    $db_erg = mysqli_query($db_link, $sql);
+    if (! $db_erg) {
+        echo "Helferdaten ungueltige Abfrage<br>\n";
+        echo "sql:$sql<br>\n";
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
 
-    $result = AlleSchichtenEinesHelfers($db_link, $HelferID);
-    $AnzahlHelferschichten = mysqli_num_rows($result);
+    return $db_erg;
+}
 
-    if ($AnzahlHelferschichten > 0) {
+
+
+function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)
+{
+
+    $HelferID = mysqli_real_escape_string($db_link, $HelferID);
+    $HelferName = mysqli_real_escape_string($db_link, $HelferName);
+    $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
+    $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
+    $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
+
+    if ($HelferNewPasswort == "") {
+        //$sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' ".($HelferIsAdmin!=-1)?',Admin='$HelferIsAdmin.':'." Where HelferId=".$HelferID;
+        if ($HelferIsAdmin == -1) {
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',HelferLevel='$HelferLevel' Where HelferId=" . $HelferID;
+        } else {
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',Admin=$HelferIsAdmin,HelferLevel='$HelferLevel' Where HelferId=" . $HelferID;
+        }
+        //echo $sql;
+        $db_erg = mysqli_query($db_link, $sql);
+        echo "<li>Helferdaten geändert</li>";
+        if ($AdminID != 0) {
+                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Admin: $HelferIsAdmin\n", 3, LOGFILE);
+        } else {
+                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Admin: $HelferIsAdmin\n", 3, LOGFILE);
+        }
+    } else {
+        $HelferNewPasswort = "€" . $HelferNewPasswort . "ß";
+        $PasswortHash = password_hash($HelferNewPasswort, PASSWORD_DEFAULT);
+        if ($HelferIsAdmin == -1) {
+            $sql = "UPDATE Helfer SET Name='" . $HelferName . "',Email='" . $HelferEmail . "',Handy='" . $HelferHandy . "',HelferLevel='$HelferLevel',Passwort='" . $PasswortHash . "' Where HelferId=" . $HelferID;
+        } else {
+            $sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy',$HelferLevel='$HelferLevel',Passwort='$PasswortHash',Admin=$HelferIsAdmin Where HelferId=" . $HelferID;
+        }
+          //echo $sql;
+        $db_erg = mysqli_query($db_link, $sql);
+        echo "<li>Passwort geändert</li>";
+        if ($AdminID != 0) {
+                  error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
+        } else {
+                  error_log(date('Y-m-d H:i') . "Helferdaten update: Name: $HelferName (HelferID:$HelferID) Email: $HelferEmail Handy: $HelferHandy HelferLevel: $HelferLevel Passwort: neu gesetzt\n", 3, LOGFILE);
+        }
+    }
+
+    if (! $db_erg) {
+        echo "HelferdatenAendern ungueltiges Statement";
+        echo $sql;
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+
+    return $db_erg;
+}
+
+
+
+
+function AlleSchichten($db_link, $Sort, $HelferLevel = 1)
+{
+
+    $Sort = mysqli_real_escape_string($db_link, $Sort);
+
+    if ($Sort == '1') {
+        $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=$HelferLevel order by Von";
+    } else {
+        $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Dienst.DienstID=SchichtUebersicht.DienstID and Dienst.Helferlevel=$HelferLevel order by Was,Von";
+    }
+
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "AlleSchichten ungueltige Abfrage";
+        echo $Sort;
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+
+    return $db_erg;
+}
+
+function AlleSchichtenCount($db_link, $HelferLevel = 1)
+{
+
+    //$sql = "select SUM(Soll) As Anzahl from SchichtUebersicht where HelferLevel=$HelferLevel";
+    $sql = "select Sum(Soll) as Anzahl, HelferLevel  from SchichtUebersicht,Dienst Where SchichtUebersicht.DienstID=Dienst.DienstID and HelferLevel=$HelferLevel";
+
+
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "AlleSchichtenCount ungueltige Abfrage";
+        echo $Sort;
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+    $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    return $zeile['Anzahl'];
+}
+
+
+function AlleBelegteSchichtenCount($db_link, $HelferLevel = 1)
+{
+
+    $sql = "select Count(HelferID) As Anzahl from EinzelSchicht,Schicht,Dienst Where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID=Dienst.DienstID and HelferLevel=$HelferLevel";
+
+
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "AlleSchichtenCount ungueltige Abfrage";
+        echo $Sort;
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+    $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    return $zeile['Anzahl'];
+}
+
+
+function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = 1)
+{
+    error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
+    // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
+    $Von = mysqli_real_escape_string($db_link, $Von);
+    $Bis = mysqli_real_escape_string($db_link, $Bis);
+    $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
+    $sql_helferlevel = "and Dienst.HelferLevel=$HelferLevel";
+    if ($HelferLevel == -1) {
+        $sql_helferlevel = "";
+    }
+
+    $sql = "select SchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis,C AS Ist,DATE_FORMAT(Von,'%W %d %M') As Tag, Soll  from Dienst,SchichtUebersicht where Von >= '" . $Von . "' and Von <'" . $Bis . "' and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel order by Was,Von";
+    error_log("AlleSchichtenImZeitbereich sql " . $sql);
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "AlleSchichtenImZeitbereich ungueltige Abfrage<br>";
+        echo $sql;
+        die('<br>Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+
+    return $db_erg;
+}
+
+
+function AlleSchichtenEinesHelfers($db_link, $HelferID)
+{
+
+    $HelferID = mysqli_real_escape_string($db_link, $HelferID);
+
+    $sql = "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=" . $HelferID . " order by Von";
+
+    $db_erg = mysqli_query($db_link, $sql);
+
+    if (! $db_erg) {
+        echo "AlleSchichtenEinesHelfers ungueltige Abfrage";
+        echo $HelferID;
+        die('Ungueltige Abfrage: ' . mysqli_error($db_link));
+    }
+
+
+    return $db_erg;
+}
+
+function HelferLoeschen($db_link, $HelferID, $AdminID)
+{
+
+    $HelferID = mysqli_real_escape_string($db_link, $HelferID);
+
+
+    $db_erg = Helferdaten($db_link, $HelferID);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferName = $zeile['Name'];
+        //echo "HelferName=$HelferName<br>";
+    }
+
+    $db_erg = AlleSchichtenEinesHelfers($db_link, $HelferID);
+
+    $AnzahlHelferschichten = mysqli_num_rows($db_erg);
+    if ($AnzahlHelferschichten == 0) {
+        $sql = "Delete from Helfer where HelferID='$HelferID'";
+        $db_erg = mysqli_query($db_link, $sql);
+        if (! $db_erg) {
+            echo "Helfer $HelferName konnte nicht gelöscht werden<br>";
+            echo "$sql <br>";
+            return -2;
+        } else {
+            echo "Helfer $HelferName (HelferID:$HelferID) wurde erfolgreich geloescht<br>";
+            error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helfer loeschen: Name: $HelferName (HelferID:$HelferID)\n", 3, LOGFILE);
+            return 1;
+        }
+    } else {
         echo "Helfer $HelferName hat noch $AnzahlHelferschichten Schichten. Bitte erst die Schichten löschen<br>";
         return -1;
     }
-
-    $stmt = mysqli_prepare($db_link, "DELETE FROM Helfer WHERE HelferID = ?");
-    if (!$stmt) {
-        echo "Helfer $HelferName konnte nicht gelöscht werden<br>";
-        die("HelferLoeschen prepare failed: " . mysqli_error($db_link));
-    }
-
-    mysqli_stmt_bind_param($stmt, "i", $HelferID);
-    if (!mysqli_stmt_execute($stmt)) {
-        echo "Helfer $HelferName konnte nicht gelöscht werden<br>";
-        die("HelferLoeschen execute failed: " . mysqli_stmt_error($stmt));
-    }
-
-    echo "Helfer $HelferName (HelferID:$HelferID) wurde erfolgreich gelöscht<br>";
-    error_log(date('Y-m-d H:i') . "(Admin $AdminID) Helfer gelöscht: Name: $HelferName (HelferID:$HelferID)\n", 3, LOGFILE);
-
-    return 1;
 }
 
 function SchichtIdArrayEinesHelfers($db_link, $HelferID)
@@ -381,6 +330,10 @@ function AlleSchichtenEinesHelfersVonJetzt($db_link, $HelferID)
     // TODO: fix GETDATE() array to string conversion
     $sql = "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=" . $HelferID . " and Bis>'" . date("Y-m-d H:i:s") . "' order by Von";
 
+
+    //$sql = "select EinzelSchicht.SchichtID ,EinzelSchichtID,Was,DATE_FORMAT(Von,'%a %H:%i') AS Ab,DATE_FORMAT(Bis,'%a %H:%i') AS Bis FROM  EinzelSchicht,Schicht,Dienst where EinzelSchicht.SchichtID=Schicht.SchichtID and Schicht.DienstID = Dienst.DienstID and HelferID=".$HelferID." and Bis>'2023-05-20' order by Von";
+
+    //echo $sql;
     $db_erg = mysqli_query($db_link, $sql);
 
     if (! $db_erg) {
