@@ -17,7 +17,7 @@ require '_login.php';
   <script>
   window.onload = function() {
     if (!window.jQuery) {
-       document.getElementById("jquerywarn").innerHTML = "<font size=+2 color=red><b>You have not installed the jquery library!</b></font>";
+       document.getElementById("jquerywarn").innerHTML = "<font size=+2 color=red><b>You have not installed the jquery library!(also check dhtmlx scheduler for the calendar)</b></font>";
     }
 }
 </script>
