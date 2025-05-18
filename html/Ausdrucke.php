@@ -53,7 +53,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
 <div style="width: 100%;">
 
 <table class="commontable">
-    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> &nbsp; <b>Ausdrucke HelferDB</b>
+    <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> &nbsp; <b>Ausdrucke</b>
   </th>
 <tr onclick="window.location.href='Ausdrucke-alles.php';">
     <td > <img src="Bilder/More.jpeg" style="width:30px;height:30px;"> <b>Ausdrucke(alles)</b>  </td> 

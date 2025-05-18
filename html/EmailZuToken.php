@@ -59,7 +59,7 @@ if (isset($_POST['email-cc'])) {
 
 $email_text = "
 Lieber Teilnehmer,
-trage dich bitte mit folgendem Link für eine Stunde pro Person als Helfer bei uns ein.Wir verschicken eine Mail pro Emailaddresse, also bitte für alle, die mit dieser Emailaddresse angemeldet sind. 
+trage dich bitte mit folgendem Link für eine Stunde pro Person bei uns ein.Wir verschicken eine Mail pro Emailaddresse, also bitte für alle, die mit dieser Emailaddresse angemeldet sind. 
 
 Danke für deine Mithilfe!
 
@@ -84,7 +84,7 @@ if (isset($_POST['sendmail'])) {
 ?>
 <!doctype html>
  <head>
-  <title>Helfer <?php echo EVENTNAME ?>: Email Tokens generieren</title>
+  <title><?php echo EVENTNAME ?>: Email Tokens generieren</title>
   
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
@@ -162,7 +162,7 @@ if (isset($_POST['email-liste'])) {
     foreach ($email_array as $email) {
         $email = trim($email);
         $encrypted_data = encode_string($secret_key, $email, $level, $secret_verification);
-        $token_url = "$urlprefix?token=$encrypted_data";
+        $token_url = "$urlprefix/UrlLogin.php?token=$encrypted_data";
         // Ausgabe des verschluesselten Textes in der URL
         $decrypted_data = decode_string($secret_key, urldecode($encrypted_data), $secret_verification);
         $email_subst_text = str_replace('XXtokenXX', $token_url, $email_text);

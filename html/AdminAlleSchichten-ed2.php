@@ -1,11 +1,17 @@
 <?php
-// Login
+// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 // zeigt login-Seite an, wenn keine Session besteht
 require '_login.php';
+
+if ($AdminStatus != 1) {
+    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
+    echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
+    exit;
+}
 ?>
 <!doctype html>
 <html>
@@ -14,13 +20,14 @@ require '_login.php';
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
-  <script src="<?php echo JQUERY ?>" type="text/javascript"></script> 
+
+  <script src="js/jquery-3.7.1.min.js" type="text/javascript"></script>
   <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>
 </head>
 <body>
-  <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';">
+  <button name="BackHelferdaten" value="1"  onclick="window.location.href = 'AdminHelferUebersicht.php';">
   <b>&larrhk;</b>
   </button>
   <?php echo "<b>" . EVENTNAME . "</b>"; ?>
@@ -30,28 +37,30 @@ require '_login.php';
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-if (isset($_POST['CloseInfo'])) {
-    unset($InfoMeineSchichtID);
-    unset($InfoAlleSchichtID);
-}
+    if (isset($_POST['CloseInfo'])) {
+        unset($InfoMeineSchichtID);
+        unset($InfoAlleSchichtID);
+    }
 // wird nie gesetzt
 //if (isset($_POST['InfoMeineSchichtID'])) {
     function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
     {
           $db_link = ConnectDB();
     //    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
+        unset($InfoAlleSchichtID);
+        //echo "<b>". $SchichtID . "</b><br>";
 
         $zeile = DetailSchicht($db_link, $SchichtID);
 
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-    $db_link->close();
-}
+        $Was = $zeile['Was'];
+        $Wo = $zeile['Wo'];
+        $Dauer = $zeile['Dauer'];
+        $Leiter = $zeile['Name'];
+        $LeiterHandy =  $zeile['Handy'];
+        $LeiterEmail =  $zeile['Email'];
+        $Info = $zeile['Info'];
+        $db_link->close();
+    }
 
 // wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier
 //if (isset($_GET['InfoAlleSchichtID'])) {
@@ -86,21 +95,53 @@ if (isset($_POST['CloseInfo'])) {
 //}
 
 // Auswahl Tag oberhalb der Dienstetabelle
-if (isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 0;
-}
+    if (isset($_GET['ZeitBereich'])) {
+        $ZeitBereich = $_GET['ZeitBereich'];
+    } else {
+        $ZeitBereich = 0;
+    }
 
+    function HelferAuswahlButton($db_link, $AliasHelferID)
+    {
+        echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
+        $db_erg = HelferListe($db_link);
+        while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+            if ($AliasHelferID != $zeile['HelferID']) {
+                echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
+            } else {
+                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
+            }
+        }
+        echo '</select></form>';
+    }
 
+    if (isset($_POST['AliasHelferID'])) {
+        $AliasHelferID = $_POST['AliasHelferID'];
+    } elseif (isset($_SESSION["AliasHelferID"])) {
+        $AliasHelferID = $_SESSION["AliasHelferID"];
+    } else {
+        HelferAuswahlButton($db_link, $AliasHelferID);
+        echo "<p>Erst Helfer auswählen</p>";
+        exit;
+    }
+    HelferAuswahlButton($db_link, $AliasHelferID);
+
+    $_SESSION["AliasHelferID"] = $AliasHelferID;
+    $AdminID = $_SESSION["AdminID"];
+
+    $db_erg = Helferdaten($db_link, $AliasHelferID);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $HelferName = $zeile['Name'];
+        $AliasHelferLevel = $zeile['HelferLevel'];
+    }
 
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
 
-?>
+    ?>
 
 
-<form method="post" action="AlleSchichten.php">
+<form method="post" action="#Info">  
 <?php
 
 
@@ -115,8 +156,9 @@ if (isset($_POST['plusschicht'])) {
     $_SESSION["SchichtIdAktiv"] = $SchichtID;
     if (empty($messages)) {
         // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtID);
+        $db_erg = HelferSchichtZuweisen($db_link, $AliasHelferID, $SchichtID, $AdminID);
 
+        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
         $HelferName = '';
         $HelferEmail = '';
         $HelferHandy = '';
@@ -131,7 +173,7 @@ if (isset($_POST['plusschicht'])) {
 }
 
 if (isset($_POST['minusschicht'])) {
-    // Mich aus Schicht entfernen
+        // Mich aus Schicht entfernen
         $messages = [];
 
         $SchichtID = $_POST['minusschicht'];
@@ -140,7 +182,7 @@ if (isset($_POST['minusschicht'])) {
 
     if (empty($messages)) {
         // Helfer aus Schicht entfernen
-        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
+        $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $AliasHelferID, $SchichtID, $AdminID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -158,12 +200,12 @@ if (isset($_POST['minusschicht'])) {
 
 
 // Zusammenfassung Eigener Schichten
- $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
+ $db_erg = SchichtenSummeEinesHelfers($db_link, $AliasHelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
-    //"Mein Dienstplan"
-    echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
-    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' .  " Mein Dienstplan (";
+    //"Dienstplan von"
+    echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
+    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . "Dienstplan von $HelferName: ";
     echo $zeile['Anzahl'];
     echo " Schichten, ";
     echo $zeile['Dauer'] / 3600;
@@ -171,21 +213,8 @@ if (isset($_POST['minusschicht'])) {
     echo '</th></tr></table><br><br>';
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
-if (isset($_SESSION["addschicht"]))
-{
-    $addschicht = $_SESSION["addschicht"];
-} else
-{
-    $addschicht = -1; // wird hier gegen Fehler gesetzt. bitte zu Ende implementieren
-}
-
-if (isset($_SESSION["dienstort"]))
-{
-    $dienstsort = $_SESSION["dienstsort"];
-} else
-{
-    $dienstsort = -1; // wird hier gegen Fehler gesetzt. bitte zu Ende implementieren
-}
+$addschicht = $_SESSION["addschicht"];
+$dienstsort = $_SESSION["dienstsort"];
 
 
 //addschicht und dienst-sort sollten wohl nach Diensten bzw Tagen sortieren
@@ -217,10 +246,10 @@ if ($addschicht == '0') {
 if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Diensten sortieren, macht es aber nicht
     echo '<table class="commontable">';
     require('_zeitbereich.php');
-    $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "AlleSchichten.php");
+    $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, $_SERVER['PHP_SELF']);
     $MeinVon = $Bereich['MeinVon'];
     $MeinBis = $Bereich['MeinBis'];
-    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevel);
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $AliasHelferLevel);
 
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);
@@ -236,7 +265,7 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     $alleHelferLevel = alleHelferLevel($db_link);
     foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
         $meine = "";
-        if ($HelferLevelIteration == $HelferLevel) {
+        if ($HelferLevelIteration == $AliasHelferLevel) {
             $meine = " &leftarrow; mein Level, Schichten werden unten angezeigt";
         }
         $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
@@ -248,14 +277,14 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
     $OldTag = "";
     $OldWas = "";
     // um Zeilen mit von mir belegten Schichten hervorzuheben
-    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $AliasHelferID);
     //print_r($MeineDienste);
 
     echo '</table>';
     // Tabelle mit allen Diensten und Schichten
     echo '<table  class="commontable collapsible">';
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($dienstsort == '1') { // dienst-sort wird momentan nie gesetzt, also immer else-Teil ausgeführt TODO
+        if ($dienstsort == '1') { // dienst-sort wird momentan nie gesetzt, also immer else-Teil ausgeführt
             $Tag = $zeile['Tag'];
 
             if ($Tag != $OldTag) {
@@ -272,9 +301,9 @@ if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Dienste
                 echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
                 $SchichtID = $zeile['SchichtID'];
                 $DienstID = $zeile['DienstID'];
-                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevel, $DienstID);
-                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevel, $DienstID);
-                echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
+                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $AliasHelferLevel, $DienstID);
+                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $AliasHelferLevel, $DienstID);
+                echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $AliasHelferLevel, $DienstID -->";
                 echo "</th>";
                 echo "</tr>";
                 SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);

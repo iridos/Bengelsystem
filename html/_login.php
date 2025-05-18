@@ -45,7 +45,7 @@ if (!isset($_SESSION["HelferID"])) {
 <!doctype html>
 <html lang=de>
 <head>
-  <title>Helfer <?php echo EVENTNAME ?> Home</title>
+  <title><?php echo EVENTNAME ?> Home</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src="js/helferdb.js" type="text/javascript"></script>
@@ -100,6 +100,7 @@ if (!isset($_SESSION["HelferID"])) {
 
 $HelferID = $_SESSION["HelferID"];
 $HelferName = $_SESSION["HelferName"];
+$HelferEmail = $_SESSION["HelferEmail"];
 $AdminID = $_SESSION["AdminID"];
 //TODO vereinheitlichen. index.php verwendet HelferIsAdmin
 $HelferIsAdmin = $AdminStatus = $_SESSION["AdminStatus"];

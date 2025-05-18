@@ -100,7 +100,11 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>Übersicht Helfer und Ihre Schichten DAS 2023</b></th>
   </tr>
 <?php
-$db_erg = AlleHelferSchichtenUebersicht($db_link);
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    if ($HelferLevelIteration == 2) {echo "Teilnehmer nicht anzeigen";continue;}
+    echo "<tr class='header infoheader'><th colspan=3>$HelferLevelBeschreibung</th>";
+    $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferName = $zeile["Name"];
 
@@ -120,7 +124,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     echo $zeile["Was"];
         echo "</td></tr>";
 }
-
+}
 
 echo "</table>";
 

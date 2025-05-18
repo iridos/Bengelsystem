@@ -62,7 +62,7 @@ if (isset($_POST['NewDienst'])) {
     $Wo = $_POST['Dienst-Wo'];
     $Info = $_POST['Dienst-Info'];
     $Leiter = $_POST['Dienst-Leiter'];
-    $Gruppe = $_POST['Dienst-Gruppe'];
+    if (isset($_POST['Dienst-Gruppe'])){$Gruppe = $_POST['Dienst-Gruppe'];}else{$Gruppe=82;}//TODO: 82 ist root-dienst
        $HelferLevel = $_POST['HelferLevel'];
     NewDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
     $NewDienstID = LastInsertId($db_link);
@@ -121,7 +121,7 @@ if (isset($_POST['NewSchicht'])) {
 
 if (isset($_POST['DeleteSchicht'])) {
     if (!DeleteSchicht($db_link, $SchichtID, false)) {
-        echo "Erst Helfer aus Schicht austragen<br>";
+        echo "Erst Schicht leeren<br>";
     }
     $SchichtID = 0;
 }
@@ -263,13 +263,13 @@ if (!isset($DienstID)) {
             <tr><td style="border: 0px solid black;">HelferLevel</td></tr>
             <tr><td style="border: 0px solid black;"> 
                 <select name="HelferLevel">
-                   <option value="1" <?php if ($HelferLevel == 1) {
-                        echo "selected";
-                                     };?> >Dauerhelfer</option>
-                   <option value="2" <?php if ($HelferLevel == 2) {
-                        echo "selected";
-                                     };?> >Teilnehmer</option>
-                   <?php //todo: Name aus HelferLevel-Tabelle erhalten?>
+<?php
+   $alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    $selected = ($HelferLevelIteration == $HelferLevel) ? "selected" : "";
+    echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
+}
+?>
                 </select>
              </td></tr>
           </table>
@@ -345,7 +345,7 @@ echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button
               </td>
             <tr>
             </tr>
-              <td style="border: 0px solid black;">Anzahl Helfer (Soll)</td></tr><tr><td style="border: 0px solid black;">
+              <td style="border: 0px solid black;">Anzahl (Soll)</td></tr><tr><td style="border: 0px solid black;">
               <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
               </td>
             <tr>

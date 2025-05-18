@@ -15,7 +15,7 @@ if ($AdminStatus != 1) {
 <!doctype html>
 <html>
  <head>
-  <title>testAlle Helferschichten</title>
+  <title>Alle Helferschichten</title>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
@@ -180,7 +180,7 @@ require('_zeitbereich.php');
 $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, "TeilnehmerSchichtenAusdruck.php");
 $MeinVon = $Bereich['MeinVon'];
 $MeinBis = $Bereich['MeinBis'];
-
+$HelferLevel=2; // nur Teilnehmer in TeilnehmerSchichtenAusdruck
 $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevel);
 //echo "<tr><th class=header> AlleSchichtenImZeitbereich(db_link,$Von,$Bis,$HelferLevel);</th></tr>"; // debug
 
@@ -234,7 +234,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         }
         echo "<tr><td>$Was <br>$Ab - $Bis </td>";
         echo "<td>$Helfername</td>";
-        echo "<td>$Was <br>$Ab-$Bis</td>";
+        echo "<td><b>$Was </b><br>$Ab-$Bis</td>"; // Mittlere Spalte fett, weil links und rechts Abrisse
         if ($Soll > 0) { // zweite Spalte nur ausgeben, wenn noch eine Schicht offen ist
             $Soll = $Soll - 1;
             $HelferZeile = mysqli_fetch_array($db_erg_helfer, MYSQLI_ASSOC); // get the next person

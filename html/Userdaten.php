@@ -10,7 +10,7 @@ require '_login.php';
 <!doctype html>
 <html>
  <head>
-  <title><?php echo EVENTNAME ?> Helferdaten ändern</title>
+  <title><?php echo EVENTNAME ?> Persönliche Daten ändern</title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
@@ -47,7 +47,7 @@ if (isset($_POST['change'])) {
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel);
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';

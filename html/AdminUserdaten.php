@@ -133,7 +133,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     
           <table class="commontable">
             <tr>
-                <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> Helferdaten</th>
+                <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'AdminHelferUebersicht.php';"><b>&larrhk;</b></button> Helferdaten</th>
 <?php echo "<b>" . EVENTNAME . "</b>"; ?>
 <form method="post">
             <tr>     
@@ -165,16 +165,10 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
            <tr><td>    
               <select name="helfer-level">
 <?php
-$db_erg = HelferLevel($db_link);
-$selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $HelferLevel = $zeile['HelferLevel'];
-    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
-    if ($HelferLevel == 1) {
-        $selected = " selected " ;
-    };
-    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
-    $selected = "";
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    $selected = ($HelferLevelIteration == $HelferLevel) ? "selected" : "";
+    echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
 }
 ?>
               </select>
