@@ -99,6 +99,7 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
     $OldAliasHelferID = "-1";
     $EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
     $HelferUeberschrift = "";
+    $OldHelferHandy="";
 
 
     echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten anzeigen</th><th>Handy</th><th>Schichten ändern</th></tr>";
@@ -109,11 +110,12 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
             $HelferHandy = $zeile["Handy"];
         if ($AliasHelferID != $OldAliasHelferID) {
             if ($EinzelDienstStundenZeile != "") {
-                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$HelferHandy);
+                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$OldHelferHandy);
             }
                 $dauer = 0;
                 $EinzelDienstStundenZeile = "";
                 $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>&nbsp;$HelferName </div></form>";
+                $OldHelferHandy=$HelferHandy;
                 $OldHelferName = $HelferName;
                 $OldAliasHelferID = $AliasHelferID;
                 $i += 1;
