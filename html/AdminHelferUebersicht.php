@@ -82,7 +82,7 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
     echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
     echo "&nbsp;";
     echo "<form style='display:table-cell' action='AdminMeineSchichten.php' method='post'>";
-    echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>👁</button></form>";
+    echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>👁</button>";
     echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>&ndash;</button></form>";
     echo "</div></th>";
     echo "$EinzelDienstStundenZeile</td></tr>\n ";
