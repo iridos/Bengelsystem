@@ -47,7 +47,7 @@ if (isset($_POST['helfer-status'])) {
 
 // nicht sicher, wo so ein default-text herkommen sollte
 // oder ob es tatsächlich einen geben sollte
-$email_subject = EVENTNAME . " beginnt bald!";
+$email_subject = strip_tags(EVENTNAME . " beginnt bald! Letzte Infos und Mithelf-Schichten");
 if (isset($_POST['email-subject'])) {
     $email_subject = $_POST['email-subject'];
 }
@@ -58,18 +58,31 @@ if (isset($_POST['email-cc'])) {
 }
 
 $email_text = "
-Lieber Teilnehmer,
-trage dich bitte mit folgendem Link für eine Stunde pro Person bei uns ein.Wir verschicken eine Mail pro Emailaddresse, also bitte für alle, die mit dieser Emailaddresse angemeldet sind. 
+Liebe Jongleure und Jongleusen,
 
-Danke für deine Mithilfe!
+die Jonglier-Convention " . strip_tags(EVENTNAME) ." beginnt bald. Wieder möchten wir die Mithelf-Schichten soweit möglich schon zu Beginn füllen. 
+
+Bitte tragt Euch bis spätestens Mittwoch unter folgendem Link für einen Dienst pro Person ein - also mehrere Dienste, wenn mehrere Personen über die selbe Email-Addresse angemeldet sind:
 
 XXtokenXX
 
-Du kannst dich auch später wieder über den Link einloggen und die Schicht ändern. 
+Der Name oben ist mit der Email-Adresse vorausgefüllt und wird für alle im System sichtbar sein – Ihr könnt das auf etwas für Euch Passendes ändern (bei mehreren z.B. Fam. Hubbydubby).
 
-Viele Grüße,
-dein " . EVENTNAME . " Team
-";
+Füllt wenn möglich zuerst die Dienste des Donnerstags auf, damit die zu Beginn gleich besetzt sind. 
+
+Checkliste Mitnehmen:
+ * vorausgesuchter Helferdienst
+ * eigenes Geschirr/Besteck/Tasse
+ * eigenes Grillgut
+ * Schlafsack/Schlafmatte
+ * Badesachen (optimistisch, optimistisch)
+ * gute Laune
+ * Jongliersachen
+ * Ticket QR-Code
+
+
+Viele liebe Grüße und bis Donnerstag, wir freuen uns,
+Dein " . strip_tags(EVENTNAME) . " Team ";
 
 if (isset($_POST['email-text'])) {
     $email_text = $_POST['email-text'];
@@ -178,8 +191,10 @@ if (isset($_POST['email-liste'])) {
         } else {
             // Email verschicken - send mail
             $to = $decrypted_data['email'];
-            $from = "root";
-            $headers = 'From: ' . $from . "\r\n";
+            $from = "<orga@dropamsee.de>";
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/plain; charset=UTF-8\r\n";
+            $headers .= 'From: ' . $from . "\r\n";
             $headers .= 'CC: ' . $email_cc . "\r\n";
             if (mail($to, $email_subject, $email_subst_text, $headers)) {
                 echo "Die E-Mail an $to wurde erfolgreich versendet.";
