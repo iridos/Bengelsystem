@@ -48,6 +48,7 @@ if (isset($_POST['change'])) {
     if (empty($messages)) {
         // Helferdaten Ändern
         HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID);
+
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
@@ -115,32 +116,49 @@ if (isset($_POST['login'])) {
                 <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> Helferdaten <?php echo EVENTNAME; ?></th>
             </tr>
 <form method="post">
-            <tr>     
+            <tr>
+
               <td>Name</td></tr><tr><td>
+              <?php
+   if($HelferName == $HelferEmail) { echo "<b style='color:red'> Hier auf Name/Spitzname ändern:"; }
+                ?>
               <input name="helfer-name" type="text" value="<?php echo htmlspecialchars($HelferName ?? '')?>" required>
+              <?php
+   if($HelferName == $HelferEmail) { echo "</b>"; }
+                ?>
               </td>
             </tr>
-            <tr>
-              <td>Email</td></tr><tr><td>     
-              <input name="helfer-email" type="email " value="<?php echo htmlspecialchars($HelferEmail ?? '')?>" required>
-              </td>
-            </tr>
-            <tr>
-              <td>Handy</td></tr><tr><td>     
+           <tr>
+              <td>Handy (freiwillig)</td></tr><tr><td>     
               <input name="helfer-handy" type="tel" value="<?php echo htmlspecialchars($HelferHandy ?? '')?>" >
               </td>
             </tr>
-            <tr>
-              <td>Altes Helfer Passwort</td></tr><tr><td>     
-              <input name="helfer-passwort" type="password" value="<?php echo htmlspecialchars($HelferPasswort ?? '')?>" >
-              </td>
-            </tr>
-            <tr>
-              <td>Neues Helfer Passwort</td></tr><tr><td>     
-              <input name="helfer-newpasswort" type="text" value="<?php echo htmlspecialchars($HelferPasswort ?? '')?>" >
-              </td>
-            </tr>
-           
+<?php
+$HelferEmailHTML    = htmlspecialchars($HelferEmail ?? '');
+# if people come from the UrlLink and their name is the email, do not display change-email or passord options
+# we still need this in the form
+$isHidden="";
+if($HelferName == $HelferEmail) {$isHidden="display: none";}
+
+$emailandpass =  <<<emailandpass
+        <tr style="$isHidden">
+          <td>Email (gleichzeitig Username - nicht ändern, wenn Login-Link gültig bleiben soll)</td></tr><tr style="$isHidden"><td>
+          <input name="helfer-email" type="email " value="$HelferEmailHTML" required  style="$isHidden">
+          </td>
+        </tr>
+         <tr style="$isHidden">
+          <td>Altes Helfer Passwort </td></tr><tr style="$isHidden"><td>
+          <input name="helfer-passwort" type="password" value=""  style="$isHidden">
+          </td>
+        </tr>
+        <tr style="$isHidden">
+          <td>Neues Helfer Passwort</td></tr><tr style="$isHidden"><td>
+          <input name="helfer-newpasswort" type="text" value=""  style="$isHidden">
+          </td>
+        </tr>
+emailandpass;
+    echo $emailandpass;
+?>
           </table>
 
           <p><button name="change" style="width:150px !important" value="1">&Auml;ndern</button></p>
