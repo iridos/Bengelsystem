@@ -39,7 +39,7 @@ require '_login.php';
     echo "$HelferName";
     if($HelferName == $HelferEmail)
         {
-        echo "<b style='color:red'> <--- bitte hier clicken und Email zu Namen ändern</b>";
+        echo "<b style='color:red'> <--- bitte hier klicken und Email zu Namen ändern. Der Name wird auf Helferlisten für alle sichtbar sein</b>";
         }
 if ($HelferIsAdmin) {
     echo " (Admin)";
