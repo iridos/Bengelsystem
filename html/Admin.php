@@ -100,7 +100,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $selectedSet = true;
     }
 }
-if( !$selectedSet ) {
+if( ! isset($selectedSet) and ! $selectedSet) {
   echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
 }
 

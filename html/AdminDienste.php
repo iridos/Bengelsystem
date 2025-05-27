@@ -185,7 +185,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $HelferLevel = $zeile['HelferLevel'];
     }
 }
-if( ! $selectedset ) { 
+if( ! isset($selectedset) or ! $selectedset ) {
 echo "<option value='none' selected='selected'>Bitte auswählen</option>";
 }
 

@@ -101,7 +101,7 @@ if (!isset($_SESSION["HelferID"])) {
 $HelferID = $_SESSION["HelferID"];
 $HelferName = $_SESSION["HelferName"];
 $HelferEmail = $_SESSION["HelferEmail"];
-$AdminID = $_SESSION["AdminID"];
+$AdminID = isset($_SESSION["AdminID"]) ? $_SESSION["AdminID"]  : -1;
 //TODO vereinheitlichen. index.php verwendet HelferIsAdmin
 $HelferIsAdmin = $AdminStatus = $_SESSION["AdminStatus"];
 $HelferLevel = $_SESSION["HelferLevel"];

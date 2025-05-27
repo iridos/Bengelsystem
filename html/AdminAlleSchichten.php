@@ -206,8 +206,8 @@ if (isset($_POST['minusschicht'])) {
     echo '</th></tr></table>';
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
-$addschicht = $_SESSION["addschicht"];
-$dienstsort = $_SESSION["dienstsort"];
+$addschicht = $_SESSION["addschicht"] ?? null;
+$dienstsort = $_SESSION["dienstsort"] ?? null;
 
 
 //addschicht und dienst-sort sollten wohl nach Diensten bzw Tagen sortieren

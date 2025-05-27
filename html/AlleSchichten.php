@@ -14,7 +14,7 @@ require '_login.php';
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
-  <script src="<?php echo JQUERY ?>" type="text/javascript"></script> 
+  <script src="<?php echo JQUERY ?>" type="text/javascript"></script>
   <script src="js/helferdb.js" type="text/javascript"></script>
   <script> collapse_table_rows();
  </script>
@@ -42,7 +42,11 @@ if (isset($_POST['CloseInfo'])) {
     //    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
 
         $zeile = DetailSchicht($db_link, $SchichtID);
-
+    if(!isset($zeile['Was'])){
+    error_log("Zeile not set in Schichtinfo");
+    error_log("called with: SchichtID $SchichtID $Was, $Wo, $Dauer, $Leiter, $LeiterHandy etc");
+    // Das ist vermutlich kein Fehler mehr, wenn wir den selben Account mehrfach auf die selbe Schicht lassen für Familien etc
+    }
     $Was = $zeile['Was'];
     $Wo = $zeile['Wo'];
     $Dauer = $zeile['Dauer'];
@@ -51,6 +55,7 @@ if (isset($_POST['CloseInfo'])) {
     $LeiterEmail =  $zeile['Email'];
     $Info = $zeile['Info'];
     $db_link->close();
+    return;
 }
 
 // wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier

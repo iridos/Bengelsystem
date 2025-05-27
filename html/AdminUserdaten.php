@@ -24,7 +24,7 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
         $selectedSet = true;
         }
     }
-    if( !$selectedSet ) {
+    if( ! isset($selectedSet) or ! $selectedSet ) {
       echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
     }
 
@@ -83,15 +83,16 @@ if (isset($_POST['change'])) {
     $HelferHandy = $_POST['helfer-handy'];
     $HelferLevel = $_POST['helfer-level'];
     $HelferNewPasswort  = $_POST['helfer-newpasswort'];
-    if ($_POST['IsAdmin']) {
-        $HelferIsAdmin = 1;
-        //echo "is Admin<br>";
+
+    if (isset($_POST['IsAdmin']) and $_POST['IsAdmin']) {
+        $HelferBecomesAdmin = 1;
     } else {
-        $HelferIsAdmin = 0;
+        $HelferBecomesAdmin = 0;
     }
+
     if (empty($messages)) {
         // Helferdaten Ändern
-        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferIsAdmin, $HelferID);
+        HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $AliasHelferID, $HelferLevel, $HelferBecomesAdmin, $HelferID);
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';
