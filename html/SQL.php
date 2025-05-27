@@ -112,7 +112,7 @@ function Helferdaten($db_link, $HelferID)
 
 
 
-function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel, $HelferIsAdmin = -1, $AdminID = 0)
+function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $HelferNewPasswort, $HelferID, $HelferLevel = -1, $HelferIsAdmin = -1, $AdminID = 0)
 {
 
     $HelferID = mysqli_real_escape_string($db_link, $HelferID);
@@ -120,6 +120,8 @@ function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $
     $HelferEmail = mysqli_real_escape_string($db_link, $HelferEmail);
     $HelferHandy = mysqli_real_escape_string($db_link, $HelferHandy);
     $HelferLevel = mysqli_real_escape_string($db_link, $HelferLevel);
+
+    if ($HelferLevel == -1) { $HelferLevel = $_SESSION["HelferLevel"]; }
 
     if ($HelferNewPasswort == "") {
         //$sql = "UPDATE Helfer SET Name='$HelferName',Email='$HelferEmail',Handy='$HelferHandy' ".($HelferIsAdmin!=-1)?',Admin='$HelferIsAdmin.':'." Where HelferId=".$HelferID;
@@ -159,7 +161,8 @@ function HelferdatenAendern($db_link, $HelferName, $HelferEmail, $HelferHandy, $
         echo $sql;
         die('Ungueltige Abfrage: ' . mysqli_error($db_link));
     }
-
+    $_SESSION["HelferName"] = $HelferName;
+    $_SESSION["HelferEmail"] = $HelferEmail;
 
     return $db_erg;
 }
