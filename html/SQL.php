@@ -671,14 +671,15 @@ function DetailSchicht($db_link, $InfoSchichtID)
     $InfoSchichtID = mysqli_real_escape_string($db_link, $InfoSchichtID);
 
 
-#    $sql = "select  Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer 
+#   $sql = "select  Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer 
 #            FROM Dienst,Schicht,Helfer 
 #            where Dienst.DienstID=Schicht.DienstID 
 #            AND Helfer.HelferID=Dienst.Leiter And SchichtID=" . $InfoSchichtID;
     $sql = "SELECT Was,Wo,Info,Name,Handy,Email,DATE_FORMAT(Dauer,'%H:%i') AS Dauer
             FROM Dienst
             JOIN Schicht ON Dienst.DienstID = Schicht.DienstID
-            LEFT JOIN Helfer ON Helfer.HelferID = Dienst.Leiter";
+            LEFT JOIN Helfer ON Helfer.HelferID = Dienst.Leiter
+            WHERE SchichtID = $InfoSchichtID";
 
 
     $db_erg = mysqli_query($db_link, $sql);
