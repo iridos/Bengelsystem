@@ -36,15 +36,13 @@ if (isset($_POST['CloseInfo'])) {
 }
 // wird nie gesetzt
 //if (isset($_POST['InfoMeineSchichtID'])) {
-    function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
+function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
     {
-          $db_link = ConnectDB();
-    //    $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
-
-        $zeile = DetailSchicht($db_link, $SchichtID);
+    $db_link = ConnectDB();
+    $zeile = DetailSchicht($db_link, $SchichtID);
     if(!isset($zeile['Was'])){
-    error_log("Zeile not set in Schichtinfo");
-    error_log("called with: SchichtID $SchichtID $Was, $Wo, $Dauer, $Leiter, $LeiterHandy etc");
+    //error_log("Zeile not set in Schichtinfo");
+    //error_log("called with: SchichtID $SchichtID $Was, $Wo, $Dauer, $Leiter, $LeiterHandy etc");
     // Das ist vermutlich kein Fehler mehr, wenn wir den selben Account mehrfach auf die selbe Schicht lassen für Familien etc
     }
     $Was = $zeile['Was'];

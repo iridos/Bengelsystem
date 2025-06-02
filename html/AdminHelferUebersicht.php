@@ -11,6 +11,16 @@ if ($AdminStatus != 1) {
     echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
     exit;
 }
+if (isset($_GET['einfachHelfer'])) {
+    // Das in der URL zu setzen laesst das Formular weg und erlaubt glatte
+    // Zeilen aus der Tabelle zu kopieren, um die Helfer zB in Pretix zu importieren
+    // TODO: Helfer-Export als csv oder xls und entsprechend auch Dienstelisten als csv
+    $einfachHelfer = $_GET['einfachHelfer'];
+    $csvTrenner='|';
+} else {
+$einfachHelfer = 0;
+$csvTrenner='';
+}
 ?>
 <!doctype html>
 <html>
@@ -74,10 +84,11 @@ echo "<br><br><table class='commontable' style='page-break-before:always'>";
 <table class="commontable collapsible">
 <?php
 // Function to output helper information
-function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$HelferHandy)
+function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$HelferHandy,$HelferEmail,$csvTrenner)
 {
-    echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden</th>";
-    echo "<th>$HelferHandy</th>";
+    echo "$HelferUeberschrift </th><th> <img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'> $dauer Stunden $csvTrenner </th>";
+    echo "<th>$HelferHandy$csvTrenner</th>";
+    echo "<th>$HelferEmail$csvTrenner</th>";
     echo "<th ><div style='display:table'><form style='display:table-cell' action='AdminAlleSchichten.php' method='post'>";
     echo "<button width='120px' name='AliasHelferID' value='" . $OldAliasHelferID . "'>+</button></form>\n";
     echo "&nbsp;";
@@ -92,7 +103,7 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
 $alleHelferLevel = alleHelferLevel($db_link);
 asort($alleHelferLevel); // sort, jetzt sind dauerhelfer lvl1 oben, lvl2 danach
 foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-    echo "<tr class='header infoheader'><th colspan=4>$HelferLevelBeschreibung (Lvl: $HelferLevelIteration)</th></tr>";
+    echo "<tr class='header infoheader'><th colspan=5>$HelferLevelBeschreibung (Lvl: $HelferLevelIteration)</th></tr>";
     $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
     $dauer = 0;
     $i = 0;
@@ -100,22 +111,31 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
     $EinzelDienstStundenZeile = ""; // Tabellenzeile mit EinzelDienstStunden
     $HelferUeberschrift = "";
     $OldHelferHandy="";
+    $OldHelferEmail="";
 
 
-    echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten anzeigen</th><th>Handy</th><th>Schichten ändern</th></tr>";
+    echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten anzeigen</th><th>Handy</th><th>Email</th><th>Schichten ändern</th></tr>";
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-            $HelferName = $zeile["Name"];
+            $HelferName = $zeile["Name"] ?: "-";
             $HelferLevel = $zeile["HelferLevel"];
             $AliasHelferID = $zeile["AliasHelferID"];
-            $HelferHandy = $zeile["Handy"];
+            $HelferHandy = $zeile["Handy"] ?: "-";
+            $HelferEmail = $zeile["Email"] ?: "-";
         if ($AliasHelferID != $OldAliasHelferID) {
             if ($EinzelDienstStundenZeile != "") {
-                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$OldHelferHandy);
+                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$OldHelferHandy,$OldHelferEmail,$csvTrenner);
             }
                 $dauer = 0;
                 $EinzelDienstStundenZeile = "";
-                $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" . $AliasHelferID . "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" . $AliasHelferID . "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID . "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>&nbsp;$HelferName </div></form>";
+                $HelferUeberschrift = " <tr class='header'> <th width='15%'> <form id='form_" .  $AliasHelferID .
+                    "' method='post' action='AdminUserdaten.php'><input type='hidden' name='AliasHelferID' value='" .  $AliasHelferID .
+                    "'/><div onclick=\"document.getElementById('form_" . $AliasHelferID .
+                    "').submit();\"/><img style='vertical-align:middle;width:30px;height:30px;' src='Bilder/PfeilRechts.jpeg'>&nbsp;$HelferName </div></form>";
+                if($einfachHelfer){
+                    $HelferUeberschrift = " <tr class='header'> <th width='15%'> $HelferName $csvTrenner";
+                }
                 $OldHelferHandy=$HelferHandy;
+                $OldHelferEmail=$HelferEmail;
                 $OldHelferName = $HelferName;
                 $OldAliasHelferID = $AliasHelferID;
                 $i += 1;
@@ -126,7 +146,7 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
             $dauer = $dauer + (int)$zeile["Dauer"];
     }
     if ($EinzelDienstStundenZeile != "") {
-                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$HelferHandy);
+                 outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer, $EinzelDienstStundenZeile,$HelferHandy,$HelferEmail,$csvTrenner);
     }
 }
 echo "</table>";
