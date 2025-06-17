@@ -34,8 +34,6 @@ if (isset($_POST['CloseInfo'])) {
     unset($InfoMeineSchichtID);
     unset($InfoAlleSchichtID);
 }
-// wird nie gesetzt
-//if (isset($_POST['InfoMeineSchichtID'])) {
 function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
     {
     $db_link = ConnectDB();
@@ -56,38 +54,6 @@ function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, 
     return;
 }
 
-// wird nur mit anderer Datei DetailsSchichten.php verwendet, nicht hier
-//if (isset($_GET['InfoAlleSchichtID'])) {
-//    $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
-//    unset($InfoMeineSchichtID);
-//    //echo "<b>". $SchichtID . "</b><br>";
-//
-//    $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
-//
-//    $Was = $zeile['Was'];
-//    $Wo = $zeile['Wo'];
-//    $Dauer = $zeile['Dauer'];
-//    $Leiter = $zeile['Name'];
-//    $LeiterHandy =  $zeile['Handy'];
-//    $LeiterEmail =  $zeile['Email'];
-//    $Info = $zeile['Info'];
-//
-//
-//
-//    // Beteiligte Helfer Holen
-//    $db_erg = BeteiligteHelfer($db_link, $InfoAlleSchichtID);
-//
-//
-//    $x = 0;
-//
-//    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-//        $MitHelferID[$x] = $zeile['HelferID'];
-//        $MitHelfer[$x] = $zeile['Name'];
-//        $MitHelferHandy[$x] = $zeile['Handy'];
-//        $x++;
-//    }
-//}
-
 // Auswahl Tag oberhalb der Dienstetabelle
 if (isset($_GET['ZeitBereich'])) {
     $ZeitBereich = $_GET['ZeitBereich'];
@@ -105,8 +71,6 @@ if (isset($_GET['ZeitBereich'])) {
 
 <form method="post" action="AlleSchichten.php">
 <?php
-
-
 
 // Neu Schicht fuer Helfer Eintragen
 ///////////////////////////////////////////////////////////
