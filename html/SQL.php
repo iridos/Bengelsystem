@@ -563,6 +563,9 @@ function LogSchichtEingabe($db_link, $HelferID, $SchichtID, $EinzelSchichtID, $A
     $Bis = $row["Bis"] ?? "-";
     $Was = $row["Was"] ?? "-";
     $HelferName = $row["Name"] ?? "-";
+    if( $Von === "-" and $Bis === "-" ){
+        error_log("Leere Zeiten werden geloggt. Parameter logging-Aufruf (HelferID:$HelferID): $HelferID, $SchichtID, $EinzelSchichtID, $Aktion, $AdminID");
+    }
 
     $logline = date('Y-m-d H:i') . "  HelferSchicht: ";
 
