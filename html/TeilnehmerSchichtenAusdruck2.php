@@ -28,7 +28,7 @@ if ($AdminStatus != 1) {
 
 
 <?php
-setlocale(LC_ALL, 'de_DE.UTF-8') or die("Locale not installed");
+setlocale(LC_ALL, 'de_DE.UTF-8') or die("Locale de_DE.UTF-8 not installed");
 
 $unixtime = strtotime('2023-09-15');
 for ($day = 0; $day < 3; $day++) {

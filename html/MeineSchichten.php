@@ -6,21 +6,22 @@ require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
 
-?>
+$eventname = EVENTNAME; // as var for heredoc
+$header = <<< HEADER
 <!doctype html>
 <html>
  <head>
-  <title>Meine Schichten <?php echo EVENTNAME ?></title>
+  <title>Meine Schichten $eventname </title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <meta name="viewport" content="width=480" />
  </head>
  <body>
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button> 
-<?php echo "<b>" . EVENTNAME . "</b>"; ?>
+<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'index.php';"><b>&larrhk;</b></button>
+<b>$eventname</b>
 <div style="width: 100%;">
-<?php
+HEADER;
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
@@ -31,7 +32,6 @@ if (isset($_POST['CloseInfo'])) {
 if (isset($_POST['InfoMeineSchichtID'])) {
     $InfoMeineSchichtID = $_POST['InfoMeineSchichtID'];
     unset($InfoAlleSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
 
     $zeile = DetailSchicht($db_link, $InfoMeineSchichtID);
 
@@ -48,7 +48,6 @@ if (isset($_POST['InfoMeineSchichtID'])) {
 if (isset($_GET['InfoAlleSchichtID'])) {
     $InfoAlleSchichtID = $_GET['InfoAlleSchichtID'];
     unset($InfoMeineSchichtID);
-    //echo "<b>". $SchichtID . "</b><br>";
 
     $zeile = DetailSchicht($db_link, $InfoAlleSchichtID);
 
@@ -76,98 +75,8 @@ if (isset($_GET['InfoAlleSchichtID'])) {
     }
 }
 
-
-/// Logout
-////////////////////////////////////////////////////////
-if (isset($_POST['logout'])) {
-    unset($_SESSION["HelferID"]);
-    //$_POST['login'] = 1;
-}
-
-/// Login
-////////////////////////////////////////////////////////
-if (isset($_POST['login'])) {
-    $messages = [];
-    // Eingaben überprüfen:
-    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //}
-
-    $HelferName = $_POST['helfer-name'];
-    $HelferEmail = $_POST['helfer-email'];
-    $HelferPasswort = $_POST['helfer-passwort'];
-
-    if (empty($messages)) {
-        HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach ($messages as $message) {
-            echo '<li>' . htmlspecialchars($message) . '</li>';
-        }
-        echo '</ul></div>';
-    }
-}
-
-
-
-if (!isset($_SESSION["HelferID"])) {
-    ?>
-<form method="post" action="#Info">
-
-  <fieldset>
-    <legend>Login</legend>
-    
-    <table border="0" style="border: 0px solid black;">
-            <tr>     
-              <td style="border: 0px solid black;">Email</td></tr><tr><td style="border: 0px solid black;">
-              <input name="helfer-email" type="text" value="<?php echo htmlspecialchars($HelferEmail ?? '')?>" required>
-              </td>
-            <tr>
-            <tr>     
-              <td style="border: 0px solid black;">Passwort</td></tr><tr><td style="border: 0px solid black;">
-              <input name="helfer-passwort" type="password" value="<?php echo htmlspecialchars($HelferHandy ?? '')?>" required>
-              </td>
-            <tr>
-    </table>
-    
-    
-  </fieldset>
-  
-  <p><button name="login" value="1">Login</button></p>
-
-
- </form> 
-    <?php
-    exit;
-}
-
-
-
 $HelferID = $_SESSION["HelferID"];
 $AdminID = $_SESSION["AdminID"];
-
-if (isset($_POST['HelferID'])) {
-    $HelferID = $_POST['HelferID'];
-}
-if (isset($_POST['ShowHelfer'])) {
-    $HelferID = $_POST['HelperSearch'];
-}
-
-$_SESSION["HelferID"] = $HelferID;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /// Schicht Löschen
 ////////////////////////////////////////////////////////
@@ -176,41 +85,9 @@ if (isset($_POST['Del'])) {
     $messages = [];
 
     $EinzelSchichtID = $_POST['Del'];
-
-
-    // Eingaben überprüfen:
-
-    //if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //}
-
-
-
-    if (empty($messages)) {
-        $db_erg = HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID);
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach ($messages as $message) {
-            echo '<li>' . htmlspecialchars($message) . '</li>';
-        }
-        echo '</ul></div>';
-    }
+    $db_erg = HelferVonSchichtLoeschen($db_link, $HelferID, $EinzelSchichtID);
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
-
-
-
-// Helferliste Anzeigen
-////////////////////////////////////////////////////////
-
-?>
-
-
-
-<form method="post" action="MeineSchichten.php#Info">  
-<?php
-
-
 
 // Neu Schicht fuer Helfer Eintragen
 ///////////////////////////////////////////////////////////
@@ -218,36 +95,11 @@ if (isset($_POST['sent'])) {
     $messages = [];
     $SchichtId = $_POST['sent'];
 
-    // Eingaben überprüfen:
-
-    //  if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $HelferName)) {
-    //    $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
-    //  }
-
-
-    if (empty($messages)) {
-        // Helfer Schicht zuweisen
-        $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
-
-        // Erfolg vermelden und Skript beenden, damit Formular nicht erneut ausgegeben wird
-        $HelferName = '';
-        $HelferEmail = '';
-        $HelferHandy = '';
-        //die('<div class="Helfer wurde angelegt.</div>');
-    } else {
-        // Fehlermeldungen ausgeben:
-        echo '<div class="error"><ul>';
-        foreach ($messages as $message) {
-            echo '<li>' . htmlspecialchars($message) . '</li>';
-        }
-        echo '</ul></div>';
-    }
+    // Helfer Schicht zuweisen
+    $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtId);
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
 
-/// Ausgabe auf Deutsch umstellen
-/////////////////////////////////////////////////////////////////////////
-
-    DatenbankAufDeutsch($db_link);
 
 /// Alle Schichten Des Helfers Anzeigen
 ////////////////////////////////////////////////////////
@@ -261,9 +113,10 @@ if (! $db_erg) {
 }
 
   $iSQLCount = mysqli_num_rows($db_erg);
-  //$iSQLCount = 3;
+  echo $header;
+  echo '<form method="post" action="MeineSchichten.php#Info">';
 
-echo '<table class="commontable">';
+  echo '<table class="commontable">';
 
   echo "<thead>";
   echo "<tr>";
@@ -275,8 +128,6 @@ echo '<table class="commontable">';
   echo "<th style='width:90px'>" . "Del" . "</th>";
   echo "</tr>";
   echo "</thead>";
-
-
 
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     //echo '<tr title="Details anzeigen" onclick="parent.DetailsSchichten.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='.$zeile['SchichtID'].'#Info\';" >';
@@ -303,11 +154,8 @@ echo "</table>";
 
 mysqli_free_result($db_erg);
 
-
 ?>
- 
  </form> 
  </div>
- 
  </body>
 </html>

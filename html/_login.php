@@ -22,9 +22,6 @@ if (isset($_POST['login'])) {
     //  $messages[] = 'Bitte prüfen Sie die eingegebenen Namen';
     //}
 
-        //if (isset ($_POST['helfer-name'])) {
-    //  $HelferName = $_POST['helfer-name'];
-        //} // delete - login shouldnt provide this
     $HelferEmail = $_POST['helfer-email'];
     $HelferPasswort = $_POST['helfer-passwort'];
 

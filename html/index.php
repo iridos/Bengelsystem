@@ -5,6 +5,11 @@ SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // POST only in _login.php
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
 ?>
 <!doctype html>
 <html lang=de>

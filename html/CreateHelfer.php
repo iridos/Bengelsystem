@@ -4,7 +4,12 @@ require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
-
+// Das hier wird über eine Art Token den Zugriff auf CreateHelfer erlauben
+// Jedes Token ist mit einem Helferlevel verknüpft, in dem dann Helfer angelegt 
+$typeSecret = $_GET['invite_code'] ?? '';
+if (empty($typeSecret)) {
+    die("Fehlender Zugangscode.");
+}
 ?>
 <!doctype html>
 <html>

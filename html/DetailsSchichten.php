@@ -6,6 +6,9 @@ require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
 
+$HelferID = $_SESSION["HelferID"];
+$AdminID = $_SESSION["AdminID"];
+
 ?>
 <!doctype html>
 <html>
@@ -52,44 +55,11 @@ if (isset($_GET['InfoAlleSchichtID'])) {
         $x++;
     }
 }
-
-
-$HelferID = $_SESSION["HelferID"];
-$AdminID = $_SESSION["AdminID"];
-
-if (isset($_POST['HelferID'])) {
-    $HelferID = $_POST['HelferID'];
-}
-if (isset($_POST['ShowHelfer'])) {
-    $HelferID = $_POST['HelperSearch'];
-}
-
-$_SESSION["HelferID"] = $HelferID;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ?>
 
 
 
-<form method="post" action="DetailsSchichten.php#Info">  
+<!--form method="post" action="DetailsSchichten.php#Info"-->
 <?php
 
 
@@ -99,30 +69,28 @@ $_SESSION["HelferID"] = $HelferID;
 /// Ausgabe auf Deutsch umstellen
 /////////////////////////////////////////////////////////////////////////
 
-    DatenbankAufDeutsch($db_link);
+DatenbankAufDeutsch($db_link);
 
 /// Alle Schichten Des Helfers Anzeigen
 ////////////////////////////////////////////////////////
 
-
+$back=$_SERVER['HTTP_REFERER'];
 echo '<table class="commontable">';
 
+echo "<th>" . $Was . "</th>";
+echo "<tr><td>";
 
-
-            echo "<th>" . $Was . "</th>";
-            echo "<tr><td>";
-
-            //echo "<p><button name='Del' value='CloseInfo'><b>&larrhk;</b></button><br>";
-            echo "<b>Beschreibung:</b><br>";
-            echo $Info . "<br><br>";
-            echo "<b>Ort:</b><br>" . $Wo . "<br><br>";
-            echo "<b>Dauer:</b><br>" . $Dauer . "<br><br>";
-            echo "<b>Ansprechparter:</b><br>" . $Leiter . ", ";
-            echo $LeiterHandy . ", ";
-            echo $LeiterEmail . "<br><br>";
-            echo "<b>Helfer der Schicht:</b><br>";
-            $x = 0;
-            $arrayLength = count($MitHelfer);
+echo "<p><a href='$back'> <button name='Back' value='CloseInfo'><b>&larrhk;</b></button></a><br>";
+echo "<b>Beschreibung:</b><br>";
+echo $Info . "<br><br>";
+echo "<b>Ort:</b><br>" . $Wo . "<br><br>";
+echo "<b>Dauer:</b><br>" . $Dauer . "<br><br>";
+echo "<b>Ansprechparter:</b><br>" . $Leiter . ", ";
+echo $LeiterHandy . ", ";
+echo $LeiterEmail . "<br><br>";
+echo "<b>Helfer der Schicht:</b><br>";
+$x = 0;
+$arrayLength = count($MitHelfer);
 while ($x < $arrayLength) {
     echo "ID:" . $MitHelferID[$x] . ", ";
     echo $MitHelfer[$x] . ", ";
@@ -149,7 +117,7 @@ mysqli_free_result($db_erg);
 
 ?>
  
- </form> 
+ <!--/form--> 
  </div>
  
  </body>

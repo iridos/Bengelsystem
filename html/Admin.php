@@ -11,7 +11,7 @@ if ($AdminStatus != 1) {
     echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
     exit;
 }
-?>
+$header=<<<HEADER
 <!doctype html>
 <html>
 <head>
@@ -23,8 +23,7 @@ if ($AdminStatus != 1) {
 <meta name="viewport" content="width=480" />
 </head>
 <body>
-
-<?php
+HEADER; //<?nop this bracket is just here for vim syntax highlighting
 
 DatenbankAufDeutsch($db_link);
 
@@ -36,18 +35,18 @@ if (isset($_SESSION["AliasHelferID"])) {
 
 if (isset($_POST["AliasHelferID"])) {
     $AliasHelferID = $_POST["AliasHelferID"];
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
 
 if ($AliasHelferID != 0) {
     $_SESSION["AliasHelferID"] = $AliasHelferID;
 }
-
+echo $header; // muss nach redirect-headern fuer POST ausgegeben werden
 $db_erg = Helferdaten($db_link, $HelferID);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }
-
 ?>
 
 <div style="width: 100%;">
@@ -100,7 +99,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $selectedSet = true;
     }
 }
-if( ! isset($selectedSet) and ! $selectedSet) {
+if( ! isset($selectedSet) or ! $selectedSet) {
   echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
 }
 
