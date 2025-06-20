@@ -299,7 +299,7 @@ function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
     $result = mysqli_stmt_get_result($stmt);
     mysqli_stmt_close($stmt);
     $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    return $zeile['Anzahl'];
+    return $zeile['Anzahl'] ?? 0;
 }
 
 
