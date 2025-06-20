@@ -89,7 +89,8 @@ Alternativ zur Accounterstellungsseite kann ein
         <th>Linkcode</th>
         <th>Accounts</th>
         <th>Dienste</th>
-        <th>Aktion</th>
+        <th>Ändern</th>
+        <th><center>Account anlegen</center></th>
     </tr>
 <?php
 foreach ($HelferLevelInfo as $level => $info) {
@@ -122,16 +123,19 @@ EOL;
         <td width="25%"><input type="text" name="linkcode[$level]" value="$linkcode" size="40"></td>
         <td width="5%" style="text-align:center">$accounts</td>
         <td width="5%" style="text-align:center">$dienste</td>
-        <td width="15%">
+        <td width="8%">
             <button type="submit" name="save" value="$level" title="Ändern">💾</button>
             $loeschButton
-
+        </td>
+        <td width="5%">
+         <center>
          <a href="CreateHelfer.php?linkcode=$linkcode"
            title="Account mit diesem Level anlegen"
            class="buttonlike"
            style="text-decoration: none; padding: 15px 6px 9px 6px; background-color: #eee; border: 1px solid #777; border-radius: 3px; display: inline-block; ">
            <span style="white-space: nowrap"> 🧑➕ </span>
         </a>
+        </center>
         </td>
     </tr>
 EOL;
@@ -144,6 +148,7 @@ EOL;
         <td>-</td>
         <td>-</td>
         <td><button type="submit" name="create" value="1" title="Neu anlegen">➕</button></td>
+        <td>-</td>
     </tr>
 </table>
 </form>
