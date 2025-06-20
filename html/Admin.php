@@ -3,7 +3,12 @@
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
+require '_functions.php';
 $db_link = ConnectDB();
+$pagename  = "Admin-Funktionen";  // name of this page
+$backlink  = "index.php";         // back button in table header from table header
+$header = PageHeader($pagename);
+$tablehead = TableHeader($pagename,$backlink);
 require '_login.php';
 
 if ($AdminStatus != 1) {
@@ -11,22 +16,6 @@ if ($AdminStatus != 1) {
     echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
     exit;
 }
-$header=<<<HEADER
-<!doctype html>
-<html>
-<head>
-  <title>Admin <?php echo EVENTNAME ?></title>
-  <link rel="stylesheet" href="css/style_common.css"/>
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-
-<meta name="viewport" content="width=480" />
-</head>
-<body>
-HEADER; //<?nop this bracket is just here for vim syntax highlighting
-
-DatenbankAufDeutsch($db_link);
-
 $AliasHelferID = 0;
 
 if (isset($_SESSION["AliasHelferID"])) {
@@ -38,29 +27,38 @@ if (isset($_POST["AliasHelferID"])) {
     header("Location: " . $_SERVER['PHP_SELF']);
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // POST from _login.php after login
+    //echo var_dump($_POST);
+    //header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+
 if ($AliasHelferID != 0) {
     $_SESSION["AliasHelferID"] = $AliasHelferID;
 }
-echo $header; // muss nach redirect-headern fuer POST ausgegeben werden
 $db_erg = Helferdaten($db_link, $HelferID);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $HelferName = $zeile['Name'];
     $HelferIsAdmin = $zeile['Admin'];
 }
+echo $header; // muss nach redirect-headern fuer POST ausgegeben werden
+echo $tablehead; // variablen aus _login.php
 ?>
 
-<div style="width: 100%;">
 
 <table class="commontable">
-    <th>
-       <button name="BackHelferdaten" value="1" onclick="window.location.href = 'index.php';">
-          <b>&larrhk;</b>
-       </button> &nbsp; 
-       <b>Admin <?php echo  EVENTNAME; ?></b>
-  </th>
-  <tr> 
-
-
+  <tr>
+  <tr onclick="window.location.href='AdminHelferLevel.php';">
+    <td>
+     <a class="fallbacklink" href='AdminHelferLevel.php'>
+        <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
+        <b>HelferLevel verwalten und Accounterstellung</b>
+     </a>
+    </td>
+  </tr>
+  <tr>
   <tr onclick="window.location.href='AdminDienste.php';">
     <td>
      <a class="fallbacklink" href='AdminDienste.php'>
@@ -69,9 +67,9 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
      </a>
     </td>
   </tr>
-    <tr onclick="window.location.href='CreateHelfer.php';"> <td>
+    <!--tr onclick="window.location.href='CreateHelfer.php';"> <td>
     <img src="Bilder/More.jpeg" style="width:30px;height:30px;"><b>Seite zur selbst-Registrierung</b>
-    </td> </tr>
+    </td> </tr-->
 
     <tr onclick="window.location.href='EmailZuToken.php';"> <td>
     <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;"><b>persönliche Einladungslink(s) generieren</b>
@@ -80,16 +78,17 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     <td>
        <a class="fallbacklink" href='AdminHelferUebersicht.php'>
           <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
-          <b>Helferübersicht und als Admin &auml;ndern <br>(Anm: dieses Menü soll die Punkte unterhalb ablösen)</b>
+          <b>Helferübersicht und -verwaltung<!--br>(Anm: dieses Menü soll die Punkte unterhalb ablösen)</b-->
        </a>
     </td>
   </tr>
 
-   <th>
+<!--   <th>
       <b>Als Admin &auml;ndern:<b> 
       <form style="display:inline-block;" method=post>
       <select style="height:33px;width:350px;font-size:20" name="AliasHelferID" id="AliasHelferID" onchange="submit()">
-<?php
+-->
+<!--?php
     $db_erg = HelferListe($db_link);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     if ($AliasHelferID != $zeile['HelferID']) {
@@ -104,16 +103,13 @@ if( ! isset($selectedSet) or ! $selectedSet) {
 }
 
 
-?>
+?--><!--
     </select></form>
     </b>
     </td>
    </th>
-<tr><!--td-->
-<!--<table class="innertable" style="padding:15px"><!-
-- inner table for indent--> 
+<tr>
 <tr onclick="window.location.href='AdminUserdaten.php';">
-    <!--td class="invis"></td-->
     <td>
       <img src="Bilder/dot.png" width="30px" height="2px">
       <img src="Bilder/PfeilRechts.jpeg" style="width:30px;height:30px;">
@@ -134,8 +130,7 @@ if( ! isset($selectedSet) or ! $selectedSet) {
         <b> Schichten Hinzufügen</b>
     </td>
   </tr>
-<!--</table></td> </tr>  inner table for indent end-->
-  <!--<tr><th>Weiteres</th></tr>-->
+-->
     <tr onclick="window.location.href='Kalender-all.php';">
     <td><img src="Bilder/More.jpeg" style="width:30px;height:30px"><b> Admin Kalenderansicht</b> </td>
     </tr>

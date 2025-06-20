@@ -5,15 +5,21 @@ SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 // Das hier wird über eine Art Token den Zugriff auf CreateHelfer erlauben
-// Jedes Token ist mit einem Helferlevel verknüpft, in dem dann Helfer angelegt 
-$typeSecret = $_GET['invite_code'] ?? '';
-if (empty($typeSecret)) {
-    die("Fehlender Zugangscode.");
+// Jedes Token ist mit einem Helferlevel verknüpft, in dem dann Helfer angelegt
+$linkcode = $_GET['linkcode'] ?? '';
+if (empty($linkcode)) {
+    die("<br>Fehlender Einladungscode.<br>");
 }
+$HelferLevelDaten = HelferLevelAusEinladung($db_link, $linkcode);
+if ($HelferLevelDaten === false) {
+    die("<br>Ungültiger Einladungscode.");
+}
+$HelferLevel = $HelferLevelDaten['HelferLevel'];
+$HelferLevelBeschreibung = $HelferLevelDaten['HelferLevelBeschreibung'];
 ?>
 <!doctype html>
 <html>
- <head>
+<head>
   <title><?php echo EVENTNAME ?></title>
 
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
@@ -21,8 +27,8 @@ if (empty($typeSecret)) {
 
 
   <meta name="viewport" content="width=480" />
- </head>
- <body>
+</head>
+<body>
 
 <?php
 
@@ -32,7 +38,6 @@ if (isset($_POST['sent'])) {
     $HelferName = $_POST['helfer-name'];
     $HelferEmail = $_POST['helfer-email'];
     $HelferHandy = $_POST['helfer-handy'];
-    $HelferLevel = $_POST['helfer-level'];
     $HelferPasswort = $_POST['helfer-passwort'];
     $HelferPasswort2 = $_POST['helfer-passwort2'];
 
@@ -82,9 +87,10 @@ if (isset($_POST['sent'])) {
 }
 
 
+echo "<p>Hier k&ouml;nnen Sie sich selbst einen Account im Level: $HelferLevelBeschreibung ($HelferLevel)  anlegen.<br>";
+echo 'Danach zum <a href="index.php">Login</a></p>';
 ?>
 
-<p>Hier k&ouml;nnen Sie sich selbst einen Account als Helfer anlegen. Danach zum <a href="index.php">Login</a></p>
 <form method="post">
 
   <table class="commontable">
@@ -121,39 +127,11 @@ if (isset($_POST['sent'])) {
               <input name="helfer-passwort2" type="password" value="<?php echo htmlspecialchars($HelferPasswort2 ?? '')?>" required>
               </td>
             </tr>
-              <tr><td>Helferlevel </td></tr>
-           <tr><td>
-              <select hidden name="helfer-level">
-<?php
-$db_erg = HelferLevel($db_link);
-$selected = "";
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $HelferLevel = $zeile['HelferLevel'];
-    $HelferLevelBeschreibung = $zeile['HelferLevelBeschreibung'];
-    if ($HelferLevel == 1) {
-        $selected = " selected " ;
-    };
-    echo "<option value='$HelferLevel' $selected>$HelferLevelBeschreibung</option>";
-    $selected = "";
-}
-?>
-              </select>
-              </td>
-            </tr>
           </table>
-
     <br>
-    <button name="sent" value="1">Helfer Anlegen</button>
+    <button name="sent" value="1">Account Anlegen</button>
 
 
 </form>
-
-
-
-<?php
-
-mysqli_free_result($db_erg);
-?>
-
- </body>
+</body>
 </html>

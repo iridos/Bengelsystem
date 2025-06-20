@@ -1,23 +1,16 @@
 <?php
 // Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
+require_once '_functions.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
+$pagename  = "Accountdaten"; // for header in _login.php
+$backlink  = "index.php";         // back button in table header from table header
+$header = PageHeader($pagename);
+$tablehead = TableHeader($pagename,$backlink);
+
 require '_login.php';
-
-$header= <<< HEADER
-<!doctype html>
-<html>
- <head>
-  <title><?php echo EVENTNAME ?> Persönliche Daten ändern</title>
-
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>  
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
-HEADER; //<? vim syntax-highlight-fix
 
 
 $HelferID = $_SESSION["HelferID"];

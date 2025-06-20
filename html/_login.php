@@ -102,4 +102,5 @@ $AdminID = isset($_SESSION["AdminID"]) ? $_SESSION["AdminID"]  : -1;
 //TODO vereinheitlichen. index.php verwendet HelferIsAdmin
 $HelferIsAdmin = $AdminStatus = $_SESSION["AdminStatus"];
 $HelferLevel = $_SESSION["HelferLevel"];
+
 ?>

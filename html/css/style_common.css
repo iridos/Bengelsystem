@@ -64,7 +64,7 @@ input, select, textarea {
   width: 95%;
 }
 
-.commontable button,.back button,.helfer button,#customers button {
+.commontable button,.back button,.helfer button,#customers button, .buttonlink{
   text-decoration: none; /* dont underline links */
   display: inline-block; /* makes it possible to set top and bottom margins */
   width: 45px;
@@ -82,3 +82,5 @@ summary  {
 font-size: 3px;
 height: 2px;
 }
+
+

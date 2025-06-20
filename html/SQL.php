@@ -926,7 +926,7 @@ function LastInsertId($db_link)
 
 function HelferLevel($db_link)
 {
-    $sql = "select HelferLevel,HelferLevelBeschreibung from HelferLevel";
+    $sql = "select HelferLevel, HelferLevelBeschreibung, linkcode from HelferLevel order by HelferLevel";
     $result = mysqli_query($db_link, $sql);
     if (! $result) {
         echo "Konnte HelferLevel nicht abfragen";
@@ -947,4 +947,90 @@ function alleHelferLevel($db_link)
     return $alleHelferLevel;
 }
 
+
+function HelferLevelAusEinladung($db_link, string $linkcode): array|false {
+    $sql = "SELECT HelferLevel, HelferLevelBeschreibung FROM HelferLevel WHERE linkcode = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "s", $linkcode);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if (!$result || $result->num_rows === 0) {
+        return false;
+    }
+
+    return $result->fetch_assoc();
+}
+
+function AlleHelferLevelAlles($db_link)
+{
+    $result = HelferLevel($db_link);
+    $alle = [];
+    while ($zeile = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $level = $zeile['HelferLevel'];
+        $alle[$level] = [
+            'HelferLevelBeschreibung' => $zeile['HelferLevelBeschreibung'],
+            'linkcode' => $zeile['linkcode'],
+        ];
+    }
+    return $alle;
+}
+
+function HelferLevelUpdate($db_link, int $level, string $beschreibung, string $linkcode): bool {
+    $sql = "UPDATE HelferLevel SET HelferLevelBeschreibung = ?, linkcode = ? WHERE HelferLevel = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "ssi", $beschreibung, $linkcode, $level);
+    if (!$stmt) {
+        return false;
+    }
+    mysqli_stmt_close($stmt);
+    return true;
+}
+
+function HelferLevelInsert($db_link, string $beschreibung, string $linkcode): bool {
+    $sql = "INSERT INTO HelferLevel (HelferLevelBeschreibung, linkcode) VALUES (?, ?)";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "ss", $beschreibung, $linkcode);
+    return $stmt !== false;
+}
+
+function HelferLevelDelete($db_link, int $level): bool {
+    $sql = "DELETE FROM HelferLevel WHERE HelferLevel = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $level);
+    return $stmt !== false;
+}
+
+function AnzahlAccountsMitHelferLevel($db_link, int $level): int {
+    $sql = "SELECT COUNT(*) AS Anzahl FROM Helfer WHERE HelferLevel = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $level);
+    $result = mysqli_stmt_get_result($stmt);
+    if ($result && ($row = mysqli_fetch_assoc($result))) {
+        return (int)$row['Anzahl'];
+    }
+    return 0;
+}
+
+function AnzahlDiensteMitHelferLevel($db_link, $level) {
+    $sql = "SELECT COUNT(*) FROM Dienst WHERE HelferLevel = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, 'i', $level);
+    $stmt->bind_result($anzahl);
+    $stmt->fetch();
+    return $anzahl;
+}
+
+
+
+// falls man sowohl nach HelferLevel, Beschreibung oder Invite Code filtern will
+//function HelferLevelAbfrage($db_link, string $spalte, string $wert): array|false {
+//    // Nur bestimmte Spalten zulassen, um SQL-Injection zu verhindern
+//    $erlaubteSpalten = ['linkcode', 'HelferLevel', 'HelferLevelBeschreibung'];
+//    if (!in_array($spalte, $erlaubteSpalten, true)) {
+//        return false;
+//    }
+//
+//    $sql = "SELECT HelferLevel, HelferLevelBeschreibung, linkcode FROM HelferLevel WHERE $spalte = ?";
+//    $result = stmt_prepare_and_execute($db_link, $sql, "s", $wert);
+//
+//    if (!$result || $result->num_rows === 0) {
+//        return false;
+//    }
+//
+//    return $result->fetch_assoc();
+//}
 
