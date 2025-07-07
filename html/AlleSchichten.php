@@ -79,7 +79,6 @@ echo $header;
 ////////////////////////////////////////////////////////
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
-
 ?>
 
 
@@ -99,35 +98,6 @@ echo $header;
     echo '</th></tr></table>';
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
-// wird hier gegen Fehler gesetzt. bitte zu Ende implementieren
-$addschicht = $_SESSION["addschicht"] ?? null;
-$dienstsort = $_SESSION["dienstsort"] ?? null;
-
-
-//addschicht und dienst-sort sollten wohl nach Diensten bzw Tagen sortieren
-//addschicht wird gerade nie gesetzt, dienst-sort damit auch nicht
-if (isset($_POST['addschicht']) && $_POST['addschicht'] == '1') {
-    $addschicht = '1';
-    $dienstsort = '1';
-}
-if (isset($_POST['addschicht']) && $_POST['addschicht'] == '2') {
-    $addschicht = '2';
-    $dienstsort = '2';
-}
-if (isset($_POST['addschicht']) && $_POST['addschicht'] == '0') {
-    $addschicht = '0';
-}
-
-$_SESSION["addschicht"] = $addschicht;
-$_SESSION["dienstsort"] = $dienstsort;
-
-//echo "<br>Detail=".$addschicht."<br>";
-
-if ($addschicht == '0') {
-    echo "<p><b>Schichten Hinzufügen geordnet nach</b>";
-    echo "<button name='addschicht' value='1'>Tage</button>";
-    echo "<button name='addschicht' value='2'>Dienste</button></p>";
-}
 
 // jeder soll sich alle HelferLevel anzeigen lassen koennen
 $HelferLevelAnzeige = $HelferLevel;
