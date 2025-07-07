@@ -7,6 +7,11 @@ require 'SQL.php';
 $db_link = ConnectDB();
 // zeigt login-Seite an, wenn keine Session besteht
 require '_login.php';
+require_once '_functions.php';
+$pagename  = "Alle Schichten";             // name of this page
+$backlink  = "index.php";  // back button in table header from table header
+$header = PageHeader($pagename);
+$tablehead = TableHeader($pagename,$backlink);
 // POST vor HTML Ausgabe
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Neu Schicht fuer Helfer Eintragen
@@ -21,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Helfer Schicht zuweisen
             // wenn es ein Admin ist, die AdminID übergeben, ansonsten 0
             // TODO: immer AdminID angeben, die Funktionen in SQL testen, ob HelferID==AdminID
-            $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtID);
+            $db_erg = HelferSchichtZuweisen($db_link, $HelferID, $SchichtID, $AdminStatus == 1 ? $AdminID : 0);
 
             $HelferName = '';
             $HelferEmail = '';
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($messages)) {
             // Helfer aus Schicht entfernen
-            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID);
+            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID, $AdminStatus == 1 ? $AdminID : 0);
         } else {
             // Fehlermeldungen ausgeben:
             echo '<div class="error"><ul>';
@@ -59,20 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     header("Location: " . $_SERVER['PHP_SELF']);
 }
+echo $header;
 ?>
-<!doctype html>
-<html>
-<head>
-  <title><?php echo EVENTNAME ?> Alle Schichten</title>
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
-  <script src="<?php echo JQUERY ?>" type="text/javascript"></script>
-  <script src="js/helferdb.js" type="text/javascript"></script>
-  <script> collapse_table_rows();
- </script>
-</head>
-<body>
   <a href="index.php">
   <button name="BackHelferdaten">
   <b>&larrhk;</b>
@@ -84,35 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
-    {
-    $db_link = ConnectDB();
-    $zeile = DetailSchicht($db_link, $SchichtID);
-    if(!isset($zeile['Was'])){
-    //error_log("Zeile not set in Schichtinfo");
-    //error_log("called with: SchichtID $SchichtID $Was, $Wo, $Dauer, $Leiter, $LeiterHandy etc");
-    // Das ist vermutlich kein Fehler mehr, wenn wir den selben Account mehrfach auf die selbe Schicht lassen für Familien etc
-    }
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-    $db_link->close();
-    return;
-}
-
-// Auswahl Tag oberhalb der Dienstetabelle
-if (isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 0;
-}
-
-
-
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
 
@@ -125,7 +89,7 @@ if (isset($_GET['ZeitBereich'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
-    //"Mein Dienstplan"
+    //"Dienstplan"
     echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'MeineSchichten.php\'">';
     echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' .  " Mein Dienstplan (";
     echo $zeile['Anzahl'];

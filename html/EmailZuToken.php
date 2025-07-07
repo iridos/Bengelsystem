@@ -4,8 +4,11 @@ require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
-require '_login.php';
-require '_crypt.php';
+$pagename = "Einladungslinks generieren, optionaler Emailversand";
+$backlink = "Admin.php";
+require_once '_login.php';
+require_once '_crypt.php';
+require_once '_functions.php';
 
 if ($AdminStatus != 1) {
     //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
@@ -93,26 +96,13 @@ if (isset($_POST['sendmail'])) {
     $sendmail = $_POST['sendmail'];
 }
 
-
-?>
-<!doctype html>
- <head>
-  <title><?php echo EVENTNAME ?>: Email Tokens generieren</title>
-  
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
- </head>
- <body>
-
-<?php
+echo PageHeader ($pagename);
+echo TableHeader ($pagename, $backlink);
 
 ?>
 
-<button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>
 <div style="width: 100%;">
 <p>
-<h2> Emails mit Login-Link zur HelferDB generieren </h2>
 Generiert  Tokens (bzw URLs mit Token) aus einer Liste von Email-Addressen. <br>
 Bei Klick auf den generierten Link wird sofort ein Account zur Email angelegt. <br>
 Als Passwort wird das Token gesetzt. Man kann sich mit dem Link danach wieder in den selben Account einloggen.

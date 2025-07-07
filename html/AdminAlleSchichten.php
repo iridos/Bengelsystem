@@ -7,6 +7,11 @@ require 'SQL.php';
 $db_link = ConnectDB();
 // zeigt login-Seite an, wenn keine Session besteht
 require '_login.php';
+require_once '_functions.php';
+$pagename  = "Alle Schichten / Schichten hinzufügen";             // name of this page
+$backlink  = "AdminHelferUebersicht.php";  // back button in table header from table header
+$header = PageHeader($pagename);
+$tablehead = TableHeader($pagename,$backlink);
 // POST vor HTML Ausgabe
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Neu Schicht fuer Helfer Eintragen
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($messages)) {
             // Helfer aus Schicht entfernen
-            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID, $AdminID);
+            $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $HelferID, $SchichtID, $AdminStatus == 1 ? $AdminID : 0);
         } else {
             // Fehlermeldungen ausgeben:
             echo '<div class="error"><ul>';
@@ -58,21 +63,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     header("Location: " . $_SERVER['PHP_SELF']);
+// Wenn es ein Admin ist HelferID AliasHelferID
+    if ($AdminStatus == 1){
+        if (isset($_POST['AliasHelferID'])) {
+            $HelferID = $_POST['AliasHelferID'];
+    } elseif (isset($_SESSION["AliasHelferID"])) {
+        $HelferID = $_SESSION["AliasHelferID"];
+        // ansonsten bleibt es die HelferID des Admins
+        }
+    HelferAuswahlButton($db_link, $HelferID);
+    }
 }
+echo $header;
 ?>
-<!doctype html>
-<html>
-<head>
-  <title><?php echo EVENTNAME ?> Alle Schichten</title>
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <meta name="viewport" content="width=480" />
-  <script src="<?php echo JQUERY ?>" type="text/javascript"></script>
-  <script src="js/helferdb.js" type="text/javascript"></script>
-  <script> collapse_table_rows();
- </script>
-</head>
-<body>
   <a href="AdminHelferUebersicht.php">
   <button name="BackHelferdaten">
   <b>&larrhk;</b>
@@ -84,68 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /// Detailinformation zu ausgewaehlten Schicht Holen
 ////////////////////////////////////////////////////////
-function SchichtInfo($SchichtID, &$Was, &$Wo, &$Dauer, &$Leiter, &$LeiterHandy, &$LeiterEmail, &$Info)
-    {
-    $db_link = ConnectDB();
-    $zeile = DetailSchicht($db_link, $SchichtID);
-    if(!isset($zeile['Was'])){
-    //error_log("Zeile not set in Schichtinfo");
-    //error_log("called with: SchichtID $SchichtID $Was, $Wo, $Dauer, $Leiter, $LeiterHandy etc");
-    // Das ist vermutlich kein Fehler mehr, wenn wir den selben Account mehrfach auf die selbe Schicht lassen für Familien etc
-    }
-    $Was = $zeile['Was'];
-    $Wo = $zeile['Wo'];
-    $Dauer = $zeile['Dauer'];
-    $Leiter = $zeile['Name'];
-    $LeiterHandy =  $zeile['Handy'];
-    $LeiterEmail =  $zeile['Email'];
-    $Info = $zeile['Info'];
-    $db_link->close();
-    return;
-}
-
-// Auswahl Tag oberhalb der Dienstetabelle
-if (isset($_GET['ZeitBereich'])) {
-    $ZeitBereich = $_GET['ZeitBereich'];
-} else {
-    $ZeitBereich = 0;
-}
-
-function HelferAuswahlButton($db_link, $AliasHelferID)
-{
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($AliasHelferID != $zeile['HelferID']) {
-            echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
-        } else {
-                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
-        }
-    }
-    echo '</select></form>';
-}
-    // Wenn es ein Admin ist HelferID AliasHelferID
-    if ($AdminStatus == 1){
-if (isset($_POST['AliasHelferID'])) {
-            $HelferID = $_POST['AliasHelferID'];
-} elseif (isset($_SESSION["AliasHelferID"])) {
-            $HelferID = $_SESSION["AliasHelferID"];
-            // ansonsten bleibt es die HelferID des Admins
-}
-        HelferAuswahlButton($db_link, $HelferID);
-
-        $_SESSION["AliasHelferID"] = $HelferID;
-        $AdminID = $_SESSION["AdminID"]; // wird beim Login gesetzt in SQL.php 
-}
-    $db_erg = Helferdaten($db_link, $HelferID);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        $HelferName = $zeile['Name'];
-        $HelferLevel = $zeile['HelferLevel'];
-    }
-
 // Helferliste Anzeigen
 ////////////////////////////////////////////////////////
-
 ?>
 
 
@@ -155,7 +98,7 @@ if (isset($_POST['AliasHelferID'])) {
  $db_erg = SchichtenSummeEinesHelfers($db_link, $HelferID);
  $zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
 
-    //"Dienstplan von"
+    //"Dienstplan"
     echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
     echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . "Dienstplan von $HelferName: ";
     echo $zeile['Anzahl'];
