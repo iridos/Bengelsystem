@@ -12,6 +12,7 @@ $pagename  = "Alle Schichten / Schichten hinzufügen";             // name of th
 $backlink  = "AdminHelferUebersicht.php";  // back button in table header from table header
 $header = PageHeader($pagename);
 $tablehead = TableHeader($pagename,$backlink);
+function AlleSchichtenCheckPOST($db_link,$HelferID,$AdminStatus,$AdminID) {
 // POST vor HTML Ausgabe
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Neu Schicht fuer Helfer Eintragen
@@ -74,6 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     HelferAuswahlButton($db_link, $HelferID);
     }
 }
+}
+AlleSchichtenCheckPOST($db_link,$HelferID,$AdminStatus,$AdminID);
 echo $header;
 ?>
   <a href="AdminHelferUebersicht.php">
@@ -125,134 +128,113 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
 echo '</select>';
 
 
-if ($addschicht != '0') { // addschicht soll Darstellung nach Tagen oder Diensten sortieren, macht es aber nicht
-    echo '<table class="commontable">';
-    require('_zeitbereich.php');
-    $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, $_SERVER['PHP_SELF']);
-    $MeinVon = $Bereich['MeinVon'];
-    $MeinBis = $Bereich['MeinBis'];
-    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevelAnzeige);
+echo '<table class="commontable">';
+require('_zeitbereich.php');
+$Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, $_SERVER['PHP_SELF']);
+$MeinVon = $Bereich['MeinVon'];
+$MeinBis = $Bereich['MeinBis'];
+$db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevelAnzeige);
 
-    // fuer Anzahlanzeige in Ueberschrift
-    $iAlleSchichtenCount = AlleSchichtenCount($db_link);
-    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
-    echo '</table>';
-        echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
+// fuer Anzahlanzeige in Ueberschrift
+$iAlleSchichtenCount = AlleSchichtenCount($db_link);
+$iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+echo '</table>';
+    echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
 
-    // "Alle Schichten der Con"
-    echo '<table  class="commontable">';
-    echo "<tr class='infoheader'>";
-    echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
+// "Alle Schichten der Con"
+echo '<table  class="commontable">';
+echo "<tr class='infoheader'>";
+echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
 
-    $alleHelferLevel = alleHelferLevel($db_link);
-    // Summe Ausgabe alle Dienste pro Helferlevel
-    foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-        $meine = "";
-        if ($HelferLevelIteration == $HelferLevel) {
-            $meine = "&leftarrow; Schichten für mich zum eintragen";
-        } else { $meine = "Eintragen hier nur nach Rücksprache mit Orga";}
-        if ($HelferLevelIteration == $HelferLevelAnzeige) {
-            $meine = "$meine - Schichten werden gerade unten angezeigt";
-        }
-        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
-        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
-        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
+$alleHelferLevel = alleHelferLevel($db_link);
+// Summe Ausgabe alle Dienste pro Helferlevel
+foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+    $meine = "";
+    if ($HelferLevelIteration == $HelferLevel) {
+        $meine = "&leftarrow; Schichten für mich zum eintragen";
+    } else { $meine = "Eintragen hier nur nach Rücksprache mit Orga";}
+    if ($HelferLevelIteration == $HelferLevelAnzeige) {
+        $meine = "$meine - Schichten werden gerade unten angezeigt";
     }
-
-
-    $OldTag = "";
-    $OldWas = "";
-    // um Zeilen mit von mir belegten Schichten hervorzuheben
-    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
-    //print_r($MeineDienste);
-
-    echo '</table>';
-    // Tabelle mit allen Diensten und Schichten
-    echo '<table  class="commontable collapsible">';
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($dienstsort == '1') { // dienst-sort wird momentan nie gesetzt, also immer else-Teil ausgeführt TODO
-            $Tag = $zeile['Tag'];
-
-            if ($Tag != $OldTag) {
-                echo "<tr class='header'><th colspan='5' >";
-                echo $Tag;
-                echo "</th></tr>";
-                $OldTag = $Tag;
-            }
-        } else {
-            $Was = $zeile['Was'];
-
-            if ($Was != $OldWas) { // Header ausgeben, wenn der Dienst nicht mehr der selbe ist
-                // + in <span> becomes - when rows are opened
-                echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
-                $SchichtID = $zeile['SchichtID'];
-                $DienstID = $zeile['DienstID'];
-                $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
-                $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
-                echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
-                echo "</th>";
-                echo "</tr>";
-                SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
-                if (true) {
-                    echo "<tr><td colspan=5 style='background:lightblue'>";
-                    echo "<b>Beschreibung:</b> $Info <br><br>";
-                    echo "<b>Ort:</b> $InfoWo <br>";
-                //echo "<b>Dauer:</b> $InfoDauer<br>"; // verschieden je nach Einzelschicht
-                    echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
-                    echo $LeiterHandy . ", ";
-                    echo "$LeiterEmail";
-                    echo "</td></td></tr>\n";
-                }
-                $OldWas = $Was;
-            }
-        }
-        $Color = "red";
-        if ($zeile['Ist'] > 0) {
-            $Color = "yellow";
-        }
-        if ($zeile['Ist'] >= $zeile['Soll']) {
-            $Color = "green";
-        }
-        $Von = $zeile['Ab'];
-        $Bis = $zeile['Bis'];
-        if (substr($Von, 0, 2) == substr($Bis, 0, 2)) {
-            $Bis = substr($Bis, 2);
-        }
-        $Von = substr($Von, 2);
-
-              // Meine Schichten gruen einfaerben
-        if (in_array($zeile['SchichtID'], $MeineDienste)) {
-             $rowstyle = ' style="background-color:lightgreen" ';
-             $regtext  = '<br><center>Meine!</center>';
-        } else {
-            // dummy-style, um SchichtID unsichtbar im Tag anzuzeigen
-            $rowstyle = 'dbinfo="SchichtID:' . $zeile['SchichtID'] . ';helferlvl:' . $HelferLevel . '" ';
-            $regtext  = '';
-        }
-        if (isset($_SESSION["SchichtIdAktiv"]) && $_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
-            $rowstyle = $rowstyle . " target='active' "; // dont collapse when the user did something
-        }
-
-                echo '<tr ' . $rowstyle . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $zeile['SchichtID'] . '#Info\';" >';
-
-        if ($dienstsort == '1') {
-            echo "<td>" . $zeile['Was'] . "</td>";
-        } else {
-            echo "<td>" . $zeile['Tag'] . "</td>";
-        }
-        echo "<td>" . $Von . "</td>";
-        echo "<td>" . $Bis . "</td>";
-        echo "<td bgcolor='" . $Color . "'>" . $zeile['Ist'] . "/";
-        echo "" . $zeile['Soll'] . "</td>";
-        // durch space:nowrap wird ein Umbruch zwischen den Buttons verhindert
-        // in Kombi mit width:1% wird immer der minimale Platz für die Spalte belegt
-        // width:200px oder max-width:200px hat zu viel weissem Platz rechts und enge links gefuehrt
-        echo "<td style='width:10%;white-space:nowrap'><button name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>";
-        echo "&nbsp;&nbsp;<button name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
-        echo "</tr>\n";
-    }
-    echo "</table>";
+    $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
+    echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
 }
+
+
+$OldTag = "";
+$OldWas = "";
+// um Zeilen mit von mir belegten Schichten hervorzuheben
+$MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+//print_r($MeineDienste);
+
+echo '</table>';
+// Tabelle mit allen Diensten und Schichten
+echo '<table  class="commontable collapsible">';
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $Was = $zeile['Was'];
+    if ($Was != $OldWas) { // Header ausgeben, wenn der Dienst nicht mehr der selbe ist
+        // + in <span> becomes - when rows are opened
+        echo "<tr class='header'><th  colspan='5' style='width:100%'><span>+</span> ";
+        $SchichtID = $zeile['SchichtID'];
+        $DienstID = $zeile['DienstID'];
+        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
+        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
+        echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
+        echo "</th>";
+        echo "</tr>";
+        SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+        echo "<tr><td colspan=5 style='background:lightblue'>";
+        echo "<b>Beschreibung:</b> $Info <br><br>";
+        echo "<b>Ort:</b> $InfoWo <br>";
+        echo "<b>Ansprechparter:</b>" . $Leiter . ", ";
+        echo $LeiterHandy . ", ";
+        echo "$LeiterEmail";
+        echo "</td></td></tr>\n";
+        $OldWas = $Was;
+    }
+    $Color = "red";
+    if ($zeile['Ist'] > 0) {
+        $Color = "yellow";
+    }
+    if ($zeile['Ist'] >= $zeile['Soll']) {
+        $Color = "green";
+    }
+    $Von = $zeile['Ab'];
+    $Bis = $zeile['Bis'];
+    if (substr($Von, 0, 2) == substr($Bis, 0, 2)) {
+        $Bis = substr($Bis, 2);
+    }
+    $Von = substr($Von, 2);
+
+          // Meine Schichten gruen einfaerben
+    if (in_array($zeile['SchichtID'], $MeineDienste)) {
+         $rowstyle = ' style="background-color:lightgreen" ';
+         $regtext  = '<br><center>Meine!</center>';
+    } else {
+        // dummy-style, um SchichtID unsichtbar im Tag anzuzeigen
+        $rowstyle = 'dbinfo="SchichtID:' . $zeile['SchichtID'] . ';helferlvl:' . $HelferLevel . '" ';
+        $regtext  = '';
+    }
+    if (isset($_SESSION["SchichtIdAktiv"]) && $_SESSION["SchichtIdAktiv"] == $zeile['SchichtID']) {
+        $rowstyle = $rowstyle . " target='active' "; // dont collapse when the user did something
+    }
+
+            echo '<tr ' . $rowstyle . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . $zeile['SchichtID'] . '#Info\';" >';
+
+    echo "<td>" . $zeile['Tag'] . "</td>";
+    echo "<td>" . $Von . "</td>";
+    echo "<td>" . $Bis . "</td>";
+    echo "<td bgcolor='" . $Color . "'>" . $zeile['Ist'] . "/";
+    echo "" . $zeile['Soll'] . "</td>";
+    // durch space:nowrap wird ein Umbruch zwischen den Buttons verhindert
+    // in Kombi mit width:1% wird immer der minimale Platz für die Spalte belegt
+    // width:200px oder max-width:200px hat zu viel weissem Platz rechts und enge links gefuehrt
+    echo "<td style='width:10%;white-space:nowrap'><button name='plusschicht' value='" . $zeile['SchichtID'] . "'>+</button>";
+    echo "&nbsp;&nbsp;<button name='minusschicht' value='" . $zeile['SchichtID'] . "'>&ndash;</button> $regtext" . "</td>";
+    echo "</tr>\n";
+}
+echo "</table>";
 
 
 
