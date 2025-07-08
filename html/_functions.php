@@ -2,7 +2,7 @@
 
 require_once 'konfiguration.php';
 
-function PageHeader ($pagename, $eventname = EVENTNAME){
+function PageHeader ($pagename, $eventname = EVENTNAME, $jquery = JQUERY){
     $header = <<<HEADER
     <!doctype html>
     <html>
@@ -12,6 +12,9 @@ function PageHeader ($pagename, $eventname = EVENTNAME){
       <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
       <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
       <meta name="viewport" content="width=480" />
+      <script src="$jquery" type="text/javascript"></script>
+      <script src="js/helferdb.js" type="text/javascript"></script>
+      <script> collapse_table_rows();</script>
     </head>
     <body>
 HEADER; //<?vim this bracket is just here for vim syntax highlighting

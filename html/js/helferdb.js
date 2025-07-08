@@ -1,3 +1,7 @@
+$(document).ready(function() {
+    console.log("jQuery is ready!");
+});
+
 function showPassword(id)
 {
     var x = document.getElementById(id);
