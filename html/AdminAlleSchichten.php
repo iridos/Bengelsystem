@@ -13,62 +13,7 @@ $backlink  = "AdminHelferUebersicht.php";  // back button in table header from t
 $header = PageHeader($pagename);
 $tablehead = TableHeader($pagename,$backlink);
 // Admin Seite setzt HelferID aus AliasHelferID, sonst bleibt wie aus _login.php gesetzt normale Seite nicht
-function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
-// Wenn es ein Admin ist ZielHelferID AliasHelferID, sonst HelferID
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Neu Schicht fuer Helfer Eintragen
-        ///////////////////////////////////////////////////////////
-            $messages = [];
-        if (isset($_POST['plusschicht'])) {
-            // Nutzer hat hier zuletzt etwas geändert und wir klappen das deshalb auf,
-            // indem wir unten target=active setzen
-            $_SESSION["SchichtIdAktiv"] = $SchichtID = $_POST['plusschicht'];
-            if (empty($messages)) {
-                // Helfer Schicht zuweisen
-                // wenn es ein Admin ist, die AdminID übergeben, ansonsten 0
-                // TODO: immer AdminID angeben, die Funktionen in SQL testen, ob ZielHelferID==AdminID
-                $db_erg = HelferSchichtZuweisen($db_link, $ZielHelferID, $SchichtID, $AdminStatus == 1 ? $AdminID : 0);
 
-                $HelferName = '';
-                $HelferEmail = '';
-                $HelferHandy = '';
-            } else {
-                // Fehlermeldungen ausgeben:
-                echo '<div class="error"><ul>';
-                foreach ($messages as $message) {
-                    echo '<li>' . htmlspecialchars($message) . '</li>';
-                }
-            echo '</ul></div>';
-            exit;
-            }
-        }
-
-        if (isset($_POST['minusschicht'])) {
-            // Mich aus Schicht entfernen
-                $messages = [];
-                // Nutzer hat hier zuletzt etwas geaendert und wir klappen das deshalb auf:
-                $_SESSION["SchichtIdAktiv"] = $SchichtID = $_POST['minusschicht'];
-
-            if (empty($messages)) {
-                // Helfer aus Schicht entfernen
-                $db_erg = HelferVonSchichtLoeschen_SchichtID($db_link, $ZielHelferID, $SchichtID, $AdminStatus == 1 ? $AdminID : 0);
-            } else {
-                // Fehlermeldungen ausgeben:
-                echo '<div class="error"><ul>';
-                foreach ($messages as $message) {
-                        echo '<li>' . htmlspecialchars($message) . '</li>';
-                }
-                echo '</ul></div>';
-                exit;
-            }
-        }
-    // Wenn es ein Admin wird ZielHelferID AliasHelferID, sonst HelferID
-        if ($AdminStatus == 1 && isset($_POST['AliasHelferID'])){
-            $_SESSION["AliasHelferID"] = $_POST['AliasHelferID'];
-        }
-        header("Location: " . $_SERVER['PHP_SELF']);
-    }
-}
 // Nutzer hat hier zuletzt etwas geändert und wir klappen das deshalb auf
 $SchichtID = $_SESSION["SchichtIdAktiv"] ?? "";
 $HelferID = $_SESSION["AliasHelferID"] ?? $HelferID; // Alias nur Adminseite
