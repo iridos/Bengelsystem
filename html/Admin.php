@@ -30,7 +30,7 @@ if (isset($_POST["AliasHelferID"])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POST from _login.php after login
     //echo var_dump($_POST);
-    //header("Location: " . $_SERVER['PHP_SELF']);
+    header("Location: " . $_SERVER['PHP_SELF']);
     exit;
 }
 
