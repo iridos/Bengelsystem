@@ -65,25 +65,32 @@ echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen<
 function ZeigeHelferLevelTabelle($db_link,$HelferLevel,$HelferLevelAnzeige){
     // fuer Anzahlanzeige in Ueberschrift
     $iAlleSchichtenCount = AlleSchichtenCount($db_link);
-    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+    $Belegung = AlleBelegteSchichtenCountMitSurplus($db_link);
+    $iBelegteSchichtenCount = $Belegung['besetzt'];
+    $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
     // "Alle Schichten der Con" (Gesamtstatistik besetzt/gewollt)
     echo '<table  class="commontable">';
     echo "<tr class='infoheader'>";
-    echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
+    echo "<th colspan='5'>Alles: ";
+    echo "Besetzt (+Überbelegt) / Gesamt&nbsp;&nbsp;&nbsp; ";
+    echo "${iBelegteSchichtenCount}(+${iueberBelegteSchichtenCount})/$iAlleSchichtenCount </th></tr>";
 
     $alleHelferLevel = alleHelferLevel($db_link);
     // Summe Ausgabe alle Dienste pro Helferlevel
     foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
         $meine = "";
         if ($HelferLevelIteration == $HelferLevel) {
-            $meine = "&leftarrow; Schichten für mich zum eintragen";
-        } else { $meine = "Eintragen hier nur nach Rücksprache mit Orga";}
+            $meine = "<div style='float:right'>&leftarrow; Schichten für mich zum eintragen</div>";
+        } else { $meine = "<div style='float:right'>Eintragen hier nur nach Rücksprache mit Orga</div>";}
         if ($HelferLevelIteration == $HelferLevelAnzeige) {
-            $meine = "$meine - Schichten werden gerade unten angezeigt";
+            $meine = "$meine  Schichten werden gerade unten angezeigt";
         }
         $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
-        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
-        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
+        $Belegung = AlleBelegteSchichtenCountMitSurplus($db_link,$HelferLevelIteration);
+        $iBelegteSchichtenCount = $Belegung['besetzt'];
+        $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
+        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung  ";
+        echo "${iBelegteSchichtenCount}(+$iueberBelegteSchichtenCount)/$iAlleSchichtenCount  $meine</th></tr>";
     }
     echo '</table>';
 }
@@ -95,7 +102,6 @@ $OldWas = "";
 $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
 //print_r($MeineDienste);
 
-echo '</table>';
 // Tabelle mit allen Diensten und Schichten
 echo '<table  class="commontable collapsible">';
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
@@ -106,8 +112,11 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $SchichtID = $zeile['SchichtID'];
         $DienstID = $zeile['DienstID'];
         $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
-        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
-        echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) <!-- Abfrage $HelferLevel, $DienstID -->";
+        $Belegung = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
+        $iBelegteSchichtenCount = $Belegung['besetzt'];
+        $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
+        $ueberBelegteSchichten = ($iueberBelegteSchichtenCount >0) ? "[+$iueberBelegteSchichtenCount]" : "";
+        echo "$Was ($iBelegteSchichtenCount/$iAlleSchichtenCount) $ueberBelegteSchichten <!-- Abfrage $HelferLevel, $DienstID -->";
         echo "</th>";
         echo "</tr>";
         SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);

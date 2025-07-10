@@ -278,24 +278,7 @@ function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
         $params[] = $DienstID;
         $types .= "i";
     }
-
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        error_log("AlleSchichtenCount prepare failed: " . mysqli_error($db_link));
-        echo "Fehler bei Datenbankabfrage.<br>";
-        return false;
-    }
-
-    if ($params) {
-        mysqli_stmt_bind_param($stmt, $types, ...$params);
-    }
-
-    if (!mysqli_stmt_execute($stmt)) {
-        error_log("AlleSchichtenCount execute failed: " . mysqli_stmt_error($stmt));
-        echo "Fehler bei Ausführung der Abfrage.<br>";
-        return false;
-    }
-
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
     $result = mysqli_stmt_get_result($stmt);
     mysqli_stmt_close($stmt);
     $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -305,15 +288,11 @@ function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
 
 function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
 {
-    $sql = "SELECT Count(HelferID) AS Anzahl
-            FROM EinzelSchicht, Schicht, Dienst
-            WHERE EinzelSchicht.SchichtID=Schicht.SchichtID
-            AND Schicht.DienstID=Dienst.DienstID ";
-//    $sql = "SELECT COUNT(HelferID) AS Anzahl
-//            FROM EinzelSchicht
-//            JOIN Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
-//            JOIN Dienst ON Schicht.DienstID = Dienst.DienstID
-//            WHERE 1=1";
+    $sql = "SELECT COUNT(HelferID) AS Anzahl
+            FROM EinzelSchicht
+            JOIN Schicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
+            JOIN Dienst ON Schicht.DienstID = Dienst.DienstID
+            WHERE 1=1";
 
     $params = [];
     $types = '';
@@ -329,24 +308,7 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#
         $params[] = $DienstID;
         $types .= 'i';
     }
-
-    $stmt = mysqli_prepare($db_link, $sql);
-    if (!$stmt) {
-        error_log("Prepare failed: " . mysqli_error($db_link));
-        echo "Abfrage konnte nicht vorbereitet werden.";
-        return false;
-    }
-
-    if (!empty($params)) {
-        mysqli_stmt_bind_param($stmt, $types, ...$params);
-    }
-
-    if (!mysqli_stmt_execute($stmt)) {
-        error_log("AlleBelegteSchichtenCount Execute failed: " . mysqli_stmt_error($stmt));
-        echo "Abfrage konnte nicht ausgeführt werden.";
-        return false;
-    }
-
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
     $result = mysqli_stmt_get_result($stmt);
     mysqli_stmt_close($stmt);
     $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -354,6 +316,48 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#
     return $zeile['Anzahl'];
 }
 
+function AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $DienstID = -1) {
+    $sql = "SELECT 
+                SUM(LEAST(Soll, Belegt)) AS Besetzt,
+                SUM(GREATEST(0, Belegt - Soll)) AS Ueberbelegt
+            FROM (
+                SELECT 
+                    Schicht.SchichtID,
+                    COUNT(EinzelSchicht.HelferID) AS Belegt,
+                    Schicht.Soll
+                FROM Schicht
+                LEFT JOIN EinzelSchicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
+                JOIN Dienst ON Schicht.DienstID = Dienst.DienstID
+                WHERE 1=1";
+
+    $params = [];
+    $types = "";
+
+    if ($HelferLevel != -1) {
+        $sql .= " AND Dienst.HelferLevel = ?";
+        $params[] = $HelferLevel;
+        $types .= "i";
+    }
+
+    if ($DienstID != -1) {
+        $sql .= " AND Dienst.DienstID = ?";
+        $params[] = $DienstID;
+        $types .= "i";
+    }
+
+    $sql .= " GROUP BY Schicht.SchichtID, Schicht.Soll
+            ) AS Belegung";
+
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
+    $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt);
+
+    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    return [
+        'besetzt' => (int)($zeile['Besetzt'] ?? 0),
+        'ueberbelegt' => (int)($zeile['Ueberbelegt'] ?? 0)
+    ];
+}
 
 
 function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1)#stmt
