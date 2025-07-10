@@ -75,7 +75,9 @@ if (isset($_GET['ZeitBereich'])) {
 
 function HelferAuswahlButton($db_link, $AliasHelferID)
 {
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
+    echo '<b>Helfer w&auml;hlen:<b>';
+    echo '  <form style="display:inline-block;" method=post>';
+    echo '  <select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
     $db_erg = HelferListe($db_link);
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         if ($AliasHelferID != $zeile['HelferID']) {
@@ -88,6 +90,10 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
 }
 
 function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
+    if (isset($_GET['helfer-level-anzeige'])) {
+        $_SESSION["HelferLevelAnzeige"] = $_GET['helfer-level-anzeige'];
+    }
+
 // Wenn es ein Admin ist ZielHelferID AliasHelferID, sonst HelferID
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Neu Schicht fuer Helfer Eintragen
@@ -116,7 +122,11 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
             exit;
             }
         }
-
+        // jeder soll sich alle HelferLevel anzeigen lassen koennen
+        if (isset($_POST['helfer-level-anzeige'])) {
+            $_SESSION["HelferLevelAnzeige"] = $_POST['helfer-level-anzeige'];
+        }
+ 
         if (isset($_POST['minusschicht'])) {
             // Mich aus Schicht entfernen
                 $messages = [];
@@ -138,8 +148,26 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
         }
     // Wenn es ein Admin wird ZielHelferID AliasHelferID, sonst HelferID
         if ($AdminStatus == 1 && isset($_POST['AliasHelferID'])){
-            $_SESSION["AliasHelferID"] = $_POST['AliasHelferID'];
+            $_SESSION["AliasHelferID"] = $AliasHelferID = $_POST['AliasHelferID'];
+            $db_erg = Helferdaten($db_link, $AliasHelferID);
+                while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+                    $AliasHelferName = $zeile['Name'];
+                }
+           $_SESSION["AliasHelferName"] = $AliasHelferName;
         }
+        //$db_link->close();
         header("Location: " . $_SERVER['PHP_SELF']);
     }
 }
+
+function HelferLevelAuswahl($db_link,$HelferLevelAnzeige){
+    echo '<select style="width:200px" name="helfer-level-anzeige" onchange="submit()">';
+    $alleHelferLevel = alleHelferLevel($db_link);
+    foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+        $selected = ($HelferLevelIteration == $HelferLevelAnzeige) ? "selected" : "" ;
+        echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
+    }
+    echo '</select>';
+    return;
+}
+

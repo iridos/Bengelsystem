@@ -15,19 +15,15 @@ $tablehead = TableHeader($pagename,$backlink);
 // Admin Seite setzt HelferID aus AliasHelferID, sonst bleibt wie aus _login.php gesetzt normale Seite nicht
 
 // Nutzer hat hier zuletzt etwas geändert und wir klappen das deshalb auf
-$SchichtID = $_SESSION["SchichtIdAktiv"] ?? "";
+$SchichtID = $_SESSION["SchichtIdAktiv"] ?? ""; // sollte die Session Var hier auf nichts zurück gesetzt werden?
 $HelferID = $_SESSION["AliasHelferID"] ?? $HelferID; // Alias nur Adminseite
+$HelferLevelAnzeige = $_SESSION["HelferLevelAnzeige"] ?? $HelferLevel;
 // POST vor HTML Ausgabe
 AlleSchichtenCheckPOST($db_link,$HelferID,$AdminStatus,$AdminID);
 echo $header;
-HelferAuswahlButton($db_link, $HelferID); // Admin Button welcher Helfer bearbeitet wird
+echo $tablehead;
+HelferAuswahlButton($db_link, $AliasHelferID); // Admin Button welcher Helfer bearbeitet wird
 ?>
-  <a href="AdminHelferUebersicht.php">
-  <button name="BackHelferdaten">
-  <b>&larrhk;</b>
-  </button></a>
-  <?php echo "<b>" . EVENTNAME . "</b>"; ?>
-  <h1> Alle Schichten / Schichten hinzuf&uuml;gen </h1>
   <div style="width: 100%;">
   <?php
 
@@ -46,7 +42,7 @@ HelferAuswahlButton($db_link, $HelferID); // Admin Button welcher Helfer bearbei
 
     //"Dienstplan"
     echo '<table class="commontable"><tr class="header"><th onclick="window.location.href=\'AdminMeineSchichten.php\'">';
-    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . "Dienstplan von $HelferName: ";
+    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">' . "Dienstplan von $AliasHelferName (";
     echo $zeile['Anzahl'];
     echo " Schichten, ";
     echo $zeile['Dauer'] / 3600;
@@ -54,21 +50,7 @@ HelferAuswahlButton($db_link, $HelferID); // Admin Button welcher Helfer bearbei
     echo '</th></tr></table>';
 /// Schichten Auswahl
 ////////////////////////////////////////////////////////
-
-// jeder soll sich alle HelferLevel anzeigen lassen koennen
-$HelferLevelAnzeige = $HelferLevel;
-if (isset($_POST['helfer-level-anzeige']))
-{
-    $HelferLevelAnzeige = $_POST['helfer-level-anzeige'];
-}
-
-echo '<select style="width:200px" name="helfer-level-anzeige" onchange="submit()">';
-$alleHelferLevel = alleHelferLevel($db_link);
-foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-    $selected = ($HelferLevelIteration == $HelferLevelAnzeige) ? "selected" : "" ;
-    echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
-}
-echo '</select>';
+HelferLevelAuswahl($db_link,$HelferLevelAnzeige);
 
 
 echo '<table class="commontable">';
@@ -78,32 +60,34 @@ $MeinVon = $Bereich['MeinVon'];
 $MeinBis = $Bereich['MeinBis'];
 $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevelAnzeige);
 
-// fuer Anzahlanzeige in Ueberschrift
-$iAlleSchichtenCount = AlleSchichtenCount($db_link);
-$iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
-echo '</table>';
-    echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
+echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
 
-// "Alle Schichten der Con"
-echo '<table  class="commontable">';
-echo "<tr class='infoheader'>";
-echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
+function ZeigeHelferLevelTabelle($db_link,$HelferLevel,$HelferLevelAnzeige){
+    // fuer Anzahlanzeige in Ueberschrift
+    $iAlleSchichtenCount = AlleSchichtenCount($db_link);
+    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link);
+    // "Alle Schichten der Con" (Gesamtstatistik besetzt/gewollt)
+    echo '<table  class="commontable">';
+    echo "<tr class='infoheader'>";
+    echo "<th colspan='5'>Alle Schichten der Con (Besetzt/Gesamt) " . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . "</th></tr>";
 
-$alleHelferLevel = alleHelferLevel($db_link);
-// Summe Ausgabe alle Dienste pro Helferlevel
-foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-    $meine = "";
-    if ($HelferLevelIteration == $HelferLevel) {
-        $meine = "&leftarrow; Schichten für mich zum eintragen";
-    } else { $meine = "Eintragen hier nur nach Rücksprache mit Orga";}
-    if ($HelferLevelIteration == $HelferLevelAnzeige) {
-        $meine = "$meine - Schichten werden gerade unten angezeigt";
+    $alleHelferLevel = alleHelferLevel($db_link);
+    // Summe Ausgabe alle Dienste pro Helferlevel
+    foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+        $meine = "";
+        if ($HelferLevelIteration == $HelferLevel) {
+            $meine = "&leftarrow; Schichten für mich zum eintragen";
+        } else { $meine = "Eintragen hier nur nach Rücksprache mit Orga";}
+        if ($HelferLevelIteration == $HelferLevelAnzeige) {
+            $meine = "$meine - Schichten werden gerade unten angezeigt";
+        }
+        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+        $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
+        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
     }
-    $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
-    $iBelegteSchichtenCount = AlleBelegteSchichtenCount($db_link, $HelferLevelIteration);
-    echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung (Besetzt/Gesamt) (" . $iBelegteSchichtenCount . "/" . $iAlleSchichtenCount . ")  $meine</th></tr>";
+    echo '</table>';
 }
-
+ZeigeHelferLevelTabelle($db_link,$HelferLevel,$HelferLevelAnzeige);
 
 $OldTag = "";
 $OldWas = "";
