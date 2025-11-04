@@ -80,7 +80,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
               </td>
             </tr>
            <tr>
-              <td>Handy (freiwillig)</td></tr><tr><td>     
+              <td>Handy (freiwillig, kann in Schichtansicht gesehen werden)</td></tr><tr><td>     
               <input name="helfer-handy" type="tel" value="<?php echo htmlspecialchars($HelferHandy ?? '')?>" >
               </td>
             </tr>
