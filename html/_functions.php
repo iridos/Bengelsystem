@@ -83,9 +83,14 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
         if ($AliasHelferID != $zeile['HelferID']) {
             echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
         } else {
-                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
+            echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
+            $selectedSet = true;
         }
     }
+    if( ! isset($selectedSet) or ! $selectedSet ) {
+      echo "<option value='none' selected='selected'>Bitte auswählen</optionen>";
+    }
+
     echo '</select></form>';
 }
 
@@ -169,5 +174,37 @@ function HelferLevelAuswahl($db_link,$HelferLevelAnzeige){
     }
     echo '</select>';
     return;
+}
+function ZeigeHelferLevelTabelle($db_link,$HelferLevel,$HelferLevelAnzeige){
+    // fuer Anzahlanzeige in Ueberschrift
+    $iAlleSchichtenCount = AlleSchichtenCount($db_link);
+    $Belegung = AlleBelegteSchichtenCountMitSurplus($db_link);
+    $iBelegteSchichtenCount = $Belegung['besetzt'];
+    $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
+    // "Alle Schichten der Con" (Gesamtstatistik besetzt/gewollt)
+    echo '<table  class="commontable">';
+    echo "<tr class='infoheader'>";
+    echo "<th colspan='5'>Alles: ";
+    echo "Besetzt (+Überbelegt) / Gesamt&nbsp;&nbsp;&nbsp; ";
+    echo "${iBelegteSchichtenCount}(+${iueberBelegteSchichtenCount})/$iAlleSchichtenCount </th></tr>";
+
+    $alleHelferLevel = alleHelferLevel($db_link);
+    // Summe Ausgabe alle Dienste pro Helferlevel
+    foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
+        $meine = "";
+        if ($HelferLevelIteration == $HelferLevel) {
+            $meine = "<div style='float:right'>&leftarrow; Schichten für mich zum eintragen</div>";
+        } else { $meine = "<div style='float:right'>Eintragen hier nur nach Rücksprache mit Orga</div>";}
+        if ($HelferLevelIteration == $HelferLevelAnzeige) {
+            $meine = "$meine  Schichten werden gerade unten angezeigt";
+        }
+        $iAlleSchichtenCount = AlleSchichtenCount($db_link, $HelferLevelIteration);
+        $Belegung = AlleBelegteSchichtenCountMitSurplus($db_link,$HelferLevelIteration);
+        $iBelegteSchichtenCount = $Belegung['besetzt'];
+        $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
+        echo "<tr class='infoheader'><th colspan='5' >&nbsp;&nbsp; &rightarrow; Schichten  $HelferLevelBeschreibung  ";
+        echo "${iBelegteSchichtenCount}(+$iueberBelegteSchichtenCount)/$iAlleSchichtenCount  $meine</th></tr>";
+    }
+    echo '</table>';
 }
 
