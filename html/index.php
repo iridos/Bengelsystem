@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <td > <img src="Bilder/PfeilRechts2.jpeg" style="width:30px;height:30px;"> 
     <b>
 <?php
-    echo "$HelferName";
+    echo "$HelferName (Accountdaten)";
     if($HelferName == $HelferEmail)
         {
         echo "<b style='color:red'> <--- bitte hier klicken und Email zu Namen ändern. Der Name wird auf Helferlisten für alle sichtbar sein</b>";

@@ -8,7 +8,7 @@ $db_link = ConnectDB();
 // zeigt login-Seite an, wenn keine Session besteht
 require '_login.php';
 require_once '_functions.php';
-$pagename  = "Alle Schichten / Schichten hinzufügen";             // name of this page
+$pagename  = "Admin Alle Schichten / Schichten hinzufügen";             // name of this page
 $backlink  = "AdminHelferUebersicht.php";  // back button in table header from table header
 $header = PageHeader($pagename);
 $tablehead = TableHeader($pagename,$backlink);
