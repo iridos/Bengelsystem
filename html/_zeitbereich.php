@@ -68,3 +68,12 @@ function AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, $
     'MeinBis' => $MeinBis
        ];
 }
+
+// Auswahl Tag oberhalb der Dienstetabelle
+if (isset($_GET['ZeitBereich'])) {
+    $ZeitBereich = $_GET['ZeitBereich'];
+} else {
+    $ZeitBereich = 0;
+}
+
+
