@@ -71,7 +71,7 @@ echo $tablehead; // variablen aus _login.php
 Jeder Account ist genau einem Level zugeordnet.
 Hier können Levels bearbeitet, erstellt oder unbenutzte Levels gelöscht werden. Nutzung durch Accounts und Dienste in den Spalten davor.
 </p><p>
-Der Button ganz rechts verlinkt eine Accounterstellungsseit pro Level (Link auf Erstellungsseite enthält jeweiligen "linkcode").<br>
+Der Button ganz rechts verlinkt eine Accounterstellungsseite für diesen Level, der zur Selbstregistrierung weitergegeben werden kann.<br>
 Alternativ zur Accounterstellungsseite kann ein 
  <a href="EmailZuToken.php"
    title="Account mit diesem Level anlegen"
@@ -80,6 +80,12 @@ Alternativ zur Accounterstellungsseite kann ein
    <span style="white-space: nowrap">✉️ </span></a> persönlicher Einladungslink per Email verschickt werden</b>, der automatisch einen Account "auf Klick" anlegt.
 </a>
 </p>
+<p>
+HelferLevel eines Nutzers ändern kann man in der Admin-Helferübersicht
+<button type="button" onclick="location.href='AdminHelferUebersicht.php';" title="Nutzer verwalten" name="AdminHelfer" class="button">🧑</button>
+</a>, dort auf den Namen klicken.
+</p>
+
 
 <form action="AdminHelferLevel.php" method="post">
 <table class="commontable">

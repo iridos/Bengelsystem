@@ -5,6 +5,7 @@ SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
+require_once '_functions.php';
 
 if ($AdminStatus != 1) {
     //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin

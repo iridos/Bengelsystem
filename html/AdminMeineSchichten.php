@@ -5,6 +5,7 @@ SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
+require_once '_functions.php';
 
 if ($AdminStatus != 1) {
     //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
@@ -82,21 +83,6 @@ if (isset($_GET['InfoAlleSchichtID'])) {
         $x++;
     }
 }
-
-function HelferAuswahlButton($db_link, $AliasHelferID)
-{
-    echo '<b>Helfer w&auml;hlen:<b> <form style="display:inline-block;" method=post><select style="height:33px;width:350px;" name="AliasHelferID" id="AliasHelferID" onchange="submit()">';
-    $db_erg = HelferListe($db_link);
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-        if ($AliasHelferID != $zeile['HelferID']) {
-                echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</optionen>";
-        } else {
-                echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</optionen>";
-        }
-    }
-    echo '</select></form>';
-}
-
 
 
 if (isset($_POST['AliasHelferID'])) {

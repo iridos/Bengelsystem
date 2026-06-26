@@ -159,7 +159,7 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
 }
 
 function HelferLevelAuswahl($db_link,$HelferLevelAnzeige){
-    echo '<select style="width:200px" name="helfer-level-anzeige" onchange="submit()">';
+    echo '<select style="width:200px;margin:6px 10px;" name="helfer-level-anzeige" onchange="submit()">';
     $alleHelferLevel = alleHelferLevel($db_link);
     foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
         $selected = ($HelferLevelIteration == $HelferLevelAnzeige) ? "selected" : "" ;
@@ -199,5 +199,290 @@ function ZeigeHelferLevelTabelle($db_link,$HelferLevel,$HelferLevelAnzeige){
         echo "${iBelegteSchichtenCount}(+$iueberBelegteSchichtenCount)/$iAlleSchichtenCount  $meine</th></tr>";
     }
     echo '</table>';
+}
+
+// ============================================================================
+// ZeigeDiensteUndSchichten — gemeinsame Renderfunktion
+//
+// $opts-Schlüssel (alle optional):
+//
+//   'modus'               string  'SchichtEintragen' — +/- Buttons (Default)
+//                                 'admin_edit'       — Bearbeiten/Löschen-Buttons
+//   'zeitbereich'         bool    Zeitbereich-Auswahl anzeigen (Default: true)
+//   'helferlevel_auswahl' bool    HelferLevel-Dropdown anzeigen (Default: true)
+//   'helferlevel_tabelle' bool    HelferLevel-Statistik-Tabelle anzeigen (Default: true)
+//   'meine_schichten_link' string URL für den "Dienstplan"-Link (Default: 'MeineSchichten.php')
+//   'zeigeHelferAuswahl'  bool    Admin-Helferauswahl-Button anzeigen (Default: false)
+//   'AliasHelferID'       int     Welcher Helfer bearbeitet wird (Admin-Modus, Default: $HelferID)
+//   'zeigeHierarchie'     bool    ElternDienstID-Einrückung anzeigen (Default: false)
+//   'suchfilter'          string  Vorausgefüllter Suchwert — normalerweise leer lassen,
+//                                 die Funktion liest $_GET['suche'] selbst (Default: '')
+//   'HelferLevelAnzeige'  int     Angezeigtes HelferLevel (Default: aus Session)
+//   'HelferLevel'         int     HelferLevel des eingeloggten Helfers (Default: aus Session)
+//   'AdminStatus'         int     (Default: aus Session)
+//   'AdminID'             int     (Default: aus Session)
+// ============================================================================
+
+function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
+{
+    // Variablen aus _zeitbereich.php / konfiguration.php (werden im globalen Scope gesetzt)
+    global $start_date, $ZeitBereich, $TageNamenDeutsch;
+
+    // --- Defaults -----------------------------------------------------------
+    $o = array_merge([
+        'modus'                => 'SchichtEintragen',
+        'zeitbereich'          => true,
+        'helferlevel_auswahl'  => true,
+        'helferlevel_tabelle'  => true,
+        'meine_schichten_link' => 'MeineSchichten.php',
+        'zeigeHelferAuswahl'   => false,
+        'AliasHelferID'        => $HelferID,
+        'zeigeHierarchie'      => false,
+        'suchfilter'           => '',
+        'HelferLevelAnzeige'   => $_SESSION['HelferLevelAnzeige'] ?? ($_SESSION['HelferLevel'] ?? 1),
+        'HelferLevel'          => $_SESSION['HelferLevel'] ?? 1,
+        'AdminStatus'          => $_SESSION['AdminStatus'] ?? 0,
+        'AdminID'              => $_SESSION['AdminID'] ?? 0,
+    ], $opts);
+
+    $HelferLevelAnzeige = $o['HelferLevelAnzeige'];
+    $HelferLevel        = $o['HelferLevel'];
+
+    // --- POST-Verarbeitung --------------------------------------------------
+    if ($o['modus'] === 'SchichtEintragen') {
+        AlleSchichtenCheckPOST($db_link, $HelferID, $o['AdminStatus'], $o['AdminID']);
+    }
+
+    // --- Optionaler Admin-Helfer-Auswahl-Button -----------------------------
+    if ($o['zeigeHelferAuswahl']) {
+        HelferAuswahlButton($db_link, $o['AliasHelferID']);
+    }
+
+    // --- Suchfilter: GET-Formular außerhalb des POST-Formulars --------------
+    // Muss VOR dem <form method="post"> stehen, damit kein form-in-form entsteht.
+    $suchfilter = trim($o['suchfilter']) !== ''
+        ? trim($o['suchfilter'])
+        : trim($_GET['suche'] ?? '');
+
+    echo '<form method="get" action="#suche" class="suchfilter-form">';
+    echo '<input type="text" name="suche" placeholder="Dienst suchen…" '
+       . 'value="' . htmlspecialchars($suchfilter) . '">';
+    echo '&nbsp;<button type="submit">&#128269;</button>';
+    if ($suchfilter !== '') {
+        echo '&nbsp;<a href="' . htmlspecialchars($_SERVER['PHP_SELF']) . '">'
+           . '<button type="button">&#x2715; Filter</button></a>';
+    }
+    echo '</form>';
+
+    if ($suchfilter !== '') {
+        _ZeigeSuchfilterHinweis($suchfilter);
+    }
+
+    // --- Dienstplan-Zusammenfassung -----------------------------------------
+    echo '<form method="post" action="#action">';
+
+    $db_erg     = SchichtenSummeEinesHelfers($db_link, $HelferID);
+    $zeile      = mysqli_fetch_array($db_erg, MYSQLI_ASSOC);
+    $helferName = htmlspecialchars($_SESSION['AliasHelferName'] ?? $_SESSION['HelferName'] ?? '');
+    $zielLink   = htmlspecialchars($o['meine_schichten_link']);
+
+    echo '<table class="commontable"><tr class="header">';
+    echo "<th onclick=\"window.location.href='{$zielLink}'\">";
+    echo '<img src="Bilder/PfeilRechts2.png" style="width:30px;height:30px;align:middle;">';
+    echo "Dienstplan von {$helferName} (";
+    echo (int)$zeile['Anzahl'];
+    echo ' Schichten, ';
+    echo $zeile['Dauer'] / 3600;
+    echo ' Stunden)';
+    echo '</th></tr></table>';
+
+    // --- Zeitbereich + Buttons + HelferLevel-Dropdown in einer Zeile --------
+    echo '<table class="commontable">';
+    if ($o['zeitbereich']) {
+        require_once '_zeitbereich.php';
+        $Bereich = AusgabeZeitbereichZeile($start_date, $ZeitBereich, $TageNamenDeutsch, $_SERVER['PHP_SELF']);
+        $MeinVon = $Bereich['MeinVon'];
+        $MeinBis = $Bereich['MeinBis'];
+    } else {
+        $MeinVon = null;
+        $MeinBis = null;
+    }
+
+    echo "<button type='button' onclick='expand_all_table_rows();'>Alles Ausklappen</button>";
+
+    if ($o['helferlevel_auswahl']) {
+        HelferLevelAuswahl($db_link, $HelferLevelAnzeige);
+    }
+    // _zeitbereich.php öffnet die Tabelle, schliesst sie nicht — wir schliessen hier
+    echo '</table>';
+
+    // --- HelferLevel-Statistik-Tabelle --------------------------------------
+    if ($o['helferlevel_tabelle']) {
+        ZeigeHelferLevelTabelle($db_link, $HelferLevel, $HelferLevelAnzeige);
+    }
+
+    // --- DB-Abfrage ---------------------------------------------------------
+    $db_erg = AlleSchichtenImZeitbereich($db_link, $MeinVon, $MeinBis, $HelferLevelAnzeige);
+
+    // --- Hierarchie-Index aufbauen (optional) -------------------------------
+    $hierarchieIndex = [];
+    if ($o['zeigeHierarchie']) {
+        $hierarchieIndex = _BaueHierarchieIndex($db_link);
+    }
+
+    // --- Meine belegten Schichten für Grün-Markierung -----------------------
+    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+
+    // --- Haupttabelle -------------------------------------------------------
+    echo '<table class="commontable collapsible">';
+
+    $OldWas = '';
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $Was = $zeile['Was'];
+
+        // Suchfilter: Zeilen überspringen, die nicht passen
+        if ($suchfilter !== '' && stripos($Was, $suchfilter) === false) {
+            continue;
+        }
+
+        // --- Dienst-Header --------------------------------------------------
+        if ($Was !== $OldWas) {
+            $SchichtID = $zeile['SchichtID'];
+            $DienstID  = $zeile['DienstID'];
+
+            $iAlleSchichtenCount         = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
+            $Belegung                    = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
+            $iBelegteSchichtenCount      = $Belegung['besetzt'];
+            $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
+            $ueberBelegteSchichten       = ($iueberBelegteSchichtenCount > 0)
+                ? "[+{$iueberBelegteSchichtenCount}]" : '';
+
+            $indent = '';
+            if ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
+                $indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $hierarchieIndex[$DienstID]['tiefe']);
+            }
+
+            echo "<tr class='header'><th colspan='5' style='width:100%'><span>+</span> ";
+            echo $indent . htmlspecialchars($Was);
+            echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
+            echo " <!-- Abfrage {$HelferLevel}, {$DienstID} -->";
+            echo "</th></tr>";
+
+            SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+            echo "<tr><td colspan=5 style='background:lightblue'>";
+            echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
+            echo '<b>Ort:</b> ' . htmlspecialchars($InfoWo ?? '') . '<br>';
+            echo '<b>Ansprechpartner:</b> ' . htmlspecialchars($Leiter ?? '');
+            if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
+            if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
+
+            if ($o['modus'] === 'admin_edit') {
+                echo '&nbsp;&nbsp;<a href="AdminDienste.php?DienstID=' . (int)$DienstID . '">'
+                   . '<button type="button" style="width:200px">Dienst bearbeiten</button></a>';
+            }
+
+            echo "</td></tr>\n";
+            $OldWas = $Was;
+        }
+
+        // --- Farbe nach Belegungsgrad ---------------------------------------
+        $Color = 'red';
+        if ($zeile['Ist'] > 0)               { $Color = 'yellow'; }
+        if ($zeile['Ist'] >= $zeile['Soll']) { $Color = 'green';  }
+
+        // --- Zeitformatierung -----------------------------------------------
+        $Von = $zeile['Ab'];
+        $Bis = $zeile['Bis'];
+        if (substr($Von, 0, 2) === substr($Bis, 0, 2)) { $Bis = substr($Bis, 2); }
+        $Von = substr($Von, 2);
+
+        // --- Zeilen-Stil (eigene Schicht = grün) ----------------------------
+        $SchichtID = $zeile['SchichtID'];
+        if (in_array($SchichtID, $MeineDienste)) {
+            $rowstyle = ' style="background-color:lightgreen" ';
+            $regtext  = '<br><center>Meine!</center>';
+        } else {
+            $rowstyle = 'dbinfo="SchichtID:' . (int)$SchichtID . ';helferlvl:' . (int)$HelferLevel . '" ';
+            $regtext  = '';
+        }
+
+        // Aktive Schicht nicht einklappen
+        if (isset($_SESSION['SchichtIdAktiv']) && $_SESSION['SchichtIdAktiv'] == $SchichtID) {
+            $rowstyle .= " target='active' ";
+        }
+
+        // --- Tabellenzeile --------------------------------------------------
+        echo '<tr ' . $rowstyle
+           . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='
+           . (int)$SchichtID . '#Info\';">';
+        echo '<td>' . htmlspecialchars($zeile['Tag']) . '</td>';
+        echo '<td>' . htmlspecialchars($Von) . '</td>';
+        echo '<td>' . htmlspecialchars($Bis) . '</td>';
+        echo "<td bgcolor='{$Color}'>" . (int)$zeile['Ist'] . '/' . (int)$zeile['Soll'] . '</td>';
+
+        echo "<td style='width:10%;white-space:nowrap'>";
+        if ($o['modus'] === 'SchichtEintragen') {
+            echo "<button name='plusschicht' value='" . (int)$SchichtID . "'>+</button>";
+            echo "&nbsp;&nbsp;<button name='minusschicht' value='" . (int)$SchichtID . "'>&ndash;</button>";
+            echo $regtext;
+        } elseif ($o['modus'] === 'admin_edit') {
+            echo '<a href="AdminDienste.php?SchichtID=' . (int)$SchichtID . '">'
+               . '<button type="button">&#9998;</button></a>';
+            echo '&nbsp;<button type="button" '
+               . 'onclick="if(confirm(\'Schicht löschen?\')){'
+               . 'document.getElementById(\'deleteSchichtID\').value=' . (int)$SchichtID . ';'
+               . 'document.getElementById(\'deleteSchichtForm\').submit();}">&#128465;</button>';
+        }
+        echo '</td>';
+        echo "</tr>\n";
+    }
+
+    echo '</table>';
+    mysqli_free_result($db_erg);
+    echo '</form>';
+
+    // Verstecktes Formular für Schicht-Löschen im Admin-Edit-Modus
+    if ($o['modus'] === 'admin_edit') {
+        echo '<form id="deleteSchichtForm" method="post" action="AdminDienste.php">';
+        echo '<input type="hidden" id="deleteSchichtID" name="DeleteSchichtID" value="">';
+        echo '</form>';
+    }
+}
+
+// --- Hilfsfunktionen (nur intern genutzt) -----------------------------------
+
+/**
+ * Baut einen Index aller Dienste mit ihrer Hierarchie-Tiefe auf.
+ * Gibt ein Array zurück: [ DienstID => ['tiefe' => int, 'eltern' => int|null] ]
+ */
+function _BaueHierarchieIndex($db_link): array
+{
+    $result   = GetDienste($db_link);
+    $rohdaten = [];
+    while ($zeile = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $rohdaten[$zeile['DienstID']] = [
+            'eltern' => $zeile['ElternDienstID'],
+            'tiefe'  => 0,
+        ];
+    }
+    // Tiefe iterativ berechnen — max. 10 Ebenen schützt vor Zyklen
+    for ($pass = 0; $pass < 10; $pass++) {
+        foreach ($rohdaten as $id => &$eintrag) {
+            $eltern = $eintrag['eltern'];
+            if ($eltern !== null && isset($rohdaten[$eltern])) {
+                $eintrag['tiefe'] = $rohdaten[$eltern]['tiefe'] + 1;
+            }
+        }
+        unset($eintrag);
+    }
+    return $rohdaten;
+}
+
+function _ZeigeSuchfilterHinweis(string $suchfilter): void
+{
+    echo '<div style="background:#fff3cd;padding:4px 8px;margin:4px 0;">';
+    echo '&#128269; Filter aktiv: <b>' . htmlspecialchars($suchfilter) . '</b>';
+    echo '&nbsp;&nbsp;<a href="' . htmlspecialchars($_SERVER['PHP_SELF']) . '">Filter entfernen</a>';
+    echo '</div>';
 }
 

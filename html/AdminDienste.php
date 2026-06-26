@@ -1,364 +1,362 @@
 <?php
-// Login und Admin Status testen. Wenn kein Admin-Status, Weiterleiten auf index.php und beenden
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
 $db_link = ConnectDB();
 require '_login.php';
+require_once '_functions.php';
+//require_once '_schichten_view.php';
 
+// Nur für Admins
 if ($AdminStatus != 1) {
-    //Seite nur fuer Admins. Weiter zu index.php und exit, wenn kein Admin
     echo '<!doctype html><head><meta http-equiv="Refresh" content="0; URL=index.php" /></head></html>';
     exit;
 }
 
 DatenbankAufDeutsch($db_link);
-$message="";
-isset($_SESSION["DienstID"]) && $DienstID = $_SESSION["DienstID"];
-$NewDienstID = 0;
-isset($_SESSION["SchichtID"]) && $SchichtID = $_SESSION["SchichtID"];
 
+// ============================================================================
+// Session-Werte lesen
+// ============================================================================
+$message  = "";
+$DienstID = $_SESSION['DienstID'] ?? null;
+$SchichtID = $_SESSION['SchichtID'] ?? null;
 
-$HelferID = $_SESSION["HelferID"];
-$AdminID = $_SESSION["AdminID"];
-
-if (isset($_POST['HelferID'])) {
-    // AdminStatus = 1
-    $HelferID = $_POST['HelferID'];
-    $_SESSION["HelferID"] = $HelferID;
-}
-
+// ============================================================================
+// POST-Verarbeitung
+// ============================================================================
 
 if (isset($_POST['ChangeDienst'])) {
-    $Was = $_POST['Dienst-Was'];
-    $Wo = $_POST['Dienst-Wo'];
-    $Info = $_POST['Dienst-Info'];
-    $Leiter = $_POST['Dienst-Leiter'];
-    $Gruppe = $_POST['Dienst-Gruppe'];
-    $HelferLevel = $_POST['HelferLevel'];
-    ChangeDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
+    ChangeDienst(
+        $db_link, $DienstID,
+        $_POST['Dienst-Was'], $_POST['Dienst-Wo'], $_POST['Dienst-Info'],
+        $_POST['Dienst-Leiter'], $_POST['Dienst-Gruppe'], $_POST['HelferLevel']
+    );
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
 
 if (isset($_POST['NewDienst'])) {
-    $Was = $_POST['Dienst-Was'];
-    $Wo = $_POST['Dienst-Wo'];
-    $Info = $_POST['Dienst-Info'];
-    $Leiter = $_POST['Dienst-Leiter'];
-    if (isset($_POST['Dienst-Gruppe'])){$Gruppe = $_POST['Dienst-Gruppe'];}else{$Gruppe=82;}//TODO: 82 ist root-dienst
-       $HelferLevel = $_POST['HelferLevel'];
-    NewDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $HelferLevel);
-    $_SESSION["DienstID"] = LastInsertId($db_link);
+    $Gruppe = $_POST['Dienst-Gruppe'] ?? 82; // 82 = root-Dienst (TODO)
+    NewDienst(
+        $db_link, $DienstID,
+        $_POST['Dienst-Was'], $_POST['Dienst-Wo'], $_POST['Dienst-Info'],
+        $_POST['Dienst-Leiter'], $Gruppe, $_POST['HelferLevel']
+    );
+    $_SESSION['DienstID'] = LastInsertId($db_link);
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
-
 
 if (isset($_POST['DeleteDienst'])) {
     if (!DeleteDienst($db_link, $DienstID, false)) {
-        $message .= "Erst Schichten des Dienstes Löschen!";
+        $message .= "Erst Schichten des Dienstes löschen!";
+    } else {
+        $DienstID = null;
+        header("Location: " . $_SERVER['PHP_SELF']); exit;
     }
 }
-
 
 if (isset($_POST['ChangeSchicht'])) {
-    $Von = $_POST['Schicht-Von'];
-    $Bis = $_POST['Schicht-Bis'];
-    $Soll = $_POST['Schicht-Soll'];
-    $Dauer = $_POST['Schicht-Dauer'];
-
-    ChangeSchicht($db_link, $SchichtID, $Von, $Bis, $Soll, $Dauer);
+    ChangeSchicht(
+        $db_link, $SchichtID,
+        $_POST['Schicht-Von'], $_POST['Schicht-Bis'],
+        $_POST['Schicht-Soll'], $_POST['Schicht-Dauer']
+    );
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
-// keine Idee, wie man hierfuer einen GET reload macht
-if (isset($_POST['Schicht-Automatic-Bis'])) {
-    $AutomaticBis = 1;
-} else {
-    $AutomaticBis = 0;
-}
 
-if (isset($_POST['Schicht-Anschlussschicht'])) {
-    $Anschlussschicht = 1;
-} else {
-    $Anschlussschicht = 0;
-}
+$AutomaticBis    = isset($_POST['Schicht-Automatic-Bis'])   ? 1 : 0;
+$Anschlussschicht = isset($_POST['Schicht-Anschlussschicht']) ? 1 : 0;
 
 if (isset($_POST['NewSchicht'])) {
-    $Von = $_POST['Schicht-Von'];
-    $Bis = $_POST['Schicht-Bis'];
-    $Soll = $_POST['Schicht-Soll'];
+    $Von   = $_POST['Schicht-Von'];
+    $Bis   = $_POST['Schicht-Bis'];
+    $Soll  = $_POST['Schicht-Soll'];
     $Dauer = $_POST['Schicht-Dauer'];
-
     if ($AutomaticBis) {
-        $Temp = new DateTime($Von);
+        $Temp  = new DateTime($Von);
         $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
-
-        $Temp = $Temp->add($Temp2);
-        $Bis = $Temp->format('Y-m-d H:i:s');
+        $Bis   = $Temp->add($Temp2)->format('Y-m-d H:i:s');
     }
     NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
-    $_SESSION["SchichtID"] = LastInsertId($db_link);
+    $_SESSION['SchichtID'] = LastInsertId($db_link);
+    header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
 
 if (isset($_POST['DeleteSchicht'])) {
     if (!DeleteSchicht($db_link, $SchichtID, false)) {
         $message .= "Erst Schicht leeren<br>";
+    } else {
+        $SchichtID = 0;
     }
-    $SchichtID = 0;
 }
 
-if (isset($_POST['ShowSchicht'])) {
-    $SchichtID = $_POST['SchichtSearch'];
+// DELETE aus der Übersichtstabelle (admin_edit-Modus)
+if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
+    $delID = (int)$_POST['DeleteSchichtID'];
+    if (!DeleteSchicht($db_link, $delID, false)) {
+        $message .= "Schicht {$delID} konnte nicht gelöscht werden (noch Helfer eingetragen?)<br>";
+    } else {
+        header("Location: " . $_SERVER['PHP_SELF']); exit;
+    }
 }
+
+if (isset($_POST['ShowSchichten'])) { $DienstID = $_POST['DienstSearch']; }
+if (isset($_POST['DienstSearch']))  {
+    $DienstID  = $_POST['DienstSearch'];
+    $SchichtID = 0;
+}
+if (isset($_POST['ShowSchicht']))   { $SchichtID = $_POST['SchichtSearch']; }
 if (isset($_POST['SchichtSearch']) && !isset($_POST['NewSchicht']) && !isset($_POST['DeleteSchicht'])) {
     $SchichtID = $_POST['SchichtSearch'];
-    $message .= "SchichtSearch<br>";
 }
 
-if (isset($_POST['ShowSchichten'])) {
-    $DienstID = $_POST['DienstSearch'];
+// GET: Dienst oder Schicht direkt aufrufen (z. B. aus der Übersichtstabelle)
+if (isset($_GET['DienstID']))  { $DienstID  = (int)$_GET['DienstID'];  }
+if (isset($_GET['SchichtID'])) { $SchichtID = (int)$_GET['SchichtID']; }
+
+// Suchfilter aus GET/POST
+$suchfilter = trim($_GET['suche'] ?? $_POST['suche'] ?? '');
+
+// Session persistieren
+$_SESSION['DienstID']  = $DienstID;
+$_SESSION['SchichtID'] = $SchichtID;
+
+// ============================================================================
+// Aktuellen Dienst laden
+// ============================================================================
+$Was = $Wo = $Info = $Leiter = $Gruppe = $HelferLevelDienst = "";
+
+if ($DienstID) {
+    $db_erg = GetDienste($db_link);
+    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        if ($zeile['DienstID'] == $DienstID) {
+            $Was             = $zeile['Was'];
+            $Wo              = $zeile['Wo'];
+            $Info            = $zeile['Info'];
+            $Leiter          = $zeile['Leiter'];
+            $Gruppe          = $zeile['ElternDienstID'];
+            $HelferLevelDienst = $zeile['HelferLevel'];
+        }
+    }
+    mysqli_free_result($db_erg);
 }
 
-if (isset($_POST['DienstSearch'])) {
-    $DienstID = $_POST['DienstSearch'];
-    $SchichtID = 0;
-}
-
-if ($NewDienstID != 0) {
-    $DienstID = $NewDienstID;
-}
-
-// Dienste Anzeigen
-////////////////////////////////////////////////////////
-
+// ============================================================================
+// HTML-Ausgabe
+// ============================================================================
 ?>
-
 <!doctype html>
 <html>
- <head>
+<head>
   <title>Admin <?php echo EVENTNAME ?></title>
-
+  <link rel="stylesheet" href="css/style_common.css"/>
   <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
   <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
   <script src="js/helferdb.js" type="text/javascript"></script>
   <meta name="viewport" content="width=480" />
- </head>
- <body onload="setEndDate();">
-<div style="width: 100%;">
-<?php echo $message; ?>
-<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button> 
-<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
-    <table border="0" class='commontable'>
-    <tr><th>  Dienst</th><th><select name="DienstSearch" id="DienstSearch"  onchange="submit()">
-<?php
+</head>
+<body onload="setEndDate();">
+<div style="width:100%">
 
-$db_erg = GetDienste($db_link);
+<button class="back" onclick="window.location.href='Admin.php';"><b>&larrhk;</b></button>
+<?php if ($message) { echo '<div class="error">' . $message . '</div>'; } ?>
 
-$Was = "";
-$Wo = "";
-$Info = "";
-$Leiter = "";
-$Gruppe = "";
-$HelferLevel = "";
+<!-- ======================================================
+     ABSCHNITT 1: Übersichtstabelle aller Dienste/Schichten
+     ====================================================== -->
+<h3>Übersicht</h3>
 
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    if (isset ($DienstID) && $zeile['DienstID'] != $DienstID) {
-        echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
-        $selectedset = true ;
-    } else {
-        echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
-
-        $Was = $zeile['Was'];
-        $Wo = $zeile['Wo'];
-        $Info = $zeile['Info'];
-        $Leiter = $zeile['Leiter'];
-        $Gruppe = $zeile['ElternDienstID'];
-        $HelferLevel = $zeile['HelferLevel'];
-    }
-}
-mysqli_free_result($db_erg);
-if( ! isset($selectedset) or ! $selectedset ) {
-echo "<option value='none' selected='selected'>Bitte auswählen</option>";
-}
-
-echo "</select>";
-echo "</th></tr>";
-echo "    </table>";
-echo "<p><noscript><button name='ShowSchichten' value='1'>Schichten Anzeigen</button></noscript>";
-//echo "<button name='DeleteDienst' value='1'>Dienst löschen</button>";
-
-// Aktueller Dienst und dessen Schichten Anzeigen
-////////////////////////////////////////////////////////
-
-if (!isset($DienstID)) {
-    echo "<img src='Bilder/Attention_Sign.svg' width='20px'> Bitte erst Dienst Auswählen </body></html>";
-    exit;
-}
-?>
-
-          <table border="0" class="commontable">
-            <tr>
-              <td style="border: 0px solid black;">Was</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Dienst-Was" type="text" value="<?php echo htmlspecialchars($Was ?? '')?>">
-              </td>
-            </tr>
-            <tr>
-              <td style="border: 0px solid black;">Wo</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Dienst-Wo" type="text " value="<?php echo htmlspecialchars($Wo ?? '')?>">
-              </td>
-            </tr>
-            </tr>
-              <td style="border: 0px solid black;">Info</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Dienst-Info" type="text" value="<?php echo htmlspecialchars($Info ?? '')?>" >
-              </td>
-            </tr>
-            <tr>
-              <td style="border: 0px solid black;">Leiter</td></tr><tr><td style="border: 0px solid black;">
-<?php
-echo "<select name='Dienst-Leiter'>";
-$db_erg = HelferListe($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    if ($zeile['HelferID'] != $Leiter) {
-        echo "<option value='" . $zeile['HelferID'] . "'>" . $zeile['Name'] . "</option>";
-    } else {
-        echo "<option value='" . $zeile['HelferID'] . "' selected='selected'>" . $zeile['Name'] . "</option>";
-    }
-}
-mysqli_free_result($db_erg);
-echo "</select>";
-?>
-               </td>
-             </tr>
-             <tr>
-               <td style="border: 0px solid black;">Gruppe</td></tr><tr><td style="border: 0px solid black;">
-
-<?php
-echo "<select name='Dienst-Gruppe'>";
-$db_erg = GetDiensteChilds($db_link, 0);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    if ($zeile['DienstID'] != $Gruppe) {
-        echo "<option value='" . $zeile['DienstID'] . "'>" . $zeile['Was'] . "</option>";
-    } else {
-        echo "<option value='" . $zeile['DienstID'] . "' selected='selected'>" . $zeile['Was'] . "</option>";
-    }
-}
-echo "</select>";
-?>
-                </td>
-                </td>
-            </tr>
-            <tr><td style="border: 0px solid black;">HelferLevel</td></tr>
-            <tr><td style="border: 0px solid black;"> 
-                <select name="HelferLevel">
-<?php
-$alleHelferLevel = alleHelferLevel($db_link);
-foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-    $selected = ($HelferLevelIteration == $HelferLevel) ? "selected" : "";
-    echo "<option value='$HelferLevelIteration' $selected>$HelferLevelBeschreibung</option>";
-}
-?>
-                </select>
-             </td></tr>
-          </table>
-          <p>
-             <button name="NewDienst" value="1">Dienst anlegen</button>
-             <button name="ChangeDienst" value="1">Ändern</button>
-             <button name='DeleteDienst' value='1'>Löschen</button>
-          </p>
+<!-- Neuer Dienst - Schnellzugriff -->
+<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" style="display:inline-block;margin-left:16px;">
+  <button name="NewDienst" value="1"
+          onclick="document.getElementById('neudienstpanel').style.display='block';">
+    + Neuer Dienst
+  </button>
 </form>
 
-<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
-    <table border="0" class='commontable'>
-    <tr><th>Schicht</th><th><select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
+<!-- Übersichtstabelle: nutzt ZeigeDiensteUndSchichten im admin_edit-Modus -->
 <?php
+ZeigeDiensteUndSchichten($db_link, $HelferID, [
+    'modus'               => 'admin_edit',
+    'zeitbereich'         => true,
+    'helferlevel_auswahl' => true,
+    'helferlevel_tabelle' => false,   // in der Admin-Übersicht weniger Rauschen
+    'meine_schichten_link'=> 'AdminMeineSchichten.php',
+    'meine_schichten_name'=> $HelferName,
+    'zeigeHierarchie'     => true,
+    'suchfilter'          => $suchfilter,
+    'HelferLevel'         => $HelferLevel,
+    'AdminStatus'         => $AdminStatus,
+    'AdminID'             => $AdminID,
+]);
+?>
 
-$Soll = 1;
-$db_erg = GetSchichtenEinesDienstes($db_link, $DienstID);
+<hr>
 
-echo "+" . $SchichtID . "+";
+<!-- ======================================================
+     ABSCHNITT 2: Dienst anlegen / bearbeiten
+     ====================================================== -->
+<h3>Dienst bearbeiten</h3>
 
+<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
+  <table border="0" class="commontable">
+    <tr><th>Dienst</th>
+    <th>
+      <select name="DienstSearch" id="DienstSearch" onchange="submit()">
+<?php
+$db_erg    = GetDienste($db_link);
+$selectedset = false;
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    if ($SchichtID == 0) {
-        $SchichtID = $zeile['SchichtID'];
-    }
-    if ($zeile['SchichtID'] != $SchichtID) {
-        echo "<option value='" . $zeile['SchichtID'] . "'>" . $zeile['TagVon'] . "</option>";
-    } else {
-        echo "<option value='" . $zeile['SchichtID'] . "' selected='selected'>" . $zeile['TagVon'] . "</option>";
+    $sel = ($DienstID && $zeile['DienstID'] == $DienstID) ? "selected='selected'" : "";
+    if ($sel) { $selectedset = true; }
+    echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
+       . htmlspecialchars($zeile['Was']) . "</option>";
+}
+mysqli_free_result($db_erg);
+if (!$selectedset) {
+    echo "<option value='none' selected='selected'>Bitte auswählen</option>";
+}
+?>
+      </select>
+    </th></tr>
+  </table>
+  <p><noscript><button name="ShowSchichten" value="1">Dienst anzeigen</button></noscript></p>
+
+<?php if ($DienstID): ?>
+  <table border="0" class="commontable">
+    <tr><td>Was</td></tr>
+    <tr><td><input name="Dienst-Was" type="text" value="<?= htmlspecialchars($Was ?? '') ?>"></td></tr>
+    <tr><td>Wo</td></tr>
+    <tr><td><input name="Dienst-Wo" type="text" value="<?= htmlspecialchars($Wo ?? '') ?>"></td></tr>
+    <tr><td>Info</td></tr>
+    <tr><td><input name="Dienst-Info" type="text" value="<?= htmlspecialchars($Info ?? '') ?>"></td></tr>
+    <tr><td>Leiter</td></tr>
+    <tr><td>
+      <select name="Dienst-Leiter">
+<?php
+$db_erg = HelferListe($db_link);
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $sel = ($zeile['HelferID'] == $Leiter) ? "selected='selected'" : "";
+    echo "<option value='" . $zeile['HelferID'] . "' {$sel}>"
+       . htmlspecialchars($zeile['Name']) . "</option>";
+}
+mysqli_free_result($db_erg);
+?>
+      </select>
+    </td></tr>
+    <tr><td>Gruppe</td></tr>
+    <tr><td>
+      <select name="Dienst-Gruppe">
+<?php
+$db_erg = GetDiensteChilds($db_link, 0);
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    $sel = ($zeile['DienstID'] == $Gruppe) ? "selected='selected'" : "";
+    echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
+       . htmlspecialchars($zeile['Was']) . "</option>";
+}
+?>
+      </select>
+    </td></tr>
+    <tr><td>HelferLevel</td></tr>
+    <tr><td>
+      <select name="HelferLevel">
+<?php
+$alleHelferLevel = alleHelferLevel($db_link);
+foreach ($alleHelferLevel as $lvl => $beschreibung) {
+    $sel = ($lvl == $HelferLevelDienst) ? "selected" : "";
+    echo "<option value='{$lvl}' {$sel}>" . htmlspecialchars($beschreibung) . "</option>";
+}
+?>
+      </select>
+    </td></tr>
+  </table>
+  <p>
+    <button name="NewDienst" value="1">Dienst anlegen</button>
+    <button name="ChangeDienst" value="1">Ändern</button>
+    <button name="DeleteDienst" value="1">Löschen</button>
+  </p>
+<?php endif; ?>
+</form>
+
+<!-- ======================================================
+     ABSCHNITT 3: Schicht anlegen / bearbeiten
+     ====================================================== -->
+<?php if ($DienstID): ?>
+<h3>Schicht bearbeiten</h3>
+<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
+  <input type="hidden" name="DienstSearch" value="<?= (int)$DienstID ?>">
+  <table border="0" class="commontable">
+    <tr><th>Schicht</th>
+    <th>
+      <select name="SchichtSearch" id="SchichtSearch" onchange="submit()">
+<?php
+$Soll  = 1;
+$Von   = $Bis = $Dauer = "";
+$db_erg = GetSchichtenEinesDienstes($db_link, $DienstID);
+while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    if (!$SchichtID) { $SchichtID = $zeile['SchichtID']; }
+    $sel = ($zeile['SchichtID'] == $SchichtID) ? "selected='selected'" : "";
+    if ($sel) {
         if (isset($_POST['NewSchicht']) && $Anschlussschicht) {
             $Von = $Bis;
         } else {
-            $Von = $zeile['Von'];
-            $Bis = $zeile['Bis'];
-            $Soll = (int)$zeile['Soll'];
+            $Von   = $zeile['Von'];
+            $Bis   = $zeile['Bis'];
+            $Soll  = (int)$zeile['Soll'];
             $Dauer = $zeile['Dauer'];
         }
     }
+    echo "<option value='" . $zeile['SchichtID'] . "' {$sel}>"
+       . htmlspecialchars($zeile['TagVon']) . "</option>";
 }
 mysqli_free_result($db_erg);
-echo "</select>";
-echo "</th></tr>";
-echo " </table>";
-echo "<p><noscript><button name='ShowSchicht' value='1'>Schicht Anzeigen</button></noscript>";
 ?>
-        <table border="0" class='commontable'>
-            <tr>
-              <td style="border: 0px solid black;">Von</td></tr><tr><td style="border: 0px solid black;">
-              <input id="Schicht-Von" name="Schicht-Von" type="datetime-local"
-                 onKeyUp="setEndDate()" value="<?php echo htmlspecialchars($Von ?? '')?>" required>
-              </td>
-            <tr>
-            <tr>
-              <td style="border: 0px solid black;">Dauer</td></tr><tr><td style="border: 0px solid black;">
-              <input id="Schicht-Dauer" name="Schicht-Dauer" type="time" onChange="setEndDate()"
-                value="<?php echo htmlspecialchars($Dauer ?? '01:00')?>" required>
-              </td>
-            <tr>
-            </tr>
-            <tr>
-            </tr>
-              <td style="border: 0px solid black;">Bis </td></tr><tr><td style="border: 0px solid black;">
-              <input id="Schicht-Bis" name="Schicht-Bis" type="datetime-local" 
-                value="<?php echo htmlspecialchars($Bis ?? '')?>" required>
-              </td>
-            <tr>
-            </tr>
-              <td style="border: 0px solid black;">Anzahl (Soll)</td></tr><tr><td style="border: 0px solid black;">
-              <input name="Schicht-Soll" type="number" min=1 value="<?php echo htmlspecialchars((int)$Soll ?? '')?>"  required>
-              </td>
-            <tr>
-            </tr>
-        </table>
-    <input  style="width:unset" width=20 id="Schicht-Automatic-Bis"
-        name="Schicht-Automatic-Bis" type="checkbox" onclick="setEndDate()"
-        <?php if ($AutomaticBis) { echo "checked"; } ?> 
-        > Endzeit von Dauer<br>
+      </select>
+    </th></tr>
+  </table>
+  <p><noscript><button name="ShowSchicht" value="1">Schicht anzeigen</button></noscript></p>
 
-    <input  style="width:unset" width=20 id="Schicht-Anschlussschicht" name="Schicht-Anschlussschicht" type="checkbox" 
-    <?php if ($Anschlussschicht) { echo "checked"; } ?> 
-    >
-    Anschlussschicht vorbereiten<br>
-           <p>
-             <button name="NewSchicht" value="1">Schicht anlegen</button>
-             <button name="ChangeSchicht" value="1">Ändern</button>
-             <button name='DeleteSchicht' value='1'>Löschen</button>
-          </p>
- </form>
- 
-<button class=back name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b><b>&larrhk;</b></b></button> 
+  <table border="0" class="commontable">
+    <tr><td>Von</td></tr>
+    <tr><td>
+      <input id="Schicht-Von" name="Schicht-Von" type="datetime-local"
+             onKeyUp="setEndDate()" value="<?= htmlspecialchars($Von ?? '') ?>" required>
+    </td></tr>
+    <tr><td>Dauer</td></tr>
+    <tr><td>
+      <input id="Schicht-Dauer" name="Schicht-Dauer" type="time"
+             onChange="setEndDate()" value="<?= htmlspecialchars($Dauer ?? '01:00') ?>" required>
+    </td></tr>
+    <tr><td>Bis</td></tr>
+    <tr><td>
+      <input id="Schicht-Bis" name="Schicht-Bis" type="datetime-local"
+             value="<?= htmlspecialchars($Bis ?? '') ?>" required>
+    </td></tr>
+    <tr><td>Anzahl (Soll)</td></tr>
+    <tr><td>
+      <input name="Schicht-Soll" type="number" min="1"
+             value="<?= htmlspecialchars((string)(int)$Soll) ?>" required>
+    </td></tr>
+  </table>
 
+  <input style="width:unset" id="Schicht-Automatic-Bis" name="Schicht-Automatic-Bis"
+         type="checkbox" onclick="setEndDate()"
+         <?= $AutomaticBis ? 'checked' : '' ?>>
+  Endzeit von Dauer<br>
 
-<?php
+  <input style="width:unset" id="Schicht-Anschlussschicht" name="Schicht-Anschlussschicht"
+         type="checkbox" <?= $Anschlussschicht ? 'checked' : '' ?>>
+  Anschlussschicht vorbereiten<br>
 
+  <p>
+    <button name="NewSchicht" value="1">Schicht anlegen</button>
+    <button name="ChangeSchicht" value="1">Ändern</button>
+    <button name="DeleteSchicht" value="1">Löschen</button>
+  </p>
+</form>
+<?php endif; ?>
 
-
-$_SESSION["DienstID"] = $DienstID;
-$_SESSION["SchichtID"] = $SchichtID;
-
-
-?>
- 
-
- </div>
- 
- </body>
+<button class="back" onclick="window.location.href='Admin.php';"><b>&larrhk;</b></button>
+</div>
+</body>
 </html>

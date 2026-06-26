@@ -362,7 +362,8 @@ function AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $Diens
 
 function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1)#stmt
 {
-    //debug only error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
+    //debug only 
+    //error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
     // SchichtID, Was, Ab, Bis, Ist, Tag, Soll - Ist und Soll sind die HelferStunden
     # bei -1 nicht in Suche einschliessen
     $sql_helferlevel = ($HelferLevel == -1)
