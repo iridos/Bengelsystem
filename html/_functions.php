@@ -16,7 +16,8 @@ function PageHeader ($pagename, $eventname = EVENTNAME, $jquery = JQUERY){
       <script src="js/helferdb.js" type="text/javascript"></script>
       <script> collapse_table_rows();</script>
     </head>
-    <body>
+    <body onload="setEndDate();">
+
 HEADER; //<?vim this bracket is just here for vim syntax highlighting
     return $header;
 }

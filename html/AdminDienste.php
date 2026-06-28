@@ -2,6 +2,7 @@
 require_once 'konfiguration.php';
 SESSION_START();
 require 'SQL.php';
+$pagename = "Admin Diensteübersicht";
 $db_link = ConnectDB();
 require '_login.php';
 require_once '_functions.php';
@@ -144,18 +145,9 @@ if ($DienstID) {
 // ============================================================================
 // HTML-Ausgabe
 // ============================================================================
+
+echo PageHeader($pagename);
 ?>
-<!doctype html>
-<html>
-<head>
-  <title>Admin <?php echo EVENTNAME ?></title>
-  <link rel="stylesheet" href="css/style_common.css"/>
-  <link rel="stylesheet" href="css/style_desktop.css" media="screen and (min-width:781px)"/>
-  <link rel="stylesheet" href="css/style_mobile.css" media="screen and (max-width:780px)"/>
-  <script src="js/helferdb.js" type="text/javascript"></script>
-  <meta name="viewport" content="width=480" />
-</head>
-<body onload="setEndDate();">
 <div style="width:100%">
 
 <button class="back" onclick="window.location.href='Admin.php';"><b>&larrhk;</b></button>
