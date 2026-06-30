@@ -24,16 +24,22 @@ DROP TABLE IF EXISTS `Dienst`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Dienst` (
-  `DienstID` int(11) NOT NULL AUTO_INCREMENT,
+  `DienstID` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `Was` text CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL,
   `Wo` text CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL,
   `Info` text CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL,
-  `Leiter` int(11) NOT NULL,
-  `ElternDienstID` int(11) DEFAULT NULL,
+  `Leiter` int(11) unsigned DEFAULT NULL,
+  `ElternDienstID` int(11) unsigned DEFAULT NULL,
   `HelferLevel` int(11) DEFAULT NULL,
+  `DienstBaumPfad` varchar(800) DEFAULT NULL,
   PRIMARY KEY (`DienstID`),
   KEY `fk_dienst_helferlevel` (`HelferLevel`),
-  CONSTRAINT `fk_dienst_helferlevel` FOREIGN KEY (`HelferLevel`) REFERENCES `HelferLevel` (`HelferLevel`)
+  KEY `fk_dienst_eltern` (`ElternDienstID`),
+  KEY `fk_dienst_leiter` (`Leiter`),
+  KEY `idx_pfad` (`DienstBaumPfad`),
+  CONSTRAINT `fk_dienst_eltern` FOREIGN KEY (`ElternDienstID`) REFERENCES `Dienst` (`DienstID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_dienst_helferlevel` FOREIGN KEY (`HelferLevel`) REFERENCES `HelferLevel` (`HelferLevel`),
+  CONSTRAINT `fk_dienst_leiter` FOREIGN KEY (`Leiter`) REFERENCES `Helfer` (`HelferID`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -49,7 +55,7 @@ CREATE TABLE `EinzelSchicht` (
   `SchichtID` int(11) NOT NULL,
   `HelferID` int(11) NOT NULL,
   PRIMARY KEY (`EinzelSchichtID`)
-) ENGINE=InnoDB AUTO_INCREMENT=1346 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1351 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +66,7 @@ DROP TABLE IF EXISTS `Helfer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Helfer` (
-  `HelferId` int(11) NOT NULL AUTO_INCREMENT,
+  `HelferID` int(11) unsigned NOT NULL,
   `Name` varchar(50) CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL,
   `Status` int(11) NOT NULL,
   `Email` varchar(50) CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL,
@@ -70,11 +76,11 @@ CREATE TABLE `Helfer` (
   `Admin` int(11) DEFAULT 0,
   `Passwort` varchar(200) DEFAULT NULL,
   `HelferLevel` int(11) DEFAULT NULL,
-  PRIMARY KEY (`HelferId`),
+  PRIMARY KEY (`HelferID`),
   UNIQUE KEY `unique_index_email` (`Email`),
   KEY `fk_helferlevel` (`HelferLevel`),
   CONSTRAINT `fk_helferlevel` FOREIGN KEY (`HelferLevel`) REFERENCES `HelferLevel` (`HelferLevel`)
-) ENGINE=InnoDB AUTO_INCREMENT=521 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,4 +175,4 @@ CREATE TABLE `Status` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-06-23 13:44:45
+-- Dump completed on 2026-06-30 13:02:46
