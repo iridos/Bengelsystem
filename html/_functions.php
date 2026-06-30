@@ -360,7 +360,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
 
             $indent = '';
             if ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
-                $indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $hierarchieIndex[$DienstID]['tiefe']);
+                //$indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $hierarchieIndex[$DienstID]['tiefe']);
+                $indent = "[".$hierarchieIndex[$DienstID]['tiefe']."]  ";
             }
 
             echo "<tr class='header'><th colspan='5' style='width:100%'><span>+</span> ";

@@ -33,7 +33,7 @@ require '_login.php';
 
 echo '<table class="commontable" >';
 
-$db_erg = GetDiensteChilds($db_link, 0);
+$db_erg = GetDiensteChilds($db_link, null);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     echo "<tr><th>";
     echo $zeile["Was"];

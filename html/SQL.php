@@ -35,14 +35,15 @@ function debug_sql($sql, $types, $params) {#stmtnoneed
 }
 
 function stmt_prepare_and_execute($db_link, $sql, $types = "", ...$params) {#stmt-func
+    global $debug;
     try {
         $stmt = mysqli_prepare($db_link, $sql);
         if ($types !== "") {
             mysqli_stmt_bind_param($stmt, $types, ...$params);
         }
         if (!mysqli_stmt_execute($stmt)) {
-            $err = "Execute failed: " . mysqli_stmt_error($stmt) . "\nSQL: $sql";
-            $err .= debug_sql($sql, $types, $params);
+            $err = "Execute failed: " . mysqli_stmt_error($stmt) . "  \n\nSQL: $sql \n";
+            $err .= "debug_sql: " . debug_sql($sql, $types, $params);
             error_log($err);
             echo nl2br($err);
             return false;
@@ -672,12 +673,22 @@ function GetDienste($db_link)
     if (!$result) {error_log("Keine Dienste gefunden"); return false;}
     return $result;
 }
-
-function GetDiensteChilds($db_link, $DienstID)#stmt2
+function GetDiensteChildren($db_link, $DienstID)#stmt2
 {
-    $sql = "SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID=? ORDER BY Was";
-    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $DienstID);
-    if (!$stmt) {error_log("Fehler in GetDiensteChilds"); return false;}
+    // $DienstID NULL anderes Queryformat
+    if ($DienstID === null) {
+        global $debug;
+        $debug=1;
+        $ElternDienstQuery = "IS NULL";
+        $sql = "SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID $ElternDienstQuery ORDER BY Was";
+        $stmt = stmt_prepare_and_execute($db_link, $sql);
+    } else {
+        $ElternDienstQuery = " = ?";
+        $sql = "SELECT DienstID, Was, Wo, Info, Leiter FROM Dienst where ElternDienstID $ElternDienstQuery ORDER BY Was";
+        $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $DienstID);
+    }
+
+    if (!$stmt) {error_log("Fehler in GetDiensteChildren"); return false;}
     $result = mysqli_stmt_get_result($stmt);
     return $result;
 }

@@ -37,7 +37,7 @@ if (isset($_POST['ChangeDienst'])) {
 }
 
 if (isset($_POST['NewDienst'])) {
-    $Gruppe = $_POST['Dienst-Gruppe'] ?? 82; // 82 = root-Dienst (TODO)
+    $Gruppe = $_POST['Dienst-Gruppe'] ?? NULL; // NULL = root-Dienste
     NewDienst(
         $db_link, $DienstID,
         $_POST['Dienst-Was'], $_POST['Dienst-Wo'], $_POST['Dienst-Info'],
@@ -240,7 +240,9 @@ mysqli_free_result($db_erg);
     <tr><td>
       <select name="Dienst-Gruppe">
 <?php
-$db_erg = GetDiensteChilds($db_link, 0);
+$db_erg = GetDiensteChilds($db_link, null);
+$sel = ( null == $Gruppe) ? "selected='selected'" : "";
+echo "<option value='null' {$sel}>Top-Level (kein Elterndienst)</option>";
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $sel = ($zeile['DienstID'] == $Gruppe) ? "selected='selected'" : "";
     echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
