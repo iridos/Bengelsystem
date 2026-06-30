@@ -240,7 +240,7 @@ mysqli_free_result($db_erg);
     <tr><td>
       <select name="Dienst-Gruppe">
 <?php
-$db_erg = GetDiensteChilds($db_link, null);
+$db_erg = GetDiensteChildren($db_link, null);
 $sel = ( null == $Gruppe) ? "selected='selected'" : "";
 echo "<option value='null' {$sel}>Top-Level (kein Elterndienst)</option>";
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
