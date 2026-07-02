@@ -38,12 +38,13 @@ if (isset($_POST['ChangeDienst'])) {
 
 if (isset($_POST['NewDienst'])) {
     $Gruppe = $_POST['Dienst-Gruppe'] ?? NULL; // NULL = root-Dienste
-    NewDienst(
-        $db_link, $DienstID,
+    $neueID = NewDienst(
+        $db_link,
         $_POST['Dienst-Was'], $_POST['Dienst-Wo'], $_POST['Dienst-Info'],
         $_POST['Dienst-Leiter'], $Gruppe, $_POST['HelferLevel']
     );
-    $_SESSION['DienstID'] = LastInsertId($db_link);
+    $_SESSION['DienstID'] = $neueID;
+    error_log("lege dienst $neueID an");
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
 
@@ -154,39 +155,7 @@ echo PageHeader($pagename);
 <?php if ($message) { echo '<div class="error">' . $message . '</div>'; } ?>
 
 <!-- ======================================================
-     ABSCHNITT 1: Übersichtstabelle aller Dienste/Schichten
-     ====================================================== -->
-<h3>Übersicht</h3>
-
-<!-- Neuer Dienst - Schnellzugriff -->
-<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" style="display:inline-block;margin-left:16px;">
-  <button name="NewDienst" value="1"
-          onclick="document.getElementById('neudienstpanel').style.display='block';">
-    + Neuer Dienst
-  </button>
-</form>
-
-<!-- Übersichtstabelle: nutzt ZeigeDiensteUndSchichten im admin_edit-Modus -->
-<?php
-ZeigeDiensteUndSchichten($db_link, $HelferID, [
-    'modus'               => 'admin_edit',
-    'zeitbereich'         => true,
-    'helferlevel_auswahl' => true,
-    'helferlevel_tabelle' => false,   // in der Admin-Übersicht weniger Rauschen
-    'meine_schichten_link'=> 'AdminMeineSchichten.php',
-    'meine_schichten_name'=> $HelferName,
-    'zeigeHierarchie'     => true,
-    'suchfilter'          => $suchfilter,
-    'HelferLevel'         => $HelferLevel,
-    'AdminStatus'         => $AdminStatus,
-    'AdminID'             => $AdminID,
-]);
-?>
-
-<hr>
-
-<!-- ======================================================
-     ABSCHNITT 2: Dienst anlegen / bearbeiten
+     ABSCHNITT 1: Dienst anlegen / bearbeiten
      ====================================================== -->
 <h3>Dienst bearbeiten</h3>
 
@@ -240,9 +209,9 @@ mysqli_free_result($db_erg);
     <tr><td>
       <select name="Dienst-Gruppe">
 <?php
-$db_erg = GetDiensteChildren($db_link, null);
+$db_erg = GetDienste($db_link, null);//Children
 $sel = ( null == $Gruppe) ? "selected='selected'" : "";
-echo "<option value='null' {$sel}>Top-Level (kein Elterndienst)</option>";
+echo "<option value='0' {$sel}>Top-Level (kein Elterndienst)</option>";
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $sel = ($zeile['DienstID'] == $Gruppe) ? "selected='selected'" : "";
     echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
@@ -273,7 +242,7 @@ foreach ($alleHelferLevel as $lvl => $beschreibung) {
 </form>
 
 <!-- ======================================================
-     ABSCHNITT 3: Schicht anlegen / bearbeiten
+     ABSCHNITT 2: Schicht anlegen / bearbeiten
      ====================================================== -->
 <?php if ($DienstID): ?>
 <h3>Schicht bearbeiten</h3>
@@ -349,6 +318,31 @@ mysqli_free_result($db_erg);
   </p>
 </form>
 <?php endif; ?>
+
+
+<!-- ======================================================
+     ABSCHNITT 3: Übersichtstabelle aller Dienste/Schichten
+     ====================================================== -->
+<h3>Übersicht</h3>
+
+<!-- Übersichtstabelle: nutzt ZeigeDiensteUndSchichten im admin_edit-Modus -->
+<?php
+ZeigeDiensteUndSchichten($db_link, $HelferID, [
+    'modus'               => 'admin_edit',
+    'zeitbereich'         => true,
+    'helferlevel_auswahl' => true,
+    'helferlevel_tabelle' => true,
+    'meine_schichten_link'=> 'AdminMeineSchichten.php',
+    'meine_schichten_name'=> $HelferName,
+    'zeigeHierarchie'     => true,
+    'suchfilter'          => $suchfilter,
+    'HelferLevel'         => $HelferLevel,
+    'AdminStatus'         => $AdminStatus,
+    'AdminID'             => $AdminID,
+]);
+?>
+
+<hr>
 
 <button class="back" onclick="window.location.href='Admin.php';"><b>&larrhk;</b></button>
 </div>
