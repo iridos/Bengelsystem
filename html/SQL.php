@@ -756,72 +756,111 @@ function ChangeDienst($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Gruppe, $
 
 function RebuildAlleDienstPfade($db_link)
 {
-    $bericht = ['gefixt' => [], 'fehler' => [], 'ok' => 0];
+    $bericht = ['gefixt' => [], 'ok' => 0];
 
-    // Alle Dienste holen, Eltern zuerst (NULL-Eltern = Top-Level kommen zuerst)
-    $sql = "SELECT DienstID, ElternDienstID, DienstBaumPfad FROM Dienst 
-            ORDER BY (ElternDienstID IS NOT NULL), ElternDienstID, DienstID";
+    // Alle Dienste holen
+    $sql = "SELECT DienstID, ElternDienstID, DienstBaumPfad FROM Dienst";
     $stmt = stmt_prepare_and_execute($db_link, $sql);
     if (!$stmt) {
         error_log("RebuildAlleDienstPfade: Fehler beim Lesen aller Dienste");
         return false;
     }
     $result = mysqli_stmt_get_result($stmt);
+
+    // Alle Dienste einmal laden, key DienstID
     $dienste = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        $dienste[] = $row;
+        $id = (int)$row['DienstID'];
+        $dienste[$id] = [
+            'eltern_id'      => $row['ElternDienstID'] !== null ? (int)$row['ElternDienstID'] : null,
+            'orig_eltern_id' => $row['ElternDienstID'] !== null ? (int)$row['ElternDienstID'] : null,
+            'alter_pfad'     => $row['DienstBaumPfad'],
+        ];
     }
 
-    // Gebaute Pfade im Speicher halten damit Kinder den Eltern-Pfad direkt
-    // finden ohne nochmal in die DB zu gehen
-    $pfadCache = [];
+    $neuePfade = []; // id => bereits berechneter neuer Pfad (Memoisierung)
 
-    foreach ($dienste as $dienst) {
-        $id       = (int)$dienst['DienstID'];
-        $elternID = $dienst['ElternDienstID'] !== null ? (int)$dienst['ElternDienstID'] : null;
-        $alterPfad = $dienst['DienstBaumPfad'];
+    // Klettert von $startID die Elternkette hoch, bis ein bekannter Pfad, ein
+    // Top-Level-Dienst, oder ein Zyklus erreicht ist. Baut den Pfad danach von
+    // oben (Wurzel) nach unten ($startID) wieder auf.
+    $loesePfad = function ($startID) use (&$dienste, &$neuePfade, &$bericht) {
+        $kette   = [];  // ids auf dem Weg nach oben, in Reihenfolge
+        $inKette = [];  // dieselben ids als Set, für Zyklus-Prüfung
+        $aktuelle = $startID;
+        $basisPfad = '/';
 
-        // Zyklus-Erkennung: Dienst ist sein eigener Vorfahre
-        if ($elternID !== null && $elternID === $id) {
-            $meldung = "Dienst $id war sein eigener Elterndienst — auf Top-Level zurückgesetzt.";
-            error_log("RebuildAlleDienstPfade: WARNUNG $meldung");
-            $bericht['gefixt'][] = $meldung;
-            // ElternDienstID korrigieren
-            $sqlFix = "UPDATE Dienst SET ElternDienstID = NULL WHERE DienstID = ?";
-            stmt_prepare_and_execute($db_link, $sqlFix, "i", $id);
-            $elternID = null;
-        }
+        while (true) {
+            if (isset($neuePfade[$aktuelle])) {
+                $basisPfad = $neuePfade[$aktuelle];
+                break;
+            }
+       if (isset($inKette[$aktuelle])) {
+           // Zyklus gefunden. Der Teil von $kette ab der ersten Position von
+           // $aktuelle ist der eigentliche Zyklus; alles davor ist nur ein
+           // Zulauf (zeigt auf den Zyklus, ist aber selbst nicht Teil davon)
+           // und bleibt unverändert.
+           $zyklusStart = array_search($aktuelle, $kette);
+           $zyklusMitglieder = array_slice($kette, $zyklusStart);
 
-        // Eltern-Pfad aus Cache holen
-        if ($elternID !== null) {
-            if (!isset($pfadCache[$elternID])) {
-                // Elterndienst noch nicht im Cache — sollte durch ORDER BY nicht passieren,
-                // aber als Fallback nochmal aus DB lesen
-                $sqlE = "SELECT DienstBaumPfad FROM Dienst WHERE DienstID = ?";
-                $stmtE = stmt_prepare_and_execute($db_link, $sqlE, "i", $elternID);
-                $rowE = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtE));
-                if (!$rowE || empty($rowE['DienstBaumPfad'])) {
-                    $meldung = "Dienst $id: Elterndienst $elternID nicht gefunden oder ohne Pfad — auf Top-Level zurückgesetzt.";
+           $meldung = "Zyklus in der Eltern-Kette gefunden: Dienst(e) "
+                    . implode(', ', $zyklusMitglieder)
+                    . " — alle auf Top-Level zurückgesetzt.";
+           error_log("RebuildAlleDienstPfade: WARNUNG $meldung");
+           $bericht['gefixt'][] = $meldung;
+
+           // Jedes Zyklus-Mitglied wird unabhängig und auf einmal Top-Level -
+           // ElternDienstID und Pfad zusammen, damit nichts auseinanderlaufen kann
+           foreach ($zyklusMitglieder as $mitglied) {
+               $dienste[$mitglied]['eltern_id'] = null;
+               $neuePfade[$mitglied] = '/' . $mitglied . '/';
+           }
+           // Falls $startID nur ein Zulauf zum Zyklus war (nicht Teil davon),
+           // bauen wir von hier normal weiter - dafür kürzen wir $kette auf den
+           // Zulauf-Teil und nehmen den (jetzt gesetzten) Pfad des ersten
+           // Zyklus-Mitglieds als Basis.
+           $kette = array_slice($kette, 0, $zyklusStart);
+           $basisPfad = $neuePfade[$aktuelle] ?? '/';
+           break;
+       }
+
+            $kette[] = $aktuelle;
+            $inKette[$aktuelle] = true;
+
+            $elternID = $dienste[$aktuelle]['eltern_id'];
+            if ($elternID === null || !isset($dienste[$elternID])) {
+                if ($elternID !== null) {
+                    $meldung = "Dienst $aktuelle: Elterndienst $elternID existiert nicht — auf Top-Level zurückgesetzt.";
                     error_log("RebuildAlleDienstPfade: WARNUNG $meldung");
                     $bericht['gefixt'][] = $meldung;
-                    $elternID = null;
-                    $sqlFix = "UPDATE Dienst SET ElternDienstID = NULL WHERE DienstID = ?";
-                    stmt_prepare_and_execute($db_link, $sqlFix, "i", $id);
-                } else {
-                    $pfadCache[$elternID] = $rowE['DienstBaumPfad'];
+                    $dienste[$aktuelle]['eltern_id'] = null;
                 }
+                $basisPfad = '/';
+                break;
             }
-            $neuerPfad = ($pfadCache[$elternID] ?? '/') . $id . '/';
-        } else {
-            $neuerPfad = '/' . $id . '/';
+            $aktuelle = $elternID;
         }
 
-        $pfadCache[$id] = $neuerPfad;
+        $pfad = $basisPfad;
+        foreach (array_reverse($kette) as $x) {
+            $pfad = $pfad . $x . '/';
+            $neuePfade[$x] = $pfad;
+        }
+        return $neuePfade[$startID];
+    };
 
-        if ($neuerPfad !== $alterPfad) {
+    foreach (array_keys($dienste) as $id) {
+        $neuerPfad = $loesePfad($id);
+        $eintrag = $dienste[$id]; // aktueller Zustand, evtl. durch Zyklus-Fix verändert
+
+        if ($eintrag['eltern_id'] !== $eintrag['orig_eltern_id']) {
+            $sqlFix = "UPDATE Dienst SET ElternDienstID = ? WHERE DienstID = ?";
+            stmt_prepare_and_execute($db_link, $sqlFix, "ii", $eintrag['eltern_id'], $id);
+        }
+
+        if ($neuerPfad !== $eintrag['alter_pfad']) {
             $sqlUpdate = "UPDATE Dienst SET DienstBaumPfad = ? WHERE DienstID = ?";
             stmt_prepare_and_execute($db_link, $sqlUpdate, "si", $neuerPfad, $id);
-            $meldung = "Dienst $id: '$alterPfad' → '$neuerPfad'";
+            $meldung = "Dienst $id: '{$eintrag['alter_pfad']}' → '$neuerPfad'";
             error_log("RebuildAlleDienstPfade: gefixt $meldung");
             $bericht['gefixt'][] = $meldung;
         } else {
