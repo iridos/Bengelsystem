@@ -154,8 +154,8 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
                 }
            $_SESSION["AliasHelferName"] = $AliasHelferName;
         }
-        //$db_link->close();
-        header("Location: " . $_SERVER['PHP_SELF']);
+        #header("Location: " . $_SERVER['PHP_SELF']);
+        header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
 }
@@ -362,7 +362,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
             $indent = '';
             if ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
                 //$indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $hierarchieIndex[$DienstID]['tiefe']);
-                $indent = "[".$hierarchieIndex[$DienstID]['tiefe']."]  ";
+                $tiefe=$hierarchieIndex[$DienstID]['tiefe'];
+                $indent = "ID:$DienstID [$tiefe]  ";
             }
 
             echo "<tr class='header'><th colspan='5' style='width:100%'><span>+</span> ";
