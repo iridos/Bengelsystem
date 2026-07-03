@@ -156,6 +156,7 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
         }
         //$db_link->close();
         header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
     }
 }
 
