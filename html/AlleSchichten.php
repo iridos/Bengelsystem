@@ -6,6 +6,8 @@ $db_link = ConnectDB();
 require '_login.php';
 require_once '_functions.php';
 
+AlleSchichtenCheckPOST($db_link, $HelferID, $AdminStatus, $AdminID);
+
 $pagename = "Alle Schichten / Schichten hinzufügen";
 $backlink = "index.php";
 echo PageHeader($pagename);

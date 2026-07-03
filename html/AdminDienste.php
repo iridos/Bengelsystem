@@ -26,7 +26,7 @@ $SchichtID = $_SESSION['SchichtID'] ?? null;
 // ============================================================================
 // POST-Verarbeitung
 // ============================================================================
-
+HelferLevelAnzeigeCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID);
 if (isset($_POST['ChangeDienst'])) {
     ChangeDienst(
         $db_link, $DienstID,

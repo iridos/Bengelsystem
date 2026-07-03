@@ -88,10 +88,20 @@ function HelferAuswahlButton($db_link, $AliasHelferID)
     echo '</select></form>';
 }
 
-function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
+function HelferLevelAnzeigeCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID){
+    // POST nach GET, denn wir behalten gets
     if (isset($_GET['helfer-level-anzeige'])) {
         $_SESSION["HelferLevelAnzeige"] = $_GET['helfer-level-anzeige'];
     }
+    // jeder soll sich alle HelferLevel anzeigen lassen koennen
+    if (isset($_POST['helfer-level-anzeige'])) {
+        $_SESSION["HelferLevelAnzeige"] = $_POST['helfer-level-anzeige'];
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+}
+
+function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
 
 // Wenn es ein Admin ist ZielHelferID AliasHelferID, sonst HelferID
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -121,11 +131,6 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
             exit;
             }
         }
-        // jeder soll sich alle HelferLevel anzeigen lassen koennen
-        if (isset($_POST['helfer-level-anzeige'])) {
-            $_SESSION["HelferLevelAnzeige"] = $_POST['helfer-level-anzeige'];
-        }
- 
         if (isset($_POST['minusschicht'])) {
             // Mich aus Schicht entfernen
                 $messages = [];
@@ -145,6 +150,7 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
                 exit;
             }
         }
+    HelferLevelAnzeigeCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID);
     // Wenn es ein Admin wird ZielHelferID AliasHelferID, sonst HelferID
         if ($AdminStatus == 1 && isset($_POST['AliasHelferID'])){
             $_SESSION["AliasHelferID"] = $AliasHelferID = $_POST['AliasHelferID'];
@@ -154,7 +160,7 @@ function AlleSchichtenCheckPOST($db_link,$ZielHelferID,$AdminStatus,$AdminID) {
                 }
            $_SESSION["AliasHelferName"] = $AliasHelferName;
         }
-        #header("Location: " . $_SERVER['PHP_SELF']);
+        //header("Location: " . $_SERVER['PHP_SELF']);
         header("Location: " . $_SERVER['REQUEST_URI']);
         exit;
     }
@@ -249,11 +255,6 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
 
     $HelferLevelAnzeige = $o['HelferLevelAnzeige'];
     $HelferLevel        = $o['HelferLevel'];
-
-    // --- POST-Verarbeitung --------------------------------------------------
-    if ($o['modus'] === 'SchichtEintragen') {
-        AlleSchichtenCheckPOST($db_link, $HelferID, $o['AdminStatus'], $o['AdminID']);
-    }
 
     // --- Optionaler Admin-Helfer-Auswahl-Button -----------------------------
     if ($o['zeigeHelferAuswahl']) {
