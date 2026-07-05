@@ -260,8 +260,34 @@ function AlleSchichten($db_link, $Sort, $HelferLevel = 1)#stmt
     mysqli_stmt_close($stmt);
     return $result;
 }
+function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1, $Rekursiv = false)#stmt
+{
+    $sql = "SELECT SUM(Soll) AS Anzahl FROM SchichtUebersicht
+            JOIN Dienst ON SchichtUebersicht.DienstID = Dienst.DienstID WHERE 1=1";
+    $params = [];
+    $types = "";
 
-function AlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
+    if ($HelferLevel != -1) {
+        $sql .= " AND HelferLevel = ?";
+        $params[] = $HelferLevel;
+        $types .= "i";
+    }
+
+    if ($DienstID != -1) {
+        $sql .= $Rekursiv
+            ? " AND Dienst.DienstBaumPfad LIKE (SELECT CONCAT(D2.DienstBaumPfad, '%') FROM Dienst D2 WHERE D2.DienstID = ?)"
+            : " AND Dienst.DienstID = ?";
+        $params[] = $DienstID;
+        $types .= "i";
+    }
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
+    $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt);
+    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    return $zeile['Anzahl'] ?? 0;
+}
+#old
+function oldAlleSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#stmt
 {
     $sql = "SELECT SUM(Soll) AS Anzahl FROM SchichtUebersicht
             JOIN Dienst ON SchichtUebersicht.DienstID = Dienst.DienstID WHERE 1=1";
@@ -316,8 +342,52 @@ function AlleBelegteSchichtenCount($db_link, $HelferLevel = -1, $DienstID = -1)#
 
     return $zeile['Anzahl'];
 }
+function AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $DienstID = -1, $Rekursiv = false) {
+    $sql = "SELECT 
+                SUM(LEAST(Soll, Belegt)) AS Besetzt,
+                SUM(GREATEST(0, Belegt - Soll)) AS Ueberbelegt
+            FROM (
+                SELECT 
+                    Schicht.SchichtID,
+                    COUNT(EinzelSchicht.HelferID) AS Belegt,
+                    Schicht.Soll
+                FROM Schicht
+                LEFT JOIN EinzelSchicht ON EinzelSchicht.SchichtID = Schicht.SchichtID
+                JOIN Dienst ON Schicht.DienstID = Dienst.DienstID
+                WHERE 1=1";
 
-function AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $DienstID = -1) {
+    $params = [];
+    $types = "";
+
+    if ($HelferLevel != -1) {
+        $sql .= " AND Dienst.HelferLevel = ?";
+        $params[] = $HelferLevel;
+        $types .= "i";
+    }
+
+    if ($DienstID != -1) {
+        $sql .= $Rekursiv
+            ? " AND Dienst.DienstBaumPfad LIKE (SELECT CONCAT(D2.DienstBaumPfad, '%') FROM Dienst D2 WHERE D2.DienstID = ?)"
+            : " AND Dienst.DienstID = ?";
+        $params[] = $DienstID;
+        $types .= "i";
+    }
+
+    $sql .= " GROUP BY Schicht.SchichtID, Schicht.Soll
+            ) AS Belegung";
+
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
+    $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt);
+
+    $zeile = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    return [
+        'besetzt' => (int)($zeile['Besetzt'] ?? 0),
+        'ueberbelegt' => (int)($zeile['Ueberbelegt'] ?? 0)
+    ];
+}
+
+function oldAlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $DienstID = -1) {
     $sql = "SELECT 
                 SUM(LEAST(Soll, Belegt)) AS Besetzt,
                 SUM(GREATEST(0, Belegt - Soll)) AS Ueberbelegt
@@ -360,8 +430,35 @@ function AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $Diens
     ];
 }
 
+function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1, $DienstID = -1)#stmt
+{
+    $sql_helferlevel = ($HelferLevel == -1) ? "" : "AND Dienst.HelferLevel = ?";
+    $sql_dienst      = ($DienstID   == -1) ? "" : "AND Dienst.DienstID = ?";
 
-function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1)#stmt
+    $sql =  "SELECT SchichtID,Was,
+                DATE_FORMAT(Von,'%a %H:%i') AS Ab,
+                DATE_FORMAT(Bis,'%a %H:%i') AS Bis,
+                C AS Ist,
+                DATE_FORMAT(Von,'%W %d %M') As Tag,
+                Soll,
+                Dienst.DienstID
+             FROM Dienst,SchichtUebersicht
+             WHERE Von >= ? and Von < ? and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel $sql_dienst
+             ORDER BY Was,Von";
+
+    $types  = "ss";
+    $params = [$Von, $Bis];
+    if ($HelferLevel != -1) { $types .= "i"; $params[] = $HelferLevel; }
+    if ($DienstID   != -1) { $types .= "i"; $params[] = $DienstID; }
+
+    $stmt = stmt_prepare_and_execute($db_link, $sql, $types, ...$params);
+    $result = mysqli_stmt_get_result($stmt);
+    mysqli_stmt_close($stmt);
+    if (!$result) { error_log("AlleSchichtenImZeitBereich Fehler"); }
+    return $result ?: null;
+}
+
+function oldAlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1)#stmt
 {
     //debug only 
     //error_log("AlleSchichtenImZeitbereich Abfrage:  $Von, $Bis, $HelferLevel");
@@ -1263,6 +1360,76 @@ function AnzahlDiensteMitHelferLevel($db_link, $level) {
     return $anzahl;
 }
 
+/**
+ * Liefert die Kette der Vorfahren-Dienste (inkl. sich selbst) von der Wurzel
+ * bis zu $DienstID, als Array [DienstID => Was], in Reihenfolge Wurzel zuerst.
+ * Nutzt DienstBaumPfad um die IDs zu extrahieren, macht dann eine einzige
+ * Abfrage für alle Namen (kein rekursives Nachladen nötig).
+ */
+function GetDienstPfadKette($db_link, $DienstID)
+{
+    if ($DienstID === null || (int)$DienstID <= 0) {
+        return []; // Top-Level -- kein Pfad
+    }
+
+    $sql = "SELECT DienstBaumPfad FROM Dienst WHERE DienstID = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $DienstID);
+    if (!$stmt) { return []; }
+    $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    $pfad = $row['DienstBaumPfad'] ?? null;
+    if (empty($pfad) || $pfad[0] !== '/') {
+        error_log("GetDienstPfadKette: ungültiger Pfad für Dienst $DienstID");
+        return [];
+    }
+
+    // "/5/12/34/" -> [5, 12, 34]
+    $ids = array_filter(explode('/', $pfad), fn($x) => $x !== '');
+    $ids = array_map('intval', $ids);
+    if (empty($ids)) { return []; }
+
+    $platzhalter = implode(',', array_fill(0, count($ids), '?'));
+    $sqlNamen = "SELECT DienstID, Was FROM Dienst WHERE DienstID IN ($platzhalter)";
+    $stmtNamen = stmt_prepare_and_execute($db_link, $sqlNamen, str_repeat('i', count($ids)), ...$ids);
+    if (!$stmtNamen) { return []; }
+    $resultNamen = mysqli_stmt_get_result($stmtNamen);
+
+    $namenNachID = [];
+    while ($r = mysqli_fetch_assoc($resultNamen)) {
+        $namenNachID[(int)$r['DienstID']] = $r['Was'];
+    }
+
+    // Reihenfolge aus dem Pfad beibehalten (SQL IN() garantiert keine Reihenfolge)
+    $kette = [];
+    foreach ($ids as $id) {
+        if (isset($namenNachID[$id])) {
+            $kette[$id] = $namenNachID[$id];
+        }
+    }
+    return $kette;
+}
+
+/**
+ * Liefert alle Dienste AUSSER $DienstID selbst und dessen Nachfahren -- als
+ * Auswahl-Kandidaten für den Elterndienst. Verhindert Zyklen schon in der
+ * Anzeige (zusätzlich zur harten Prüfung in ChangeDienst()).
+ * $DienstID = null -> alle Dienste (z.B. beim Anlegen eines komplett neuen
+ * Dienstes, wo "sich selbst ausschließen" noch nicht relevant ist).
+ */
+function GetDiensteAuswahlbar($db_link, $DienstID = null)
+{
+    if ($DienstID === null || (int)$DienstID <= 0) {
+        $stmt = stmt_prepare_and_execute($db_link, "SELECT DienstID, Was FROM Dienst ORDER BY Was");
+    } else {
+        $sql = "SELECT DienstID, Was FROM Dienst
+                WHERE DienstID != ?
+                  AND DienstBaumPfad NOT LIKE (SELECT CONCAT(D2.DienstBaumPfad, '%') FROM Dienst D2 WHERE D2.DienstID = ?)
+                ORDER BY Was";
+        $stmt = stmt_prepare_and_execute($db_link, $sql, "ii", $DienstID, $DienstID);
+    }
+    if (!$stmt) { error_log("Fehler in GetDiensteAuswahlbar"); return null; }
+    return mysqli_stmt_get_result($stmt);
+}
+
 
 // falls man sowohl nach HelferLevel, Beschreibung oder Invite Code filtern will
 //function HelferLevelAbfrage($db_link, string $spalte, string $wert): array|false {
@@ -1281,4 +1448,5 @@ function AnzahlDiensteMitHelferLevel($db_link, $level) {
 //
 //    return $result->fetch_assoc();
 //}
+
 

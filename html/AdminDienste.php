@@ -127,16 +127,18 @@ $_SESSION['SchichtID'] = $SchichtID;
 // Aktuellen Dienst laden
 // ============================================================================
 $Was = $Wo = $Info = $Leiter = $Gruppe = $HelferLevelDienst = "";
+$AlleDienstNamen = [];
 
 if ($DienstID) {
     $db_erg = GetDienste($db_link);
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+        $AlleDienstNamen[$zeile['DienstID']] = $zeile['Was'];
         if ($zeile['DienstID'] == $DienstID) {
-            $Was             = $zeile['Was'];
-            $Wo              = $zeile['Wo'];
-            $Info            = $zeile['Info'];
-            $Leiter          = $zeile['Leiter'];
-            $Gruppe          = $zeile['ElternDienstID'];
+            $Was               = $zeile['Was'];
+            $Wo                = $zeile['Wo'];
+            $Info              = $zeile['Info'];
+            $Leiter            = $zeile['Leiter'];
+            $Gruppe            = $zeile['ElternDienstID'];
             $HelferLevelDienst = $zeile['HelferLevel'];
         }
     }
@@ -171,7 +173,7 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     $sel = ($DienstID && $zeile['DienstID'] == $DienstID) ? "selected='selected'" : "";
     if ($sel) { $selectedset = true; }
     echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
-       . htmlspecialchars($zeile['Was']) . "</option>";
+       . htmlspecialchars($zeile['Was']) . "DDD</option>";
 }
 mysqli_free_result($db_erg);
 if (!$selectedset) {
@@ -207,18 +209,19 @@ mysqli_free_result($db_erg);
     </td></tr>
     <tr><td>Gruppe</td></tr>
     <tr><td>
-      <select name="Dienst-Gruppe">
+<input type="text" name="Dienst-Gruppe" list="dienste-datalist"
+         placeholder="ID oder Name eingeben, leer = Top-Level"
+         value="<?= $Gruppe ? (int)$Gruppe . ' - ' . htmlspecialchars($AlleDienstNamen[$Gruppe] ?? '?') : '' ?>">
+  <datalist id="dienste-datalist">
 <?php
-$db_erg = GetDienste($db_link, null);//Children
-$sel = ( null == $Gruppe) ? "selected='selected'" : "";
-echo "<option value='0' {$sel}>Top-Level (kein Elterndienst)</option>";
+$db_erg = GetDiensteAuswahlbar($db_link, $DienstID);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $sel = ($zeile['DienstID'] == $Gruppe) ? "selected='selected'" : "";
-    echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
-       . htmlspecialchars($zeile['Was']) . "</option>";
+    echo "<option value='" . (int)$zeile['DienstID'] . " - " . htmlspecialchars($zeile['Was']) . "'>";
 }
 ?>
-      </select>
+  </datalist>
+</td></tr>
+</input>
     </td></tr>
     <tr><td>HelferLevel</td></tr>
     <tr><td>

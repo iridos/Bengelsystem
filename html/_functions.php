@@ -491,3 +491,15 @@ function _ZeigeSuchfilterHinweis(string $suchfilter): void
     echo '</div>';
 }
 
+/**
+ * Liest den aktuellen Navigations-Kontext (welcher Dienst gerade "geöffnet" ist)
+ * aus dem GET-Parameter. Kein Parameter oder ungültiger Wert -> Top-Level (null).
+ */
+function GetAktuellenDienstKontext(): ?int
+{
+    if (!isset($_GET['dienst'])) {
+        return null;
+    }
+    $id = (int)$_GET['dienst'];
+    return $id > 0 ? $id : null;
+}
