@@ -102,9 +102,9 @@ if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
     }
 }
 
-if (isset($_POST['ShowSchichten'])) { $DienstID = $_POST['DienstSearch']; }
+if (isset($_POST['ShowSchichten'])) { $DienstID = (int)$_POST['DienstSearch']; }
 if (isset($_POST['DienstSearch']))  {
-    $DienstID  = $_POST['DienstSearch'];
+    $DienstID  = (int)$_POST['DienstSearch'];
     $SchichtID = 0;
 }
 if (isset($_POST['ShowSchicht']))   { $SchichtID = $_POST['SchichtSearch']; }
@@ -160,29 +160,26 @@ echo PageHeader($pagename);
      ABSCHNITT 1: Dienst anlegen / bearbeiten
      ====================================================== -->
 <h3>Dienst bearbeiten</h3>
-
 <form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
   <table border="0" class="commontable">
     <tr><th>Dienst</th>
     <th>
-      <select name="DienstSearch" id="DienstSearch" onchange="submit()">
+      <input type="text" name="DienstSearch" id="DienstSearch" list="dienst-search-datalist"
+             placeholder="Dienst suchen…"
+             value="<?= $DienstID ? (int)$DienstID . ' - ' . htmlspecialchars($AlleDienstNamen[$DienstID] ?? '?') : '' ?>"
+             onchange="submit()">
+      <datalist id="dienst-search-datalist">
 <?php
-$db_erg    = GetDienste($db_link);
-$selectedset = false;
+$db_erg = GetDienste($db_link);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    $sel = ($DienstID && $zeile['DienstID'] == $DienstID) ? "selected='selected'" : "";
-    if ($sel) { $selectedset = true; }
-    echo "<option value='" . $zeile['DienstID'] . "' {$sel}>"
-       . htmlspecialchars($zeile['Was']) . "DDD</option>";
+    echo "<option value='" . (int)$zeile['DienstID'] . " - " . htmlspecialchars($zeile['Was']) . "'>";
 }
 mysqli_free_result($db_erg);
-if (!$selectedset) {
-    echo "<option value='none' selected='selected'>Bitte auswählen</option>";
-}
 ?>
-      </select>
+      </datalist>
     </th></tr>
   </table>
+
   <p><noscript><button name="ShowSchichten" value="1">Dienst anzeigen</button></noscript></p>
 
 <?php if ($DienstID): ?>

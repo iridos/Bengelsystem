@@ -61,11 +61,11 @@ if (isset($_POST['SchichtSearch'])) {
 }
 
 if (isset($_POST['ShowSchichten'])) {
-    $DienstID = $_POST['DienstSearch'];
+    $DienstID = (int)$_POST['DienstSearch'];
 }
 
 if (isset($_POST['DienstSearch'])) {
-    $DienstID = $_POST['DienstSearch'];
+    $DienstID = (int)$_POST['DienstSearch'];
     $SchichtID = 0;
 }
 
