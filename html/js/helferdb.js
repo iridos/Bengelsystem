@@ -56,14 +56,15 @@ function collapse_table_rows()
 {
     $(document).ready(
         function () {
-            // Unter-Zeilen in collapsible Tabellen verbergen
-            $('table.collapsible tr:not(.header)').hide();
-            // Zeile mit dem target="active" (von PHP nach submit gesetzt) und dazugehoerige Zeilen anzeigen
-            $('table.collapsible tr[target="active"]').prevUntil('tr.header').addBack().nextUntil('tr.header').addBack().show();
-            // id="active" als Anker auf letztes tr.header vor der target=active Seite setzen und dort hin springen
-            // damit der Nutzer nach Abschicken des Posts seine geoeffneten Optionen sieht
+            // Nur explizit als "collapsible-content" markierte Zeilen werden versteckt.
+            // Alles andere (header, static, zukünftige neue Zeilenarten) bleibt sichtbar,
+            // sofern nicht ausdrücklich als einklappbar markiert.
+            $('table.collapsible tr.collapsible-content').hide();
+
+            $('table.collapsible tr[target="active"]').show();
             $('table.collapsible tr[target="active"]').prevAll('.header').first().attr('id', 'active');
             location.href = '#active';
+
             $('table.collapsible tr.header').click(
                 function () {
                     $(this).find('span').text(
@@ -71,7 +72,7 @@ function collapse_table_rows()
                             return value == '-' ? '+' : '-'
                         }
                     );
-                    $(this).nextUntil('tr.header').slideToggle(100, function () {});
+                    $(this).nextUntil(':not(.collapsible-content)').slideToggle(100, function () {});
                 }
             );
         }
