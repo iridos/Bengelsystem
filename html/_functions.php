@@ -370,7 +370,9 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
             if ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
                 $praefix .= "[".$hierarchieIndex[$DienstID]['tiefe']."]  ";
             }
-            _ZeigeDienstHeader($db_link, $DienstID, $Was, $zeile['SchichtID'], $HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix);
+            SchichtInfo($zeile['SchichtID'], $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+            _ZeigeDienstHeader($db_link, $DienstID, $Was, $InfoWo, $Info, $Leiter, 
+                       $LeiterHandy, $LeiterEmail,$HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix);
             $OldWas = $Was;
         }
         _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel);
@@ -439,12 +441,12 @@ function GetAktuellenDienstKontext(): ?int
 
 /**
  * Rendert den Header-Block eines Dienstes (Kopfzeile + Beschreibung).
- * $SchichtID ist eine repräsentative Schicht dieses Dienstes -- SchichtInfo()
- * liest Beschreibungsdetails aktuell pro Schicht, nicht pro Dienst (unverändert
- * übernommenes Verhalten, nur der Ort des Codes ändert sich hier).
+ * Die Beschreibungsfelder werden vom Aufrufer übergeben -- je nach Kontext
+ * kommen sie per Schicht (SchichtInfo, alte flache Liste) oder direkt aus
+ * der Dienst-Tabelle (Baum-Ansicht, auch für Dienste ohne eigene Schichten).
  */
-function _ZeigeDienstHeader($db_link, $DienstID, $Was, $SchichtID, $HelferLevel,
-                             $HelferLevelAnzeige, string $modus, string $praefix = ''): void
+function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $LeiterHandy, $LeiterEmail,
+                             $HelferLevel, $HelferLevelAnzeige, string $modus, string $praefix = ''): void
 {
     $iAlleSchichtenCount         = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
     $Belegung                    = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
@@ -458,14 +460,12 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $SchichtID, $HelferLevel,
     echo " <!-- Abfrage {$HelferLevel}, {$DienstID} -->";
     echo "</th></tr>";
 
-    SchichtInfo($SchichtID, $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
     echo "<tr class='collapsible-content'><td colspan=5 style='background:lightblue'>";
     echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
-    echo '<b>Ort:</b> ' . htmlspecialchars($InfoWo ?? '') . '<br>';
+    echo '<b>Ort:</b> ' . htmlspecialchars($Wo ?? '') . '<br>';
     echo '<b>Ansprechpartner:</b> ' . htmlspecialchars($Leiter ?? '');
     if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
-
     if ($modus === 'admin_edit') {
         echo '&nbsp;&nbsp;<a href="AdminDienste.php?DienstID=' . (int)$DienstID . '">'
            . '<button type="button" style="width:200px">Dienst bearbeiten</button></a>';
