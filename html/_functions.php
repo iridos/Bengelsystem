@@ -180,8 +180,7 @@ function HelferLevelAuswahl($db_link,$HelferLevelAnzeige){
 /**
  * Rendert eine einzelne HelferLevel-Zeile mit Besetzt/Gesamt-Zahlen.
  * $DienstID=-1 (Default) = ganze Con, sonst nur dieser Dienst
- * (bzw. sein Teilbaum, wenn $Rekursiv=true) -- für Wiederverwendung
- * auf einzelnen Dienst-Ebenen später.
+ * (bzw. sein Teilbaum, wenn $Rekursiv=true) -- für einzelne Dienst-Ebenen.
  */
 function _ZeigeHelferLevelZeile($db_link, $HelferLevelIteration, $HelferLevelBeschreibung,
                                  $HelferLevel, $HelferLevelAnzeige, $DienstID = -1, $Rekursiv = false): void
@@ -446,7 +445,8 @@ function GetAktuellenDienstKontext(): ?int
  * der Dienst-Tabelle (Baum-Ansicht, auch für Dienste ohne eigene Schichten).
  */
 function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $LeiterHandy, $LeiterEmail,
-                             $HelferLevel, $HelferLevelAnzeige, string $modus, string $praefix = ''): void
+                             $HelferLevel, $HelferLevelAnzeige, string $modus, string $praefix = '',
+                             int $tiefe = 0, bool $foldable = true): void
 {
     $iAlleSchichtenCount         = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
     $Belegung                    = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
@@ -454,13 +454,17 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
     $ueberBelegteSchichten       = ($iueberBelegteSchichtenCount > 0) ? "[+{$iueberBelegteSchichtenCount}]" : '';
 
-    echo "<tr class='header'><th colspan='5' style='width:100%'><span>+</span> ";
+    $padding = (20 * $tiefe) . 'px';
+    $icon    = $foldable ? '<span>+</span> ' : '';
+
+    echo "<tr class='header'><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
     echo $praefix . htmlspecialchars($Was);
     echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
     echo " <!-- Abfrage {$HelferLevel}, {$DienstID} -->";
     echo "</th></tr>";
 
-    echo "<tr class='collapsible-content'><td colspan=5 style='background:lightblue'>";
+    $contentClass = $foldable ? "class='collapsible-content'" : '';
+    echo "<tr {$contentClass}><td colspan=5 style='background:lightblue; padding-left:{$padding}'>";
     echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
     echo '<b>Ort:</b> ' . htmlspecialchars($Wo ?? '') . '<br>';
     echo '<b>Ansprechpartner:</b> ' . htmlspecialchars($Leiter ?? '');
@@ -476,7 +480,7 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
 /**
  * Rendert eine einzelne Schicht-Zeile.
  */
-function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $HelferLevel): void
+function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $HelferLevel, bool $foldable = true): void
 {
     $Color = 'red';
     if ($zeile['Ist'] > 0)               { $Color = 'yellow'; }
@@ -498,8 +502,8 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
     if (isset($_SESSION['SchichtIdAktiv']) && $_SESSION['SchichtIdAktiv'] == $SchichtID) {
         $rowstyle .= " target='active' ";
     }
-
-    echo '<tr class="collapsible-content"' . $rowstyle
+    $rowClass = $foldable ? "collapsible-content" : '';
+    echo "<tr class='{$rowClass}' $rowstyle"
        . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='
        . (int)$SchichtID . '#Info\';">';
     echo '<td>' . htmlspecialchars($zeile['Tag']) . '</td>';
@@ -521,11 +525,6 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
     }
     echo '</td></tr>' . "\n";
 }
-/**
- * Zeigt eine einzelne Ebene des Dienst-Baums: Breadcrumb, Kind-Dienste zum
- * Reinklicken (mit Teilbaum-Summen), und die Schichten, die direkt am
- * aktuellen Dienst hängen (mit Eintragen-Funktion wie gewohnt).
- */
 /**
  * Zeigt eine einzelne Ebene des Dienst-Baums: Breadcrumb, Kind-Dienste zum
  * Reinklicken (mit Teilbaum-Summen), und die Schichten, die direkt am
@@ -555,35 +554,115 @@ function ZeigeDienstEbene($db_link, $HelferID, array $opts = []): void
 
     ZeigeHelferLevelTabelle($db_link, $o['HelferLevel'], $o['HelferLevel'], $AktuellerDienst ?? -1, true);
 
+    $Von = '2000-01-01 00:00:00';
+    $Bis = '2100-01-01 00:00:00';
+
+    $abflachen = false;
+    if ($AktuellerDienst !== null) {
+        $GesamtSchichtenTeilbaum = AlleSchichtenCount($db_link, -1, $AktuellerDienst, true);
+        $abflachen = ($GesamtSchichtenTeilbaum <= DIENST_FLATTEN_SCHWELLWERT);
+        if (isset($_GET['alle_anzeigen'])) {
+            $abflachen = ($_GET['alle_anzeigen'] == '1'); // manueller Override
+        }
+    }
+    echo '<form method="post" action="#action">';
     echo '<table class="commontable collapsible">';
+    if ($abflachen) {
+        _ZeigeDienstTeilbaumFlach($db_link, $AktuellerDienst, $Von, $Bis, $HelferID, $o);
+    } else {
+        _ZeigeDienstDrilldown($db_link, $AktuellerDienst, $Von, $Bis, $HelferID, $o);
+    }
+    echo '</table>';
+    echo '</form>';
+
+    if ($AktuellerDienst !== null) {
+        $ziel = $abflachen ? 0 : 1;
+        $text = $abflachen
+            ? 'Nur direkte Schichten dieser Gruppe anzeigen'
+            : 'Alle Schichten dieser Gruppe (inkl. Untergruppen) anzeigen';
+        echo '<p><a href="' . htmlspecialchars($_SERVER['PHP_SELF']) . '?dienst=' . (int)$AktuellerDienst
+           . '&alle_anzeigen=' . $ziel . '">' . $text . '</a></p>';
+    }
+}
+/**
+ * Flach-Modus: aktueller Dienst + ALLE Nachfahren, jeweils mit eigenem
+ * Header + eigenen Schichten, in einer Liste -- nur für kleine Teilbäume.
+ * $dienste ist bereits Eltern-vor-Kind sortiert (siehe GetDienstTeilbaum),
+ * die erste Zeile ist der aktuelle Dienst selbst.
+ */
+
+function _ZeigeDienstTeilbaumFlach($db_link, $AktuellerDienst, $Von, $Bis, $HelferID, array $o): void
+{
+    $teilbaum = GetDienstTeilbaum($db_link, $AktuellerDienst);
+    $dienste = [];
+    $eigenePfadLaenge = null;
+    while ($row = mysqli_fetch_assoc($teilbaum)) {
+        $dienste[(int)$row['DienstID']] = $row;
+        if ((int)$row['DienstID'] === (int)$AktuellerDienst) {
+            $eigenePfadLaenge = substr_count($row['DienstBaumPfad'], '/');
+        }
+    }
+
+    $schichten = AlleSchichtenImZeitbereich($db_link, $Von, $Bis, -1, $AktuellerDienst, true);
+    $schichtenNachDienst = [];
+    while ($zeile = mysqli_fetch_array($schichten, MYSQLI_ASSOC)) {
+        $schichtenNachDienst[(int)$zeile['DienstID']][] = $zeile;
+    }
+
+    $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
+
+    // Nur der aktuelle (Wurzel-)Dienst ist NIE faltbar. Alle anderen (Kind-,
+    // Enkel-Dienste, ...) sind faltbar, aber nur wenn es mehr als einen gibt --
+    // ein einzelner lohnt das Auf-/Zuklappen nicht.
+    $andereAnzahl  = count($dienste) - ($AktuellerDienst !== null ? 1 : 0);
+    $andereFoldable = $andereAnzahl > 1;
+
+    foreach ($dienste as $DienstID => $d) {
+        $istWurzel = ($DienstID === (int)$AktuellerDienst);
+        $tiefe = $eigenePfadLaenge !== null ? (substr_count($d['DienstBaumPfad'], '/') - $eigenePfadLaenge) : 0;
+        $foldable = $istWurzel ? false : $andereFoldable;
+
+        _ZeigeDienstHeader($db_link, $DienstID, $d['Was'], $d['Wo'], $d['Info'], $d['Leiter'],
+                            null, null, $o['HelferLevel'], $o['HelferLevel'], $o['modus'],
+                            "ID:$DienstID ", $tiefe, $foldable);
+
+        foreach (($schichtenNachDienst[$DienstID] ?? []) as $zeile) {
+            _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $o['HelferLevel'], $foldable);
+        }
+    }
+}
+
+/**
+ * Drilldown-Modus: eigener Header + direkte Schichten, Kind-Dienste nur als
+ * Navigations-Links (keine Schichten inline) -- für große Teilbäume.
+ */
+function _ZeigeDienstDrilldown($db_link, $AktuellerDienst, $Von, $Bis, $HelferID, array $o): void
+{
+    if ($AktuellerDienst !== null) {
+        $dienst = GetEinzelDienst($db_link, $AktuellerDienst);
+        if ($dienst) {
+            _ZeigeDienstHeader($db_link, $dienst['DienstID'], $dienst['Was'], $dienst['Wo'], $dienst['Info'],
+                                $dienst['Leiter'], null, null, $o['HelferLevel'], $o['HelferLevel'],
+                                $o['modus'], "ID:{$dienst['DienstID']} ");
+        }
+    }
 
     $kinder = GetDiensteChildren($db_link, $AktuellerDienst);
     while ($row = mysqli_fetch_assoc($kinder)) {
         $zahlen = AlleBelegteSchichtenCountMitSurplus($db_link, -1, $row['DienstID'], true);
         $gesamt = AlleSchichtenCount($db_link, -1, $row['DienstID'], true);
         $ueberbelegt = $zahlen['ueberbelegt'] > 0 ? "[+{$zahlen['ueberbelegt']}]" : '';
-        echo "<tr class='header'><th colspan='5' style='width:100%'>";
+        echo "<tr><th colspan='5' style='width:100%'>";
         echo '<a href="' . htmlspecialchars($_SERVER['PHP_SELF']) . '?dienst=' . (int)$row['DienstID'] . '">';
-        echo '&#128193; ' . htmlspecialchars($row['Was']);
+        echo '&#128193; ID:' . (int)$row['DienstID'] . ' ' . htmlspecialchars($row['Was']);
         echo "</a> ({$zahlen['besetzt']}/{$gesamt}) {$ueberbelegt}</th></tr>";
     }
 
     if ($AktuellerDienst !== null) {
         $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
-
-        $Von = '2000-01-01 00:00:00';
-        $Bis = '2100-01-01 00:00:00';
-        $schichten = AlleSchichtenImZeitbereich($db_link, $Von, $Bis, -1, $AktuellerDienst);
-        $erste = true;
+        $schichten = AlleSchichtenImZeitbereich($db_link, $Von, $Bis, -1, $AktuellerDienst, false);
         while ($zeile = mysqli_fetch_array($schichten, MYSQLI_ASSOC)) {
-            if ($erste) {
-                _ZeigeDienstHeader($db_link, $AktuellerDienst, $zeile['Was'], $zeile['SchichtID'],
-                                    $o['HelferLevel'], $o['HelferLevel'], $o['modus']);
-                $erste = false;
-            }
             _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $o['HelferLevel']);
         }
     }
-
-    echo '</table>';
 }

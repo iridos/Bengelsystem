@@ -77,7 +77,7 @@ if (isset($_POST['DienstSearch'])) {
 
 echo "<br><br><table class='commontable' style='page-break-before:always'>";
 ?>
-  <tr class="header">
+  <tr>
     <th><button name="BackHelferdaten" value="1"  onclick="window.location.href = 'Admin.php';"><b>&larrhk;</b></button>  &nbsp; <b>&Uuml;bersicht Helfer und Ihre Schichten</b></th>
   </tr>
 </table>
@@ -103,7 +103,7 @@ function outputHelperInformation($HelferUeberschrift, $OldAliasHelferID, $dauer,
 $alleHelferLevel = alleHelferLevel($db_link);
 asort($alleHelferLevel); // sort, jetzt sind dauerhelfer lvl1 oben, lvl2 danach
 foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) {
-    echo "<tr class='header infoheader'><th colspan=5>$HelferLevelBeschreibung (Lvl: $HelferLevelIteration)</th></tr>";
+    echo "<tr class='infoheader'><th colspan=5>$HelferLevelBeschreibung (Lvl: $HelferLevelIteration)</th></tr>";
     $db_erg = AlleHelferSchichtenUebersicht($db_link, $HelferLevelIteration);
     $dauer = 0;
     $i = 0;
@@ -114,7 +114,7 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
     $OldHelferEmail="";
 
 
-    echo "<tr class='header infoheader'><th>Accountdaten</th><th>Schichten anzeigen</th><th>Handy</th><th>Email</th><th>Schichten ändern</th></tr>";
+    echo "<tr class='infoheader'><th>Accountdaten</th><th>Schichten anzeigen</th><th>Handy</th><th>Email</th><th>Schichten ändern</th></tr>";
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
             $HelferName = $zeile["Name"] ?: "-";
             $HelferLevel = $zeile["HelferLevel"];
@@ -140,7 +140,7 @@ foreach ($alleHelferLevel as $HelferLevelIteration => $HelferLevelBeschreibung) 
                 $OldAliasHelferID = $AliasHelferID;
                 $i += 1;
         }
-            $EinzelDienstStundenZeile .= "<tr><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
+            $EinzelDienstStundenZeile .= "<tr class='collapsible-content'><td style='width:100px'> " . (int)$zeile["Dauer"] . "</td><td>";
             $EinzelDienstStundenZeile .= $zeile["Was"];
             $EinzelDienstStundenZeile .= "</td></tr>";
             $dauer = $dauer + (int)$zeile["Dauer"];

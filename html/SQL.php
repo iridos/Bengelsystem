@@ -430,10 +430,15 @@ function oldAlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevel = -1, $Di
     ];
 }
 
-function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1, $DienstID = -1)#stmt
+function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1, $DienstID = -1, $Rekursiv = false)#stmt
 {
     $sql_helferlevel = ($HelferLevel == -1) ? "" : "AND Dienst.HelferLevel = ?";
-    $sql_dienst      = ($DienstID   == -1) ? "" : "AND Dienst.DienstID = ?";
+    $sql_dienst = "";
+    if ($DienstID != -1) {
+        $sql_dienst = $Rekursiv
+            ? "AND Dienst.DienstBaumPfad LIKE (SELECT CONCAT(D2.DienstBaumPfad, '%') FROM Dienst D2 WHERE D2.DienstID = ?)"
+            : "AND Dienst.DienstID = ?";
+    }
 
     $sql =  "SELECT SchichtID,Was,
                 DATE_FORMAT(Von,'%a %H:%i') AS Ab,
@@ -1429,6 +1434,42 @@ function GetDiensteAuswahlbar($db_link, $DienstID = null)
     if (!$stmt) { error_log("Fehler in GetDiensteAuswahlbar"); return null; }
     return mysqli_stmt_get_result($stmt);
 }
+
+/**
+ * Liefert einen Dienst und ALLE seine Nachfahren (kompletter Teilbaum) in
+ * einer Abfrage. $DienstID = null -> ganzer Baum (alle Dienste).
+ * Sortiert Eltern-vor-Kind über die Pfadlänge.
+ */
+function GetDienstTeilbaum($db_link, $DienstID)
+{
+    if ($DienstID === null || (int)$DienstID <= 0) {
+        $sql = "SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel, DienstBaumPfad
+                FROM Dienst ORDER BY LENGTH(DienstBaumPfad), Was
+                LIMIT " . DIENST_TEILBAUM_LIMIT;
+        $stmt = stmt_prepare_and_execute($db_link, $sql);
+    } else {
+        $sql = "SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel, DienstBaumPfad
+                FROM Dienst
+                WHERE DienstBaumPfad LIKE (SELECT CONCAT(D2.DienstBaumPfad, '%') FROM Dienst D2 WHERE D2.DienstID = ?)
+                ORDER BY LENGTH(DienstBaumPfad), Was
+                LIMIT " . DIENST_TEILBAUM_LIMIT;
+        $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $DienstID);
+    }
+    if (!$stmt) { error_log("Fehler in GetDienstTeilbaum"); return null; }
+    return mysqli_stmt_get_result($stmt);
+}
+
+function GetEinzelDienst($db_link, $DienstID)
+{
+    $sql = "SELECT DienstID, Was, Wo, Info, Leiter, ElternDienstID, HelferLevel, DienstBaumPfad
+            FROM Dienst WHERE DienstID = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $DienstID);
+    if (!$stmt) { return null; }
+    return mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+}
+
+
+
 
 
 // falls man sowohl nach HelferLevel, Beschreibung oder Invite Code filtern will
