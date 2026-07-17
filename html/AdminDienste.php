@@ -189,7 +189,9 @@ mysqli_free_result($db_erg);
     <tr><td>Wo</td></tr>
     <tr><td><input name="Dienst-Wo" type="text" value="<?= htmlspecialchars($Wo ?? '') ?>"></td></tr>
     <tr><td>Info</td></tr>
-    <tr><td><input name="Dienst-Info" type="text" value="<?= htmlspecialchars($Info ?? '') ?>"></td></tr>
+    <tr><td>
+    <textarea name="Dienst-Info" rows="3"><?= htmlspecialchars($Info ?? '') ?></textarea>
+    </td></tr>
     <tr><td>Leiter</td></tr>
     <tr><td>
       <select name="Dienst-Leiter">
