@@ -1,22 +1,48 @@
- 
 <?php
-// create the file below from the template:
-require_once  __DIR__ . '/../bengelsystem_konfiguration.php';
 
-// muss nicht angepasst werden // no changes needed
-// Zeitbereich: -1 davor, 0 kein Limit, 1-N Tag N der Con, 1000: nach der Con
-$ZeitBereichWerte = range(-1, TAGE_DAUER);
-array_push($ZeitBereichWerte, 1000);
-define('ZEITBEREICHWERTE', $ZeitBereichWerte);
-$TageNamenDeutsch = array("So","Mo","Di","Mi","Do","Fr","Sa");
+// Datenbank-Konfiguration
+define('MYSQL_HOST',     'localhost');
+define('MYSQL_BENUTZER', 'bengel_user');
+define('MYSQL_KENNWORT', 'bengel_password');
+define('MYSQL_DATENBANK', 'Bengelsystem');
 
-//Kalender-Konfiguration
-$dsn = "mysql:host=localhost;dbname=" . MYSQL_DATENBANK; // dsn fuer Kalender
-$options = array(
-    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'",
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-);
+// Event-Name
+define('EVENTNAME', 'EJC');
+
+// jQuery URL
+define('JQUERY', 'https://code.jquery.com/jquery-3.6.0.min.js');
+
+// Logdatei
+define('LOGFILE', '/var/log/bengelsystem.log');
+
+// Hierarchie-Konfiguration
 define('DIENST_TEILBAUM_LIMIT', 10000);
 define('DIENST_FLATTEN_SCHWELLWERT', 50);
-$debug = 0;
+
+// Session-Einstellungen
+session_start();
+
+// Fehlerberichterstattung
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Zeitbereich Standardwerte
+$start_date = '2000-01-01';
+$ZeitBereich = 30;
+$TageNamenDeutsch = array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
+
+// Datenbank auf Deutsch setzen
+function DatenbankAufDeutsch($db_link) {
+    mysqli_query($db_link, "SET lc_time_names = 'de_DE'");
+    mysqli_query($db_link, "SET NAMES utf8mb4");
+}
+
+// Alle HelferLevel
+function alleHelferLevel($db_link) {
+    return array(
+        1 => 'Team',
+        2 => 'Orga',
+        3 => 'Dauerhelfer',
+        4 => 'Leitung'
+    );
+}
