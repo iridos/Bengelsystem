@@ -22,7 +22,7 @@ $message = "";
 // Schicht-Formulare mit ihrer eigenen Verarbeitung sind nach
 // AdminDiensteLegacy.php ausgelagert)
 // ============================================================================
--// This shouldnt need to transmit HelferID
+// This shouldnt need to transmit HelferID
 HelferLevelAnzeigeCheckPOST($db_link, $HelferID, $AdminStatus, $AdminID);
 
 // DELETE aus der Übersichtstabelle (admin_edit-Modus)
