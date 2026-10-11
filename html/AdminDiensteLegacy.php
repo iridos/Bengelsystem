@@ -61,7 +61,7 @@ if (isset($_POST['ChangeSchicht'])) {
         $_POST['Schicht-Von'], $_POST['Schicht-Bis'],
         $_POST['Schicht-Soll'], $_POST['Schicht-Dauer']
     );
-    header("Location: " . $_SERVER['PHP_SELF']); exit;
+    header("Location: " . $_SERVER['PHP_SELF'] . "#schicht"); exit;
 }
 
 // Checkbox-Stellung "Endzeit von Dauer" / "Anschlussschicht vorbereiten":
@@ -100,7 +100,7 @@ if (isset($_POST['NewSchicht'])) {
     // ob $Bis gerade per AutomaticBis berechnet oder roh aus dem
     // datetime-local-Feld kam.
     $_SESSION['Schicht-AnschlussVon'] = $Anschlussschicht ? (new DateTime($Bis))->format('Y-m-d H:i:s') : null;
-    header("Location: " . $_SERVER['PHP_SELF']); exit;
+    header("Location: " . $_SERVER['PHP_SELF'] . "#schicht"); exit;
 }
 
 if (isset($_POST['DeleteSchicht'])) {
@@ -251,8 +251,8 @@ foreach ($alleHelferLevel as $lvl => $beschreibung) {
      ABSCHNITT 2: Schicht anlegen / bearbeiten
      ====================================================== -->
 <?php if ($DienstID): ?>
-<h3>Schicht bearbeiten</h3>
-<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
+<h3 id="schicht">Schicht bearbeiten</h3>
+<form method="post" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>#schicht">
   <input type="hidden" name="DienstSearch" value="<?= (int)$DienstID ?>">
   <table border="0" class="commontable">
     <tr><th>Schicht</th>
