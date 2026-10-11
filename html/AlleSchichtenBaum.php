@@ -8,6 +8,7 @@ require_once '_functions.php';
 
 $pagename = "Alle Schichten (Baum)";
 $backlink = "index.php";
+$backlink = "Admin.php";
 $AktuellerDienst = GetAktuellenDienstKontext();
 echo PageHeader($pagename);
 echo TableHeader($pagename, $backlink, EVENTNAME, "", DienstEbeneUpLinkHtml($db_link, $AktuellerDienst));

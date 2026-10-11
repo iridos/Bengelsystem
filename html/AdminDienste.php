@@ -66,8 +66,17 @@ if (isset($_POST['ChangeSchicht'])) {
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
 
-$AutomaticBis    = isset($_POST['Schicht-Automatic-Bis'])   ? 1 : 0;
-$Anschlussschicht = isset($_POST['Schicht-Anschlussschicht']) ? 1 : 0;
+// Checkbox "Endzeit von Dauer" / "Anschlussschicht vorbereiten" 
+// entweder aus POST direkt oder aus Session Variable
+if (isset($_POST['Schicht-Von'])) {
+    $AutomaticBis      = isset($_POST['Schicht-Automatic-Bis'])   ? 1 : 0;
+    $Anschlussschicht  = isset($_POST['Schicht-Anschlussschicht']) ? 1 : 0;
+    $_SESSION['Schicht-Automatic-Bis']    = $AutomaticBis;
+    $_SESSION['Schicht-Anschlussschicht'] = $Anschlussschicht;
+} else {
+    $AutomaticBis     = $_SESSION['Schicht-Automatic-Bis']    ?? 0;
+    $Anschlussschicht = $_SESSION['Schicht-Anschlussschicht'] ?? 0;
+}
 
 if (isset($_POST['NewSchicht'])) {
     $Von   = $_POST['Schicht-Von'];
@@ -81,6 +90,13 @@ if (isset($_POST['NewSchicht'])) {
     }
     NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
     $_SESSION['SchichtID'] = LastInsertId($db_link);
+    // Anschlussschicht: die nächste Schicht soll direkt an diese anschließen
+    // (Von = Bis der gerade angelegten Schicht). Muss hier vor dem Redirect
+    // gemerkt werden -- der Check weiter unten im Schicht-Auswahl-Loop kann nie
+    // greifen, weil dieser Zweig hier immer per exit endet, bevor die Anzeige
+    // erreicht wird. DateTime normalisiert das Format unabhängig davon, ob $Bis
+    // gerade per AutomaticBis berechnet oder roh aus dem datetime-local-Feld kam.
+    $_SESSION['Schicht-AnschlussVon'] = $Anschlussschicht ? (new DateTime($Bis))->format('Y-m-d H:i:s') : null;
     header("Location: " . $_SERVER['PHP_SELF']); exit;
 }
 
@@ -183,17 +199,18 @@ mysqli_free_result($db_erg);
   <p><noscript><button name="ShowSchichten" value="1">Dienst anzeigen</button></noscript></p>
 
 <?php if ($DienstID): ?>
-  <table border="0" class="commontable">
-    <tr><td>Was</td></tr>
-    <tr><td><input name="Dienst-Was" type="text" value="<?= htmlspecialchars($Was ?? '') ?>"></td></tr>
-    <tr><td>Wo</td></tr>
-    <tr><td><input name="Dienst-Wo" type="text" value="<?= htmlspecialchars($Wo ?? '') ?>"></td></tr>
-    <tr><td>Info</td></tr>
-    <tr><td>
+  <table border="0" class="commontable collapsible">
+    <tr class="header"><th><span>+</span> Details: <?= htmlspecialchars($Was ?? '') ?></th></tr>
+    <tr class="collapsible-content"><td>Was</td></tr>
+    <tr class="collapsible-content"><td><input name="Dienst-Was" type="text" value="<?= htmlspecialchars($Was ?? '') ?>"></td></tr>
+    <tr class="collapsible-content"><td>Wo</td></tr>
+    <tr class="collapsible-content"><td><input name="Dienst-Wo" type="text" value="<?= htmlspecialchars($Wo ?? '') ?>"></td></tr>
+    <tr class="collapsible-content"><td>Info</td></tr>
+    <tr class="collapsible-content"><td>
     <textarea name="Dienst-Info" rows="3"><?= htmlspecialchars($Info ?? '') ?></textarea>
     </td></tr>
-    <tr><td>Leiter</td></tr>
-    <tr><td>
+    <tr class="collapsible-content"><td>Leiter</td></tr>
+    <tr class="collapsible-content"><td>
       <select name="Dienst-Leiter">
 <?php
 $db_erg = HelferListe($db_link);
@@ -206,24 +223,22 @@ mysqli_free_result($db_erg);
 ?>
       </select>
     </td></tr>
-    <tr><td>Gruppe</td></tr>
-    <tr><td>
-<input type="text" name="Dienst-Gruppe" list="dienste-datalist"
-         placeholder="ID oder Name eingeben, leer = Top-Level"
-         value="<?= $Gruppe ? (int)$Gruppe . ' - ' . htmlspecialchars($AlleDienstNamen[$Gruppe] ?? '?') : '' ?>">
-  <datalist id="dienste-datalist">
+    <tr class="collapsible-content"><td>Gruppe</td></tr>
+    <tr class="collapsible-content"><td>
+      <input type="text" name="Dienst-Gruppe" list="dienste-datalist"
+             placeholder="ID oder Name eingeben, leer = Top-Level"
+             value="<?= $Gruppe ? (int)$Gruppe . ' - ' . htmlspecialchars($AlleDienstNamen[$Gruppe] ?? '?') : '' ?>">
+      <datalist id="dienste-datalist">
 <?php
 $db_erg = GetDiensteAuswahlbar($db_link, $DienstID);
 while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     echo "<option value='" . (int)$zeile['DienstID'] . " - " . htmlspecialchars($zeile['Was']) . "'>";
 }
 ?>
-  </datalist>
-</td></tr>
-</input>
+      </datalist>
     </td></tr>
-    <tr><td>HelferLevel</td></tr>
-    <tr><td>
+    <tr class="collapsible-content"><td>HelferLevel</td></tr>
+    <tr class="collapsible-content"><td>
       <select name="HelferLevel">
 <?php
 $alleHelferLevel = alleHelferLevel($db_link);
@@ -234,12 +249,14 @@ foreach ($alleHelferLevel as $lvl => $beschreibung) {
 ?>
       </select>
     </td></tr>
+    <tr class="collapsible-content">
+      <td>
+        <button name="NewDienst" value="1">Dienst anlegen</button>
+        <button name="ChangeDienst" value="1">Ändern</button>
+        <button name="DeleteDienst" value="1">Löschen</button>
+      </td>
+    </tr>
   </table>
-  <p>
-    <button name="NewDienst" value="1">Dienst anlegen</button>
-    <button name="ChangeDienst" value="1">Ändern</button>
-    <button name="DeleteDienst" value="1">Löschen</button>
-  </p>
 <?php endif; ?>
 </form>
 
@@ -262,19 +279,29 @@ while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
     if (!$SchichtID) { $SchichtID = $zeile['SchichtID']; }
     $sel = ($zeile['SchichtID'] == $SchichtID) ? "selected='selected'" : "";
     if ($sel) {
-        if (isset($_POST['NewSchicht']) && $Anschlussschicht) {
-            $Von = $Bis;
-        } else {
-            $Von   = $zeile['Von'];
-            $Bis   = $zeile['Bis'];
-            $Soll  = (int)$zeile['Soll'];
-            $Dauer = $zeile['Dauer'];
-        }
+        $Von   = $zeile['Von'];
+        $Bis   = $zeile['Bis'];
+        $Soll  = (int)$zeile['Soll'];
+        $Dauer = $zeile['Dauer'];
     }
     echo "<option value='" . $zeile['SchichtID'] . "' {$sel}>"
-       . htmlspecialchars($zeile['TagVon']) . "</option>";
+       . htmlspecialchars("ID:".$zeile['SchichtID'] . " " . $zeile['TagVon']) . "</option>";
 }
 mysqli_free_result($db_erg);
+
+// Anschlussschicht: direkt nach "Schicht anlegen" gesetzt (siehe NewSchicht-
+// Verarbeitung oben). Einmalig anwenden und aus der Session löschen, damit es
+// nicht bei der nächsten, unabhängigen Navigation (z.B. andere Schicht manuell
+// ausgewählt) nochmal zuschlägt.
+if (!empty($_SESSION['Schicht-AnschlussVon'])) {
+    $Von = $_SESSION['Schicht-AnschlussVon'];
+    if ($AutomaticBis && $Dauer) {
+        $Temp  = new DateTime($Von);
+        $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
+        $Bis   = $Temp->add($Temp2)->format('Y-m-d H:i:s');
+    }
+}
+unset($_SESSION['Schicht-AnschlussVon']);
 ?>
       </select>
     </th></tr>
