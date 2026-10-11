@@ -29,6 +29,10 @@ function TableHeader ($pagename, $backlink, $eventname = EVENTNAME, $backlinkTop
     // backlinkTop: if there are several levels to go back until the top, need to 
     //     present a way to jump to the top. Maybe better as an array and then
     //     presenting a path-like structure to allow jumping to any level above?
+    // upLinkHtml: fertiges HTML (Button/Link) für "eine Ebene höher", z.B. aus
+    //     DienstEbeneUpLinkHtml(). Leer = kein Up-Button (Default, abwärtskompatibel).
+    //     Steht bewusst außerhalb des <a href="$backlink">-Wrappers, damit es sein
+    //     eigenes Ziel hat statt versehentlich mitverlinkt zu werden.
     $tablehead = <<<TABLEHEAD
     <div style="width: 100%;">
     <table class="commontable">
@@ -502,7 +506,7 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
-        echo '&nbsp;&nbsp;<a href="AdminDienste.php?DienstID=' . (int)$DienstID . '">'
+        echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">'
            . '<button type="button" style="width:200px">Dienst bearbeiten</button></a>';
     }
     echo "</td></tr>\n";
@@ -547,7 +551,7 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
         echo "&nbsp;&nbsp;<button name='minusschicht' value='" . (int)$SchichtID . "'>&ndash;</button>";
         echo $regtext;
     } elseif ($modus === 'admin_edit') {
-        echo '<a href="AdminDienste.php?SchichtID=' . (int)$SchichtID . '">'
+        echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
            . '<button type="button">&#9998;</button></a>';
         echo '&nbsp;<button type="button" '
            . 'onclick="if(confirm(\'Schicht löschen?\')){'
