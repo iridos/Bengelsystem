@@ -317,7 +317,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
         : trim($_GET['suche'] ?? '');
 
     echo '<form method="get" action="#suche" class="suchfilter-form">';
-    echo '<input type="text" name="suche" placeholder="Dienst suchen…" '
+    echo '<input type="text" name="suche" list="dl-suche-dienste" placeholder="Dienst suchen…" '
        . 'value="' . htmlspecialchars($suchfilter) . '">';
     echo '&nbsp;<button type="submit">&#128269;</button>';
     if ($suchfilter !== '') {
@@ -385,13 +385,21 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     // --- Meine belegten Schichten für Grün-Markierung -----------------------
     $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
 
+    // Zuletzt bearbeiteter Dienst (admin_edit): wird einmalig aufgeklappt und angesprungen
+    $aktiverDienst = null;
+    if ($o['modus'] === 'admin_edit') {
+        $aktiverDienst = $_SESSION['DienstIdAktiv'] ?? null;
+        unset($_SESSION['DienstIdAktiv']);
+    }
+
     // --- Haupttabelle -------------------------------------------------------
     echo '<table class="commontable collapsible">';
 
     $OldWas = '';
-    $OldWas = '';
+    $dienstNamen = [];   // fuer die Vorschlagsliste im Suchfeld
     while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
         $Was = $zeile['Was'];
+        $dienstNamen[$Was] = true;
         if ($suchfilter !== '' && stripos($Was, $suchfilter) === false) {
             continue;
         }
@@ -406,7 +414,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
             }
             SchichtInfo($zeile['SchichtID'], $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
             _ZeigeDienstHeader($db_link, $DienstID, $Was, $InfoWo, $Info, $Leiter, 
-                       $LeiterHandy, $LeiterEmail,$HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix);
+                       $LeiterHandy, $LeiterEmail,$HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix,
+                       0, true, ($aktiverDienst !== null && (int)$aktiverDienst === (int)$DienstID));
             $OldWas = $Was;
         }
         _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel);
@@ -415,9 +424,16 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     mysqli_free_result($db_erg);
     echo '</form>';
 
+    // Vorschlagsliste fuer das Suchfeld: die Dienste, die in dieser Ansicht vorkommen
+    echo '<datalist id="dl-suche-dienste">';
+    foreach (array_keys($dienstNamen) as $name) {
+        echo '<option value="' . htmlspecialchars((string)$name, ENT_QUOTES) . '">';
+    }
+    echo '</datalist>';
+
     // Verstecktes Formular für Schicht-Löschen im Admin-Edit-Modus
     if ($o['modus'] === 'admin_edit') {
-        echo '<form id="deleteSchichtForm" method="post" action="AdminDienste.php">';
+        echo '<form id="deleteSchichtForm" method="post" action="' . htmlspecialchars($_SERVER['REQUEST_URI']) . '">';
         echo '<input type="hidden" id="deleteSchichtID" name="DeleteSchichtID" value="">';
         echo '</form>';
         _AdminEditDatalists($db_link);
@@ -482,7 +498,7 @@ function GetAktuellenDienstKontext(): ?int
  */
 function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $LeiterHandy, $LeiterEmail,
                              $HelferLevel, $HelferLevelAnzeige, string $modus, string $praefix = '',
-                             int $tiefe = 0, bool $foldable = true): void
+                             int $tiefe = 0, bool $foldable = true, bool $aktiv = false): void
 {
     $iAlleSchichtenCount         = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
     $Belegung                    = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
@@ -493,7 +509,7 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $padding = (20 * $tiefe) . 'px';
     $icon    = $foldable ? '<span>+</span> ' : '';
 
-    $headerId = ($modus === 'admin_edit') ? " id='D{$DienstID}'" : '';
+    $headerId = $aktiv ? " data-aktiv='1'" : '';
     echo "<tr class='header'{$headerId}><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
     echo $praefix . htmlspecialchars($Was);
     echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
@@ -509,7 +525,7 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
-        echo '<br><button type="button" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998; Dienst bearbeiten</button>';
+        echo '<br><button type="button" title="Dienst bearbeiten" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998;</button>';
         echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">Formularseite</a>';
         echo '</div>';
         _ZeigeDienstEditBlock($db_link, $DienstID);
@@ -562,12 +578,12 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
         echo $regtext;
     } elseif ($modus === 'admin_edit') {
         if ($inline) {
-            echo '<button type="button" onclick="toggleEditSchicht(' . (int)$SchichtID . ')">&#9998;</button>';
+            echo '<button type="button" title="Schicht bearbeiten" onclick="toggleEditSchicht(' . (int)$SchichtID . ')">&#9998;</button>';
         } else {
             echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
                . '<button type="button">&#9998;</button></a>';
         }
-        echo '&nbsp;<button type="button" '
+        echo '&nbsp;<button type="button" title="Schicht löschen" '
            . 'onclick="if(confirm(\'Schicht löschen?\')){'
            . 'document.getElementById(\'deleteSchichtID\').value=' . (int)$SchichtID . ';'
            . 'document.getElementById(\'deleteSchichtForm\').submit();}">&#128465;</button>';
@@ -812,8 +828,8 @@ function _ZeigeDienstEditBlock($db_link, $DienstID): void
         echo '<option value="' . (int)$lvl . '"' . $sel . '>' . $h($beschr) . '</option>';
     }
     echo '</select><br><br>';
-    echo '<button type="submit" name="SpeicherDienst" value="' . (int)$DienstID . '" data-save>Speichern</button> ';
-    echo '<button type="button" onclick="toggleEditDienst(' . (int)$DienstID . ')">Abbrechen</button>';
+    echo '<button type="submit" title="Speichern" name="SpeicherDienst" value="' . (int)$DienstID . '" data-save>&#128190;</button> ';
+    echo '<button type="button" title="Abbrechen" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#10006;</button>';
     echo '</div>';
 }
 
@@ -835,7 +851,7 @@ function _ZeigeSchichtEditZelle(array $zeile): void
        . htmlspecialchars($zeile['BisInput']) . "'{$key}> ";
     echo "<label><input type='checkbox' id='es_auto_{$id}' style='width:unset' checked> Ende aus Dauer</label> ";
     echo "Soll <input type='number' name='{$n}[soll]' min='1' style='width:4.5em' value='" . (int)$zeile['Soll'] . "'{$key}> ";
-    echo "<button type='submit' name='SpeicherSchicht' value='{$id}' data-save>Speichern</button> ";
-    echo "<button type='button' onclick='toggleEditSchicht({$id})'>Abbrechen</button>";
+    echo "<button type='submit' title='Speichern' name='SpeicherSchicht' value='{$id}' data-save>&#128190;</button> ";
+    echo "<button type='button' title='Abbrechen' onclick='toggleEditSchicht({$id})'>&#10006;</button>";
     echo "</td>";
 }

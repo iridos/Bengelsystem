@@ -783,7 +783,7 @@ function GetDiensteChildren($db_link, $DienstID)#stmt2
     // $DienstID NULL anderes Queryformat
     if ($DienstID === null) {
         global $debug;
-        //$debug=1;
+        $debug=1;
         $ElternDienstQuery = "IS NULL";
         $sql = "SELECT DienstID, Was, Wo, Info, Leiter, HelferLevel FROM Dienst where ElternDienstID $ElternDienstQuery ORDER BY Was";
         $stmt = stmt_prepare_and_execute($db_link, $sql);
@@ -1493,4 +1493,12 @@ function GetEinzelDienst($db_link, $DienstID)
 //    return $result->fetch_assoc();
 //}
 
-
+/** DienstID, zu der eine Schicht gehört (null, wenn die Schicht nicht existiert). */
+function GetDienstIDVonSchicht($db_link, $SchichtID)
+{
+    $sql = "SELECT DienstID FROM Schicht WHERE SchichtID = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $SchichtID);
+    if (!$stmt) { return null; }
+    $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    return $row ? (int)$row['DienstID'] : null;
+}

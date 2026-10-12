@@ -305,10 +305,10 @@ unset($_SESSION['Schicht-AnschlussVon']);
     <tr><td>Dauer</td></tr>
     <tr><td>
 <?php [$DauerH, $DauerM] = DauerZerlegen($Dauer); ?>
-      <input id="Schicht-Dauer-H" name="Schicht-Dauer-H" type="number" min="0" max="99" style="width:5em"
-             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerH ?>" required> Std.
-      <input id="Schicht-Dauer-M" name="Schicht-Dauer-M" type="number" min="0" max="59" style="width:5em"
-             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerM ?>" required> Min.
+      <input id="Schicht-Dauer-H" name="Schicht-Dauer-H" type="number" min="0" max="99" style="width:3em"
+             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerH ?>" required> h
+      <input id="Schicht-Dauer-M" name="Schicht-Dauer-M" type="number" min="0" max="59" style="width:3em"
+             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerM ?>" required> m
     </td></tr>
     <tr><td>Bis</td></tr>
     <tr><td>

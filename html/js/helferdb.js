@@ -111,6 +111,19 @@ function collapse_table_rows()
 
             $('table.collapsible tr[target="active"]').show();
             $('table.collapsible tr[target="active"]').prevAll('.header').first().attr('id', 'active');
+
+            // Dienste, die gerade bearbeitet wurden (data-aktiv, siehe _ZeigeDienstHeader):
+            // komplett aufklappen und anspringen. Ein evtl. älteres "active" (aus
+            // SchichtIdAktiv) weicht, damit die ID nur einmal vorkommt.
+            var aktiv = $('table.collapsible tr.header[data-aktiv]');
+            if (aktiv.length) {
+                $('#active').removeAttr('id');
+                aktiv.each(function () {
+                    $(this).nextUntil(':not(.collapsible-content)').show();
+                    $(this).find('span').first().text('-');
+                });
+                aktiv.first().attr('id', 'active');
+            }
             location.href = '#active';
 
             $('table.collapsible tr.header').click(

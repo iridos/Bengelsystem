@@ -29,6 +29,8 @@ if (isset($_POST['SpeicherSchicht'])) {
     $id = (int)$_POST['SpeicherSchicht'];
     $f  = $_POST['edit_schicht'][$id] ?? null;
     if ($id > 0 && is_array($f)) {
+        // Dienst der Schicht nach dem Speichern (oder bei Fehlermeldung) aufgeklappt anzeigen
+        $_SESSION['DienstIdAktiv'] = GetDienstIDVonSchicht($db_link, $id);
         $von   = str_replace('T', ' ', trim($f['von'] ?? ''));
         $bis   = str_replace('T', ' ', trim($f['bis'] ?? ''));
         $soll  = (int)($f['soll'] ?? 0);
@@ -40,8 +42,6 @@ if (isset($_POST['SpeicherSchicht'])) {
         } elseif (ChangeSchicht($db_link, $id, $von, $bis, $soll, $dauer) === false) {
             $message .= "Schicht {$id} konnte nicht gespeichert werden.<br>";
         } else {
-            // vorhandener Mechanismus: Zeile wird aufgeklappt und angesprungen
-            $_SESSION['SchichtIdAktiv'] = $id;
             header("Location: " . $_SERVER['REQUEST_URI']); exit;
         }
     }
@@ -52,6 +52,7 @@ if (isset($_POST['SpeicherDienst'])) {
     $id = (int)$_POST['SpeicherDienst'];
     $f  = $_POST['edit_dienst'][$id] ?? null;
     if ($id > 0 && is_array($f)) {
+        $_SESSION['DienstIdAktiv'] = $id;   // bearbeiteten Dienst aufgeklappt anzeigen
         $was    = trim($f['was'] ?? '');
         $leiter = (int)($f['leiter'] ?? 0);          // "12 - Name" -> 12
         $leiter = $leiter > 0 ? $leiter : null;
@@ -61,7 +62,7 @@ if (isset($_POST['SpeicherDienst'])) {
                                $leiter, (int)($f['eltern'] ?? 0), (int)($f['level'] ?? 0)) === false) {
             $message .= "Dienst {$id} konnte nicht gespeichert werden (Elterndienst darf nicht der Dienst selbst oder einer seiner Unterdienste sein).<br>";
         } else {
-            header("Location: " . $_SERVER['REQUEST_URI'] . "#D" . $id); exit;
+            header("Location: " . $_SERVER['REQUEST_URI']); exit;
         }
     }
 }
@@ -69,10 +70,13 @@ if (isset($_POST['SpeicherDienst'])) {
 // DELETE aus der Übersichtstabelle (admin_edit-Modus)
 if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
     $delID = (int)$_POST['DeleteSchichtID'];
+    // Dienst merken (die Schicht ist danach weg), damit er aufgeklappt bleibt
+    $_SESSION['DienstIdAktiv'] = GetDienstIDVonSchicht($db_link, $delID);
     if (!DeleteSchicht($db_link, $delID, false)) {
         $message .= "Schicht {$delID} konnte nicht gelöscht werden (noch Helfer eingetragen?)<br>";
     } else {
-        header("Location: " . $_SERVER['PHP_SELF']); exit;
+        // REQUEST_URI statt PHP_SELF: Suchfilter etc. bleiben erhalten
+        header("Location: " . $_SERVER['REQUEST_URI']); exit;
     }
 }
 
