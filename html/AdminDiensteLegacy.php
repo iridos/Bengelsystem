@@ -26,12 +26,16 @@ $SchichtID = $_SESSION['SchichtID'] ?? null;
 // POST-Verarbeitung
 // ============================================================================
 if (isset($_POST['ChangeDienst'])) {
-    ChangeDienst(
+    $ok = ChangeDienst(
         $db_link, $DienstID,
         $_POST['Dienst-Was'], $_POST['Dienst-Wo'], $_POST['Dienst-Info'],
         $_POST['Dienst-Leiter'], $_POST['Dienst-Gruppe'], $_POST['HelferLevel']
     );
-    header("Location: " . $_SERVER['PHP_SELF']); exit;
+    if ($ok === false) {
+        $message .= "Dienst konnte nicht geändert werden (Elterndienst darf nicht der Dienst selbst oder einer seiner Unterdienste sein).<br>";
+    } else {
+        header("Location: " . $_SERVER['PHP_SELF']); exit;
+    }
 }
 
 if (isset($_POST['NewDienst'])) {
@@ -59,7 +63,8 @@ if (isset($_POST['ChangeSchicht'])) {
     ChangeSchicht(
         $db_link, $SchichtID,
         $_POST['Schicht-Von'], $_POST['Schicht-Bis'],
-        $_POST['Schicht-Soll'], $_POST['Schicht-Dauer']
+        $_POST['Schicht-Soll'],
+        DauerAusFormular($_POST['Schicht-Dauer-H'] ?? 0, $_POST['Schicht-Dauer-M'] ?? 0)
     );
     header("Location: " . $_SERVER['PHP_SELF'] . "#schicht"); exit;
 }
@@ -84,11 +89,9 @@ if (isset($_POST['NewSchicht'])) {
     $Von   = $_POST['Schicht-Von'];
     $Bis   = $_POST['Schicht-Bis'];
     $Soll  = $_POST['Schicht-Soll'];
-    $Dauer = $_POST['Schicht-Dauer'];
+    $Dauer = DauerAusFormular($_POST['Schicht-Dauer-H'] ?? 0, $_POST['Schicht-Dauer-M'] ?? 0);
     if ($AutomaticBis) {
-        $Temp  = new DateTime($Von);
-        $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
-        $Bis   = $Temp->add($Temp2)->format('Y-m-d H:i:s');
+        $Bis = DauerEndzeit($Von, $Dauer);
     }
     NewSchicht($db_link, $DienstID, $Von, $Bis, $Soll, $Dauer, $HelferName);
     $_SESSION['SchichtID'] = LastInsertId($db_link);
@@ -283,9 +286,7 @@ mysqli_free_result($db_erg);
 if (!empty($_SESSION['Schicht-AnschlussVon'])) {
     $Von = $_SESSION['Schicht-AnschlussVon'];
     if ($AutomaticBis && $Dauer) {
-        $Temp  = new DateTime($Von);
-        $Temp2 = DateInterval::createFromDateString($Dauer[0] . $Dauer[1] . ' hours ' . $Dauer[3] . $Dauer[4] . ' minutes');
-        $Bis   = $Temp->add($Temp2)->format('Y-m-d H:i:s');
+        $Bis = DauerEndzeit($Von, $Dauer);
     }
 }
 unset($_SESSION['Schicht-AnschlussVon']);
@@ -299,12 +300,15 @@ unset($_SESSION['Schicht-AnschlussVon']);
     <tr><td>Von</td></tr>
     <tr><td>
       <input id="Schicht-Von" name="Schicht-Von" type="datetime-local"
-             onKeyUp="setEndDate()" value="<?= htmlspecialchars($Von ?? '') ?>" required>
+             onKeyUp="setEndDate()" onChange="setEndDate()" value="<?= htmlspecialchars($Von ?? '') ?>" required>
     </td></tr>
     <tr><td>Dauer</td></tr>
     <tr><td>
-      <input id="Schicht-Dauer" name="Schicht-Dauer" type="time"
-             onChange="setEndDate()" value="<?= htmlspecialchars($Dauer ?? '01:00') ?>" required>
+<?php [$DauerH, $DauerM] = DauerZerlegen($Dauer); ?>
+      <input id="Schicht-Dauer-H" name="Schicht-Dauer-H" type="number" min="0" max="99" style="width:5em"
+             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerH ?>" required> Std.
+      <input id="Schicht-Dauer-M" name="Schicht-Dauer-M" type="number" min="0" max="59" style="width:5em"
+             onChange="setEndDate()" onKeyUp="setEndDate()" value="<?= (int)$DauerM ?>" required> Min.
     </td></tr>
     <tr><td>Bis</td></tr>
     <tr><td>
