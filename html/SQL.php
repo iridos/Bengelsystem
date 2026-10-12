@@ -446,7 +446,10 @@ function AlleSchichtenImZeitbereich($db_link, $Von, $Bis, $HelferLevel = -1, $Di
                 C AS Ist,
                 DATE_FORMAT(Von,'%W %d %M') As Tag,
                 Soll,
-                Dienst.DienstID
+                Dienst.DienstID,
+                DATE_FORMAT(Von,'%Y-%m-%dT%H:%i') AS VonInput,
+                DATE_FORMAT(Bis,'%Y-%m-%dT%H:%i') AS BisInput,
+                (SELECT S2.Dauer FROM Schicht S2 WHERE S2.SchichtID = SchichtUebersicht.SchichtID) AS Dauer
              FROM Dienst,SchichtUebersicht
              WHERE Von >= ? and Von < ? and Dienst.DienstID=SchichtUebersicht.DienstID $sql_helferlevel $sql_dienst
              ORDER BY Was,Von";
