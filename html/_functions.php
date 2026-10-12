@@ -420,6 +420,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
         echo '<form id="deleteSchichtForm" method="post" action="AdminDienste.php">';
         echo '<input type="hidden" id="deleteSchichtID" name="DeleteSchichtID" value="">';
         echo '</form>';
+        _AdminEditDatalists($db_link);
     }
 }
 
@@ -492,22 +493,26 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $padding = (20 * $tiefe) . 'px';
     $icon    = $foldable ? '<span>+</span> ' : '';
 
-    echo "<tr class='header'><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
+    $headerId = ($modus === 'admin_edit') ? " id='D{$DienstID}'" : '';
+    echo "<tr class='header'{$headerId}><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
     echo $praefix . htmlspecialchars($Was);
     echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
     echo " <!-- Abfrage {$HelferLevel}, {$DienstID} -->";
     echo "</th></tr>";
 
     $contentClass = $foldable ? "class='collapsible-content'" : '';
-    echo "<tr {$contentClass}><td colspan=5 style='background:lightblue; padding-left:{$padding}'>";
+    echo "<tr {$contentClass}><td id='DD{$DienstID}' colspan=5 style='background:lightblue; padding-left:{$padding}'>";
+    echo ($modus === 'admin_edit') ? '<div class="view">' : '';
     echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
     echo '<b>Ort:</b> ' . htmlspecialchars($Wo ?? '') . '<br>';
     echo '<b>Ansprechpartner:</b> ' . htmlspecialchars($Leiter ?? '');
     if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
-        echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">'
-           . '<button type="button" style="width:200px">Dienst bearbeiten</button></a>';
+        echo '<br><button type="button" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998; Dienst bearbeiten</button>';
+        echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">Formularseite</a>';
+        echo '</div>';
+        _ZeigeDienstEditBlock($db_link, $DienstID);
     }
     echo "</td></tr>\n";
 }
@@ -538,27 +543,40 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
         $rowstyle .= " target='active' ";
     }
     $rowClass = $foldable ? "collapsible-content" : '';
-    echo "<tr class='{$rowClass}' $rowstyle"
+    // Inline-Editieren nur im admin_edit-Modus und wenn die Abfrage die Rohwerte geliefert hat
+    $inline = ($modus === 'admin_edit') && isset($zeile['VonInput'], $zeile['BisInput']);
+    $vc     = $inline ? " class='view'" : '';
+    $rowId  = $inline ? " id='S" . (int)$SchichtID . "'" : '';
+    echo "<tr class='{$rowClass}'{$rowId} $rowstyle"
        . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='
        . (int)$SchichtID . '#Info\';">';
-    echo '<td>' . htmlspecialchars($zeile['Tag']) . '</td>';
-    echo '<td>' . htmlspecialchars($Von) . '</td>';
-    echo '<td>' . htmlspecialchars($Bis) . '</td>';
-    echo "<td bgcolor='{$Color}'>" . (int)$zeile['Ist'] . '/' . (int)$zeile['Soll'] . '</td>';
-    echo "<td style='width:10%;white-space:nowrap'>";
+    echo "<td{$vc}>" . htmlspecialchars($zeile['Tag']) . '</td>';
+    echo "<td{$vc}>" . htmlspecialchars($Von) . '</td>';
+    echo "<td{$vc}>" . htmlspecialchars($Bis) . '</td>';
+    echo "<td{$vc} bgcolor='{$Color}'>" . (int)$zeile['Ist'] . '/' . (int)$zeile['Soll'] . '</td>';
+    $btnClick = $inline ? " onclick='event.stopPropagation()'" : '';
+    echo "<td" . ($inline ? " class='view'" : '') . " style='width:10%;white-space:nowrap'{$btnClick}>";
     if ($modus === 'SchichtEintragen') {
         echo "<button name='plusschicht' value='" . (int)$SchichtID . "'>+</button>";
         echo "&nbsp;&nbsp;<button name='minusschicht' value='" . (int)$SchichtID . "'>&ndash;</button>";
         echo $regtext;
     } elseif ($modus === 'admin_edit') {
-        echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
-           . '<button type="button">&#9998;</button></a>';
+        if ($inline) {
+            echo '<button type="button" onclick="toggleEditSchicht(' . (int)$SchichtID . ')">&#9998;</button>';
+        } else {
+            echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
+               . '<button type="button">&#9998;</button></a>';
+        }
         echo '&nbsp;<button type="button" '
            . 'onclick="if(confirm(\'Schicht löschen?\')){'
            . 'document.getElementById(\'deleteSchichtID\').value=' . (int)$SchichtID . ';'
            . 'document.getElementById(\'deleteSchichtForm\').submit();}">&#128465;</button>';
     }
-    echo '</td></tr>' . "\n";
+    echo '</td>';
+    if ($inline) {
+        _ZeigeSchichtEditZelle($zeile);
+    }
+    echo '</tr>' . "\n";
 }
 /**
  * Zeigt eine einzelne Ebene des Dienst-Baums: Breadcrumb, Kind-Dienste zum
@@ -700,4 +718,124 @@ function _ZeigeDienstDrilldown($db_link, $AktuellerDienst, $Von, $Bis, $HelferID
             _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $o['HelferLevel'], false);
         }
     }
+}
+
+
+// ============================================================================
+// Dauer-Hilfsfunktionen
+// ============================================================================
+// Dauer ist in der DB eine TIME-Spalte ("HH:MM:SS"), im Formular aber zwei
+// Zahlenfelder (Stunden/Minuten): <input type="time"> zeigt je nach Browser-
+// Locale "12:00 AM" für 0 und ist für Dauern ungeeignet.
+
+/** "HH:MM[:SS]" -> [Stunden, Minuten]. Leer/ungültig -> Defaults. */
+function DauerZerlegen($dauer, int $defaultStunden = 1, int $defaultMinuten = 0): array
+{
+    if (is_string($dauer) && preg_match('/^(\d{1,3}):(\d{2})/', $dauer, $m)) {
+        return [(int)$m[1], (int)$m[2]];
+    }
+    return [$defaultStunden, $defaultMinuten];
+}
+
+/** Stunden + Minuten aus dem Formular -> "HH:MM:00" für die TIME-Spalte (begrenzt auf 0-99 h / 0-59 min). */
+function DauerAusFormular($stunden, $minuten): string
+{
+    $h = max(0, min(99, (int)$stunden));
+    $m = max(0, min(59, (int)$minuten));
+    return sprintf('%02d:%02d:00', $h, $m);
+}
+
+/** Von (beliebiges DateTime-Format, auch "…T…") + Dauer ("HH:MM:SS") -> "Y-m-d H:i:s". */
+function DauerEndzeit(string $von, string $dauer): string
+{
+    [$h, $m] = DauerZerlegen($dauer, 0, 0);
+    return (new DateTime($von))->add(new DateInterval("PT{$h}H{$m}M"))->format('Y-m-d H:i:s');
+}
+
+// ============================================================================
+// Inline-Editiermodus (admin_edit)
+// ============================================================================
+
+/** Auswahllisten einmal pro Seite laden statt pro Zeile. */
+function _AdminEditDaten($db_link): array
+{
+    static $daten = null;
+    if ($daten !== null) { return $daten; }
+    $daten = ['helfer' => [], 'dienste' => [], 'level' => alleHelferLevel($db_link)];
+    $erg = HelferListe($db_link);
+    while ($z = mysqli_fetch_assoc($erg)) { $daten['helfer'][(int)$z['HelferID']] = $z['Name']; }
+    mysqli_free_result($erg);
+    $erg = GetDienste($db_link);
+    while ($z = mysqli_fetch_assoc($erg)) { $daten['dienste'][(int)$z['DienstID']] = $z['Was']; }
+    mysqli_free_result($erg);
+    return $daten;
+}
+
+/** Gemeinsame <datalist>s für Leiter und Elterndienst (Format "ID - Name", ausgewertet wird nur die ID). */
+function _AdminEditDatalists($db_link): void
+{
+    $d = _AdminEditDaten($db_link);
+    echo '<datalist id="dl-eltern-dienste">';
+    foreach ($d['dienste'] as $id => $was) {
+        echo '<option value="' . $id . ' - ' . htmlspecialchars($was, ENT_QUOTES) . '">';
+    }
+    echo '</datalist><datalist id="dl-helfer">';
+    foreach ($d['helfer'] as $id => $name) {
+        echo '<option value="' . $id . ' - ' . htmlspecialchars($name, ENT_QUOTES) . '">';
+    }
+    echo '</datalist>';
+}
+
+/** Editier-Block eines Dienstes (steht in der Beschreibungszelle, zunächst versteckt). */
+function _ZeigeDienstEditBlock($db_link, $DienstID): void
+{
+    $d = GetEinzelDienst($db_link, $DienstID);
+    if (!$d) { return; }
+    $e   = _AdminEditDaten($db_link);
+    $h   = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES);
+    $n   = "edit_dienst[" . (int)$DienstID . "]";
+    $key = ' onkeydown="return enterSpeichern(event,this)"';
+
+    $leiterWert = $d['Leiter'] ? ((int)$d['Leiter'] . ' - ' . ($e['helfer'][(int)$d['Leiter']] ?? '?')) : '';
+    $elternWert = $d['ElternDienstID'] ? ((int)$d['ElternDienstID'] . ' - ' . ($e['dienste'][(int)$d['ElternDienstID']] ?? '?')) : '';
+
+    echo '<div class="edit" style="display:none">';
+    echo '<b>Was:</b><br><input type="text" name="' . $n . '[was]" value="' . $h($d['Was']) . '"' . $key . '><br>';
+    echo '<b>Ort:</b><br><input type="text" name="' . $n . '[wo]" value="' . $h($d['Wo']) . '"' . $key . '><br>';
+    echo '<b>Dienstinfo (Beschreibung):</b><br><textarea name="' . $n . '[info]" rows="4">' . $h($d['Info']) . '</textarea><br>';
+    echo '<b>Ansprechpartner:</b><br><input type="text" name="' . $n . '[leiter]" list="dl-helfer" value="' . $h($leiterWert) . '"' . $key . '><br>';
+    echo '<b>Elterndienst:</b> (leer = Top-Level)<br><input type="text" name="' . $n . '[eltern]" list="dl-eltern-dienste" '
+       . 'placeholder="ID oder Name eingeben" value="' . $h($elternWert) . '"' . $key . '><br>';
+    echo '<b>HelferLevel:</b><br><select name="' . $n . '[level]">';
+    foreach ($e['level'] as $lvl => $beschr) {
+        $sel = ((int)$lvl === (int)$d['HelferLevel']) ? ' selected' : '';
+        echo '<option value="' . (int)$lvl . '"' . $sel . '>' . $h($beschr) . '</option>';
+    }
+    echo '</select><br><br>';
+    echo '<button type="submit" name="SpeicherDienst" value="' . (int)$DienstID . '" data-save>Speichern</button> ';
+    echo '<button type="button" onclick="toggleEditDienst(' . (int)$DienstID . ')">Abbrechen</button>';
+    echo '</div>';
+}
+
+/** Editier-Zelle einer Schicht: ersetzt im Editiermodus alle Anzeige-Zellen der Zeile. */
+function _ZeigeSchichtEditZelle(array $zeile): void
+{
+    $id = (int)$zeile['SchichtID'];
+    [$dh, $dm] = DauerZerlegen($zeile['Dauer'] ?? null);
+    $n    = "edit_schicht[{$id}]";
+    $key  = ' onkeydown="return enterSpeichern(event,this)"';
+    $calc = "berechneEnde('es_von_{$id}','es_dh_{$id}','es_dm_{$id}','es_bis_{$id}','es_auto_{$id}')";
+
+    echo "<td class='edit' colspan='5' style='display:none' onclick='event.stopPropagation()'>";
+    echo "Von <input type='datetime-local' id='es_von_{$id}' name='{$n}[von]' style='width:auto' value='"
+       . htmlspecialchars($zeile['VonInput']) . "' onchange=\"{$calc}\"{$key}> ";
+    echo "Dauer <input type='number' id='es_dh_{$id}' name='{$n}[dauer_h]' min='0' max='99' style='width:4.5em' value='{$dh}' onchange=\"{$calc}\"{$key}> Std. ";
+    echo "<input type='number' id='es_dm_{$id}' name='{$n}[dauer_m]' min='0' max='59' style='width:4.5em' value='{$dm}' onchange=\"{$calc}\"{$key}> Min. ";
+    echo "Bis <input type='datetime-local' id='es_bis_{$id}' name='{$n}[bis]' style='width:auto' value='"
+       . htmlspecialchars($zeile['BisInput']) . "'{$key}> ";
+    echo "<label><input type='checkbox' id='es_auto_{$id}' style='width:unset' checked> Ende aus Dauer</label> ";
+    echo "Soll <input type='number' name='{$n}[soll]' min='1' style='width:4.5em' value='" . (int)$zeile['Soll'] . "'{$key}> ";
+    echo "<button type='submit' name='SpeicherSchicht' value='{$id}' data-save>Speichern</button> ";
+    echo "<button type='button' onclick='toggleEditSchicht({$id})'>Abbrechen</button>";
+    echo "</td>";
 }
