@@ -125,14 +125,19 @@ function enterSpeichern(ev, el)
     return false;
 }
 
-// Mülleimer: ausgegraut, bis beim Dienst "Schichten löschen" angehakt wird
+// Mülleimer: ausgegraut ("gesperrt"), bis beim Dienst "Schichten löschen" angehakt wird
 function schichtenLoeschenUmschalten(dienstId, an)
 {
-    $('tr.header[data-dienst="' + dienstId + '"]').nextUntil('tr.header').find('button.btn-loeschen').prop('disabled', !an);
+    $('tr.header[data-dienst="' + dienstId + '"]').nextUntil('tr.header').find('button.btn-loeschen')
+        .toggleClass('gesperrt', !an).css('opacity', an ? '' : '0.4');
 }
 
-function loescheSchicht(id)
+function loescheSchicht(id, btn)
 {
+    if ($(btn).hasClass('gesperrt')) {
+        alert('Löschen ist gesperrt.\n\nZum Freischalten beim Dienst den Haken "Schichten löschen" setzen.');
+        return;
+    }
     $('#deleteSchichtID').val(id);
     $('#deleteSchichtForm').submit();
 }

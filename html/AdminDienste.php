@@ -22,15 +22,25 @@ $message = "";
 // Schicht-Formulare mit ihrer eigenen Verarbeitung sind nach
 // AdminDiensteLegacy.php ausgelagert)
 // ============================================================================
-HelferLevelAnzeigeCheckPOST($db_link, $HelferID, $AdminStatus, $AdminID);
+// Aufklappen kommt aus der URL (nicht aus der Session): nach dem Speichern/Löschen leitet der
+// Server auf dieselbe Seite mit ?aktiv=<DienstID> um. An der Adresszeile sieht man sofort, ob
+// die Aktion beim Server angekommen ist.
+// Debuggen: Seite mit ?debug=1 aufrufen -> Zusatzinfos auf der Seite und Zeilen im PHP-Error-Log.
+$aktiverDienst = (int)($_GET['aktiv'] ?? 0) ?: null;
+$loeschenAktiv = !empty($_GET['loeschen']);
+$debug = isset($_GET['debug']);
+$log = function (string $text) use ($debug) { if ($debug) { error_log("AdminDienste DEBUG: " . $text); } };
+if ($debug && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $log("POST mit " . count($_POST) . " Variablen, Schlüssel: " . implode(',', array_slice(array_keys($_POST), 0, 25)));
+}
 
 // Inline-Speichern einer Schicht (Bleistift in der Übersichtstabelle)
 if (isset($_POST['SpeicherSchicht'])) {
     $id = (int)$_POST['SpeicherSchicht'];
     $f  = $_POST['edit_schicht'][$id] ?? null;
+    $log("SpeicherSchicht id={$id}, Felder " . (is_array($f) ? json_encode($f) : 'FEHLEN'));
     if ($id > 0 && is_array($f)) {
-        // Dienst der Schicht nach dem Speichern (oder bei Fehlermeldung) aufgeklappt anzeigen
-        $_SESSION['DienstIdAktiv'] = GetDienstIDVonSchicht($db_link, $id);
+        $aktiverDienst = GetDienstIDVonSchicht($db_link, $id);   // Dienst bleibt aufgeklappt (auch bei Fehlermeldung)
         $von   = str_replace('T', ' ', trim($f['von'] ?? ''));
         $bis   = str_replace('T', ' ', trim($f['bis'] ?? ''));
         $soll  = (int)($f['soll'] ?? 0);
@@ -42,8 +52,12 @@ if (isset($_POST['SpeicherSchicht'])) {
         } elseif (ChangeSchicht($db_link, $id, $von, $bis, $soll, $dauer) === false) {
             $message .= "Schicht {$id} konnte nicht gespeichert werden.<br>";
         } else {
-            header("Location: " . $_SERVER['REQUEST_URI']); exit;
+            $log("Schicht {$id} gespeichert, Redirect mit aktiv={$aktiverDienst}");
+            header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], ['aktiv' => $aktiverDienst], ['loeschen']));
+            exit;
         }
+    } else {
+        $message .= "Schicht {$id}: Die Formulardaten sind nicht beim Server angekommen, nichts gespeichert.<br>";
     }
 }
 
@@ -51,8 +65,9 @@ if (isset($_POST['SpeicherSchicht'])) {
 if (isset($_POST['SpeicherDienst'])) {
     $id = (int)$_POST['SpeicherDienst'];
     $f  = $_POST['edit_dienst'][$id] ?? null;
+    $log("SpeicherDienst id={$id}, Felder " . (is_array($f) ? json_encode($f) : 'FEHLEN'));
     if ($id > 0 && is_array($f)) {
-        $_SESSION['DienstIdAktiv'] = $id;   // bearbeiteten Dienst aufgeklappt anzeigen
+        $aktiverDienst = $id;   // bearbeiteter Dienst bleibt aufgeklappt (auch bei Fehlermeldung)
         $was    = trim($f['was'] ?? '');
         $leiter = (int)($f['leiter'] ?? 0);          // "12 - Name" -> 12
         $leiter = $leiter > 0 ? $leiter : null;
@@ -62,24 +77,35 @@ if (isset($_POST['SpeicherDienst'])) {
                                $leiter, (int)($f['eltern'] ?? 0), (int)($f['level'] ?? 0)) === false) {
             $message .= "Dienst {$id} konnte nicht gespeichert werden (Elterndienst darf nicht der Dienst selbst oder einer seiner Unterdienste sein).<br>";
         } else {
-            header("Location: " . $_SERVER['REQUEST_URI']); exit;
+            $log("Dienst {$id} gespeichert, Redirect mit aktiv={$id}");
+            header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], ['aktiv' => $id], ['loeschen']));
+            exit;
         }
+    } else {
+        $message .= "Dienst {$id}: Die Formulardaten sind nicht beim Server angekommen, nichts gespeichert.<br>";
     }
 }
 
 // DELETE aus der Übersichtstabelle (admin_edit-Modus)
 if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
     $delID = (int)$_POST['DeleteSchichtID'];
-    // Dienst merken (die Schicht ist danach weg), damit er aufgeklappt bleibt
-    $_SESSION['DienstIdAktiv']       = GetDienstIDVonSchicht($db_link, $delID);
-    $_SESSION['DienstLoeschenAktiv'] = true;   // weitere Schichten desselben Dienstes direkt löschbar lassen
+    $aktiverDienst = GetDienstIDVonSchicht($db_link, $delID);   // vor dem Löschen merken
+    $loeschenAktiv = true;                                      // weitere Schichten direkt löschbar lassen
+    $log("DeleteSchichtID={$delID}, Dienst {$aktiverDienst}");
     if (!DeleteSchicht($db_link, $delID, false)) {
         $message .= "Schicht {$delID} konnte nicht gelöscht werden (noch Helfer eingetragen?)<br>";
     } else {
         // REQUEST_URI statt PHP_SELF: Suchfilter etc. bleiben erhalten
-        header("Location: " . $_SERVER['REQUEST_URI']); exit;
+        header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], ['aktiv' => $aktiverDienst, 'loeschen' => 1]));
+        exit;
     }
 }
+
+// HelferLevel-Umschaltung: MUSS NACH den Speichern/Löschen-Handlern stehen. Das HelferLevel-Dropdown
+// liegt im selben <form> wie die Tabelle, "helfer-level-anzeige" steckt also in jedem POST aus dieser
+// Tabelle -- die Funktion leitet bei jedem POST um, in dem es vorkommt, und hätte so jedes Speichern
+// abgefangen, bevor ein Handler es sieht.
+HelferLevelAnzeigeCheckPOST($db_link, $HelferID, $AdminStatus, $AdminID);
 
 // Suchfilter aus GET/POST
 $suchfilter = trim($_GET['suche'] ?? $_POST['suche'] ?? '');
@@ -97,6 +123,13 @@ echo PageHeader($pagename);
   Formulare (Dienst/Schicht anlegen, mehrere Schichten in Serie)
 </button>
 <?php if ($message) { echo '<div class="error">' . $message . '</div>'; } ?>
+<?php if ($debug) {
+    echo '<pre style="background:#ffd;border:1px solid #cc0;padding:4px;font-size:smaller">DEBUG '
+       . htmlspecialchars($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']
+       . "\nPOST-Variablen: " . count($_POST) . (count($_POST) ? ' (' . implode(', ', array_slice(array_keys($_POST), 0, 15)) . ')' : '')
+       . "\naktiverDienst=" . var_export($aktiverDienst, true) . ' loeschenAktiv=' . var_export($loeschenAktiv, true))
+       . '</pre>';
+} ?>
 
 <!-- ======================================================
      Übersichtstabelle aller Dienste/Schichten
@@ -114,6 +147,8 @@ ZeigeDiensteUndSchichten($db_link, $HelferID, [
     'meine_schichten_name'=> $HelferName,
     'zeigeHierarchie'     => true,
     'suchfilter'          => $suchfilter,
+    'aktiverDienst'       => $aktiverDienst,
+    'loeschenAktiv'       => $loeschenAktiv,
     'HelferLevel'         => $HelferLevel,
     'AdminStatus'         => $AdminStatus,
     'AdminID'             => $AdminID,

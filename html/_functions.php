@@ -274,6 +274,8 @@ function ZeigeHelferLevelTabelle($db_link, $HelferLevel, $HelferLevelAnzeige, $D
 //   'zeigeHierarchie'     bool    ElternDienstID-Einrückung anzeigen (Default: false)
 //   'suchfilter'          string  Vorausgefüllter Suchwert — normalerweise leer lassen,
 //                                 die Funktion liest $_GET['suche'] selbst (Default: '')
+//   'aktiverDienst'       int     (admin_edit) Dienst, der aufgeklappt und angesprungen wird (Default: null)
+//   'loeschenAktiv'       bool    (admin_edit) Mülleimer des aktiven Dienstes freigeschaltet (Default: false)
 //   'HelferLevelAnzeige'  int     Angezeigtes HelferLevel (Default: aus Session)
 //   'HelferLevel'         int     HelferLevel des eingeloggten Helfers (Default: aus Session)
 //   'AdminStatus'         int     (Default: aus Session)
@@ -296,6 +298,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
         'AliasHelferID'        => $HelferID,
         'zeigeHierarchie'      => false,
         'suchfilter'           => '',
+        'aktiverDienst'        => null,
+        'loeschenAktiv'        => false,
         'HelferLevelAnzeige'   => $_SESSION['HelferLevelAnzeige'] ?? ($_SESSION['HelferLevel'] ?? 1),
         'HelferLevel'          => $_SESSION['HelferLevel'] ?? 1,
         'AdminStatus'          => $_SESSION['AdminStatus'] ?? 0,
@@ -385,12 +389,9 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     // --- Meine belegten Schichten für Grün-Markierung -----------------------
     $MeineDienste = SchichtIdArrayEinesHelfers($db_link, $HelferID);
 
-    // Zuletzt bearbeiteter Dienst (admin_edit): wird einmalig aufgeklappt und angesprungen
-    $aktiverDienst = null;
-    if ($o['modus'] === 'admin_edit') {
-        $aktiverDienst = $_SESSION['DienstIdAktiv'] ?? null;
-        unset($_SESSION['DienstIdAktiv']);
-    }
+    // Zuletzt bearbeiteter Dienst (admin_edit): wird aufgeklappt und angesprungen.
+    // Kommt von der aufrufenden Seite (dort aus der URL), nicht aus der Session.
+    $aktiverDienst = ($o['modus'] === 'admin_edit') ? $o['aktiverDienst'] : null;
 
     // --- Haupttabelle -------------------------------------------------------
     echo '<table class="commontable collapsible">';
@@ -407,12 +408,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     // Wenige Treffer: gleich aufklappen
     $suchAufklappen = (count($treffer) > 0 && count($treffer) <= SUCHE_AUTOAUFKLAPPEN);
 
-    // Nach einem Löschen bleibt der Löschen-Haken des Dienstes gesetzt (einmalig)
-    $loeschenAktiv = false;
-    if ($o['modus'] === 'admin_edit') {
-        $loeschenAktiv = !empty($_SESSION['DienstLoeschenAktiv']);
-        unset($_SESSION['DienstLoeschenAktiv']);
-    }
+    // Nach einem Löschen bleibt der Löschen-Haken des Dienstes gesetzt
+    $loeschenAktiv = ($o['modus'] === 'admin_edit') && !empty($o['loeschenAktiv']);
     $loeschenDienst = false;
 
     $OldWas = '';
@@ -556,10 +553,10 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
         echo '<br><button type="button" title="Dienst bearbeiten" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998;</button>';
-        echo '&nbsp;&nbsp;<label title="Schaltet die Mülleimer-Buttons der Schichten dieses Dienstes frei">'
-           . '<input type="checkbox" style="width:unset" onclick="schichtenLoeschenUmschalten(' . (int)$DienstID . ', this.checked)"'
-           . ($loeschen ? ' checked' : '') . '> Schichten löschen</label>';
         echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">Formularseite</a>';
+        echo '<div align="right"><label title="Schaltet die Mülleimer-Buttons der Schichten dieses Dienstes frei">'
+           . 'Schichten löschen:<input type="checkbox" style="width:unset" onclick="schichtenLoeschenUmschalten(' . (int)$DienstID . ', this.checked)"'
+           . ($loeschen ? ' checked' : '') . '> </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>';
         echo '</div>';
     }
     echo "</td></tr>\n";
@@ -624,9 +621,12 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
                . '<button type="button">&#9998;</button></a>';
         }
         // Mülleimer ist ausgegraut, bis beim Dienst "Schichten löschen" angehakt wird (statt Pop-up)
-        echo '&nbsp;<button type="button" class="btn-loeschen" title="Schicht löschen (vorher beim Dienst &quot;Schichten löschen&quot; anhaken)"'
-           . ($loeschErlaubt ? '' : ' disabled')
-           . ' onclick="loescheSchicht(' . (int)$SchichtID . ')">&#128465;</button>';
+        // Mülleimer ist ausgegraut ("gesperrt"), bis beim Dienst "Schichten löschen" angehakt wird.
+        // Bewusst kein disabled-Attribut: ein deaktivierter Button löst keinen Klick aus, wir wollen
+        // beim Klick auf den ausgegrauten Mülleimer aber einen Hinweis zeigen.
+        echo '&nbsp;<button type="button" class="btn-loeschen' . ($loeschErlaubt ? '' : ' gesperrt') . '"'
+           . ($loeschErlaubt ? '' : ' style="opacity:0.4"')
+           . ' title="Schicht löschen" onclick="loescheSchicht(' . (int)$SchichtID . ', this)">&#128465;</button>';
     }
     echo '</td>';
     echo '</tr>' . "\n";
@@ -899,4 +899,18 @@ function _DienstEditAttribute($db_link, $DienstID): string
     return " data-was='" . $h($d['Was']) . "' data-wo='" . $h($d['Wo']) . "' data-info='" . $h($d['Info'])
          . "' data-leiter='" . $h($leiter) . "' data-eltern='" . $h($eltern)
          . "' data-level='" . (int)$d['HelferLevel'] . "'";
+}
+
+/**
+ * Setzt/entfernt Query-Parameter einer URL (Pfad + Query, z.B. $_SERVER['REQUEST_URI']),
+ * alle anderen Parameter (Suche, Zeitbereich, ...) bleiben erhalten.
+ */
+function UrlMitParametern(string $uri, array $setzen = [], array $entfernen = []): string
+{
+    $teile = parse_url($uri);
+    $q = [];
+    parse_str($teile['query'] ?? '', $q);
+    foreach ($entfernen as $k) { unset($q[$k]); }
+    foreach ($setzen as $k => $v) { $q[$k] = $v; }
+    return ($teile['path'] ?? '') . ($q ? '?' . http_build_query($q) : '');
 }
