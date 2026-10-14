@@ -395,9 +395,29 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     // --- Haupttabelle -------------------------------------------------------
     echo '<table class="commontable collapsible">';
 
+    // Alle Zeilen einlesen, damit die Suchtreffer vorab gezählt werden können
+    $zeilen = mysqli_fetch_all($db_erg, MYSQLI_ASSOC);
+    mysqli_free_result($db_erg);
+    $treffer = [];
+    if ($suchfilter !== '') {
+        foreach ($zeilen as $z) {
+            if (stripos($z['Was'], $suchfilter) !== false) { $treffer[$z['DienstID']] = true; }
+        }
+    }
+    // Wenige Treffer: gleich aufklappen
+    $suchAufklappen = (count($treffer) > 0 && count($treffer) <= SUCHE_AUTOAUFKLAPPEN);
+
+    // Nach einem Löschen bleibt der Löschen-Haken des Dienstes gesetzt (einmalig)
+    $loeschenAktiv = false;
+    if ($o['modus'] === 'admin_edit') {
+        $loeschenAktiv = !empty($_SESSION['DienstLoeschenAktiv']);
+        unset($_SESSION['DienstLoeschenAktiv']);
+    }
+    $loeschenDienst = false;
+
     $OldWas = '';
     $dienstNamen = [];   // fuer die Vorschlagsliste im Suchfeld
-    while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
+    foreach ($zeilen as $zeile) {
         $Was = $zeile['Was'];
         $dienstNamen[$Was] = true;
         if ($suchfilter !== '' && stripos($Was, $suchfilter) === false) {
@@ -413,23 +433,29 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
                 $praefix .= "[".$hierarchieIndex[$DienstID]['tiefe']."]  ";
             }
             SchichtInfo($zeile['SchichtID'], $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+            $dienstAktiv    = ($aktiverDienst !== null && (int)$aktiverDienst === (int)$DienstID);
+            $loeschenDienst = $dienstAktiv && $loeschenAktiv;
             _ZeigeDienstHeader($db_link, $DienstID, $Was, $InfoWo, $Info, $Leiter, 
                        $LeiterHandy, $LeiterEmail,$HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix,
-                       0, true, ($aktiverDienst !== null && (int)$aktiverDienst === (int)$DienstID));
+                       0, true, $dienstAktiv, $suchAufklappen, $loeschenDienst);
             $OldWas = $Was;
         }
-        _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel);
+        _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel, true, $loeschenDienst);
     }
     echo '</table>';
-    mysqli_free_result($db_erg);
     echo '</form>';
 
-    // Vorschlagsliste fuer das Suchfeld: die Dienste, die in dieser Ansicht vorkommen
-    echo '<datalist id="dl-suche-dienste">';
-    foreach (array_keys($dienstNamen) as $name) {
-        echo '<option value="' . htmlspecialchars((string)$name, ENT_QUOTES) . '">';
+    // Vorschlagsliste fuer das Suchfeld: Admin sieht alle Dienste (wie im Formular), alle anderen nur
+    // die Dienste, die in ihrer Ansicht vorkommen (keine Namen von Diensten anderer HelferLevel)
+    if ($o['modus'] === 'admin_edit') {
+        AusgabeDienstDatalist($db_link, 'dl-suche-dienste', false);
+    } else {
+        echo '<datalist id="dl-suche-dienste">';
+        foreach (array_keys($dienstNamen) as $name) {
+            echo '<option value="' . htmlspecialchars((string)$name, ENT_QUOTES) . '">';
+        }
+        echo '</datalist>';
     }
-    echo '</datalist>';
 
     // Verstecktes Formular für Schicht-Löschen im Admin-Edit-Modus
     if ($o['modus'] === 'admin_edit') {
@@ -498,7 +524,8 @@ function GetAktuellenDienstKontext(): ?int
  */
 function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $LeiterHandy, $LeiterEmail,
                              $HelferLevel, $HelferLevelAnzeige, string $modus, string $praefix = '',
-                             int $tiefe = 0, bool $foldable = true, bool $aktiv = false): void
+                             int $tiefe = 0, bool $foldable = true, bool $aktiv = false,
+                             bool $aufklappen = false, bool $loeschen = false): void
 {
     $iAlleSchichtenCount         = AlleSchichtenCount($db_link, $HelferLevelAnzeige, $DienstID);
     $Belegung                    = AlleBelegteSchichtenCountMitSurplus($db_link, $HelferLevelAnzeige, $DienstID);
@@ -509,7 +536,9 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $padding = (20 * $tiefe) . 'px';
     $icon    = $foldable ? '<span>+</span> ' : '';
 
-    $headerId = $aktiv ? " data-aktiv='1'" : '';
+    // data-dienst: für JS (Löschen-Haken, Rückkehr von der Detailseite)
+    // data-aktiv: gerade bearbeitet -> aufklappen + anspringen; data-aufklappen: nur aufklappen (z.B. wenige Suchtreffer)
+    $headerId = " data-dienst='" . (int)$DienstID . "'" . ($aktiv ? " data-aktiv='1'" : '') . ($aufklappen ? " data-aufklappen='1'" : '');
     echo "<tr class='header'{$headerId}><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
     echo $praefix . htmlspecialchars($Was);
     echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
@@ -517,7 +546,8 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     echo "</th></tr>";
 
     $contentClass = $foldable ? "class='collapsible-content'" : '';
-    echo "<tr {$contentClass}><td id='DD{$DienstID}' colspan=5 style='background:lightblue; padding-left:{$padding}'>";
+    $editAttr = ($modus === 'admin_edit') ? _DienstEditAttribute($db_link, $DienstID) : '';
+    echo "<tr {$contentClass}><td id='DD{$DienstID}'{$editAttr} colspan=5 style='background:lightblue; padding-left:{$padding}'>";
     echo ($modus === 'admin_edit') ? '<div class="view">' : '';
     echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
     echo '<b>Ort:</b> ' . htmlspecialchars($Wo ?? '') . '<br>';
@@ -526,9 +556,11 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
         echo '<br><button type="button" title="Dienst bearbeiten" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998;</button>';
+        echo '&nbsp;&nbsp;<label title="Schaltet die Mülleimer-Buttons der Schichten dieses Dienstes frei">'
+           . '<input type="checkbox" style="width:unset" onclick="schichtenLoeschenUmschalten(' . (int)$DienstID . ', this.checked)"'
+           . ($loeschen ? ' checked' : '') . '> Schichten löschen</label>';
         echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">Formularseite</a>';
         echo '</div>';
-        _ZeigeDienstEditBlock($db_link, $DienstID);
     }
     echo "</td></tr>\n";
 }
@@ -536,7 +568,8 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
 /**
  * Rendert eine einzelne Schicht-Zeile.
  */
-function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $HelferLevel, bool $foldable = true): void
+function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $HelferLevel, bool $foldable = true,
+                            bool $loeschErlaubt = false): void
 {
     $Color = 'red';
     if ($zeile['Ist'] > 0)               { $Color = 'yellow'; }
@@ -563,12 +596,19 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
     $inline = ($modus === 'admin_edit') && isset($zeile['VonInput'], $zeile['BisInput']);
     $vc     = $inline ? " class='view'" : '';
     $rowId  = $inline ? " id='S" . (int)$SchichtID . "'" : '';
+    if ($inline) {   // Rohwerte für den per JS gebauten Editiermodus
+        [$dh, $dm] = DauerZerlegen($zeile['Dauer'] ?? null);
+        $rowId .= " data-von='" . htmlspecialchars($zeile['VonInput'], ENT_QUOTES) . "'"
+                . " data-bis='" . htmlspecialchars($zeile['BisInput'], ENT_QUOTES) . "'"
+                . " data-dh='{$dh}' data-dm='{$dm}' data-soll='" . (int)$zeile['Soll'] . "'";
+    }
     echo "<tr class='{$rowClass}'{$rowId} $rowstyle"
        . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='
        . (int)$SchichtID . '#Info\';">';
     echo "<td{$vc}>" . htmlspecialchars($zeile['Tag']) . '</td>';
-    echo "<td{$vc}>" . htmlspecialchars($Von) . '</td>';
-    echo "<td{$vc}>" . htmlspecialchars($Bis) . '</td>';
+    // Von - Bis (Dauer) in einer Zelle über zwei Spalten
+    $dauerText = isset($zeile['Dauer']) ? ' (' . DauerKurz($zeile['Dauer']) . ')' : '';
+    echo "<td{$vc} colspan='2'>" . htmlspecialchars(trim($Von) . ' - ' . trim($Bis) . $dauerText) . '</td>';
     echo "<td{$vc} bgcolor='{$Color}'>" . (int)$zeile['Ist'] . '/' . (int)$zeile['Soll'] . '</td>';
     $btnClick = $inline ? " onclick='event.stopPropagation()'" : '';
     echo "<td" . ($inline ? " class='view'" : '') . " style='width:10%;white-space:nowrap'{$btnClick}>";
@@ -583,15 +623,12 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
             echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
                . '<button type="button">&#9998;</button></a>';
         }
-        echo '&nbsp;<button type="button" title="Schicht löschen" '
-           . 'onclick="if(confirm(\'Schicht löschen?\')){'
-           . 'document.getElementById(\'deleteSchichtID\').value=' . (int)$SchichtID . ';'
-           . 'document.getElementById(\'deleteSchichtForm\').submit();}">&#128465;</button>';
+        // Mülleimer ist ausgegraut, bis beim Dienst "Schichten löschen" angehakt wird (statt Pop-up)
+        echo '&nbsp;<button type="button" class="btn-loeschen" title="Schicht löschen (vorher beim Dienst &quot;Schichten löschen&quot; anhaken)"'
+           . ($loeschErlaubt ? '' : ' disabled')
+           . ' onclick="loescheSchicht(' . (int)$SchichtID . ')">&#128465;</button>';
     }
     echo '</td>';
-    if ($inline) {
-        _ZeigeSchichtEditZelle($zeile);
-    }
     echo '</tr>' . "\n";
 }
 /**
@@ -772,7 +809,52 @@ function DauerEndzeit(string $von, string $dauer): string
 // Inline-Editiermodus (admin_edit)
 // ============================================================================
 
-/** Auswahllisten einmal pro Seite laden statt pro Zeile. */
+/** Dauer für die Listenanzeige: "1h", "1h 30min", "45min"; 0 wird bewusst als "0h" sichtbar. */
+function DauerKurz($dauer): string
+{
+    [$h, $m] = DauerZerlegen($dauer, 0, 0);
+    if ($h > 0 && $m > 0) { return "{$h}h {$m}min"; }
+    if ($h > 0)           { return "{$h}h"; }
+    return $m > 0 ? "{$m}min" : "0h";
+}
+
+/** Ab wie vielen Suchtreffern (Diensten) wird NICHT mehr automatisch aufgeklappt. */
+if (!defined('SUCHE_AUTOAUFKLAPPEN')) {
+    define('SUCHE_AUTOAUFKLAPPEN', 3);
+}
+
+/**
+ * <datalist> mit den Diensten -- gemeinsam für Legacy-Formulare und Übersichtssuche.
+ * $mitID: Werte als "ID - Name" (zum Auswählen eines Dienstes; ausgewertet wird die ID),
+ *         sonst nur der Name (Textfilter, stripos auf den Namen).
+ * $ausser: Dienst samt Nachfahren weglassen (Elterndienst-Auswahl, Zyklus-Schutz).
+ */
+function AusgabeDienstDatalist($db_link, string $id, bool $mitID = true, $ausser = null): void
+{
+    $erg = ($ausser !== null) ? GetDiensteAuswahlbar($db_link, $ausser) : GetDienste($db_link);
+    $namen = [];
+    echo '<datalist id="' . htmlspecialchars($id, ENT_QUOTES) . '">';
+    while ($z = mysqli_fetch_array($erg, MYSQLI_ASSOC)) {
+        if ($mitID) {
+            echo '<option value="' . (int)$z['DienstID'] . ' - ' . htmlspecialchars($z['Was'], ENT_QUOTES) . '">';
+        } elseif (!isset($namen[$z['Was']])) {
+            $namen[$z['Was']] = true;
+            echo '<option value="' . htmlspecialchars($z['Was'], ENT_QUOTES) . '">';
+        }
+    }
+    mysqli_free_result($erg);
+    echo '</datalist>';
+}
+
+// ============================================================================
+// Inline-Editiermodus (admin_edit)
+// ============================================================================
+// Die Editierfelder gibt es nicht im HTML: sie werden erst beim Klick auf den
+// Bleistift per JavaScript (helferdb.js) aus data-Attributen gebaut. Sonst
+// enthielte die Seite hunderte versteckte Felder -- das ist langsam und sprengt
+// das PHP-Limit max_input_vars (Standard 1000) beim Abschicken.
+
+/** Alle Dienste/Helfer/Level einmal pro Seite laden statt pro Zeile. */
 function _AdminEditDaten($db_link): array
 {
     static $daten = null;
@@ -782,76 +864,39 @@ function _AdminEditDaten($db_link): array
     while ($z = mysqli_fetch_assoc($erg)) { $daten['helfer'][(int)$z['HelferID']] = $z['Name']; }
     mysqli_free_result($erg);
     $erg = GetDienste($db_link);
-    while ($z = mysqli_fetch_assoc($erg)) { $daten['dienste'][(int)$z['DienstID']] = $z['Was']; }
+    while ($z = mysqli_fetch_assoc($erg)) { $daten['dienste'][(int)$z['DienstID']] = $z; }
     mysqli_free_result($erg);
     return $daten;
 }
 
-/** Gemeinsame <datalist>s für Leiter und Elterndienst (Format "ID - Name", ausgewertet wird nur die ID). */
+/** Gemeinsame <datalist>s für Leiter/Elterndienst, Suchvorschläge und die HelferLevel-Liste für das JS. */
 function _AdminEditDatalists($db_link): void
 {
     $d = _AdminEditDaten($db_link);
     echo '<datalist id="dl-eltern-dienste">';
-    foreach ($d['dienste'] as $id => $was) {
-        echo '<option value="' . $id . ' - ' . htmlspecialchars($was, ENT_QUOTES) . '">';
+    foreach ($d['dienste'] as $id => $dienst) {
+        echo '<option value="' . $id . ' - ' . htmlspecialchars($dienst['Was'], ENT_QUOTES) . '">';
     }
     echo '</datalist><datalist id="dl-helfer">';
     foreach ($d['helfer'] as $id => $name) {
         echo '<option value="' . $id . ' - ' . htmlspecialchars($name, ENT_QUOTES) . '">';
     }
     echo '</datalist>';
+    echo '<script>var DIENST_EDIT_LEVEL = ' . json_encode((object)$d['level'],
+         JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>';
 }
 
-/** Editier-Block eines Dienstes (steht in der Beschreibungszelle, zunächst versteckt). */
-function _ZeigeDienstEditBlock($db_link, $DienstID): void
+/** data-Attribute eines Dienstes für den Editiermodus (am <td id="DD…">). */
+function _DienstEditAttribute($db_link, $DienstID): string
 {
-    $d = GetEinzelDienst($db_link, $DienstID);
-    if (!$d) { return; }
-    $e   = _AdminEditDaten($db_link);
-    $h   = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES);
-    $n   = "edit_dienst[" . (int)$DienstID . "]";
-    $key = ' onkeydown="return enterSpeichern(event,this)"';
-
-    $leiterWert = $d['Leiter'] ? ((int)$d['Leiter'] . ' - ' . ($e['helfer'][(int)$d['Leiter']] ?? '?')) : '';
-    $elternWert = $d['ElternDienstID'] ? ((int)$d['ElternDienstID'] . ' - ' . ($e['dienste'][(int)$d['ElternDienstID']] ?? '?')) : '';
-
-    echo '<div class="edit" style="display:none">';
-    echo '<b>Was:</b><br><input type="text" name="' . $n . '[was]" value="' . $h($d['Was']) . '"' . $key . '><br>';
-    echo '<b>Ort:</b><br><input type="text" name="' . $n . '[wo]" value="' . $h($d['Wo']) . '"' . $key . '><br>';
-    echo '<b>Dienstinfo (Beschreibung):</b><br><textarea name="' . $n . '[info]" rows="4">' . $h($d['Info']) . '</textarea><br>';
-    echo '<b>Ansprechpartner:</b><br><input type="text" name="' . $n . '[leiter]" list="dl-helfer" value="' . $h($leiterWert) . '"' . $key . '><br>';
-    echo '<b>Elterndienst:</b> (leer = Top-Level)<br><input type="text" name="' . $n . '[eltern]" list="dl-eltern-dienste" '
-       . 'placeholder="ID oder Name eingeben" value="' . $h($elternWert) . '"' . $key . '><br>';
-    echo '<b>HelferLevel:</b><br><select name="' . $n . '[level]">';
-    foreach ($e['level'] as $lvl => $beschr) {
-        $sel = ((int)$lvl === (int)$d['HelferLevel']) ? ' selected' : '';
-        echo '<option value="' . (int)$lvl . '"' . $sel . '>' . $h($beschr) . '</option>';
-    }
-    echo '</select><br><br>';
-    echo '<button type="submit" title="Speichern" name="SpeicherDienst" value="' . (int)$DienstID . '" data-save>&#128190;</button> ';
-    echo '<button type="button" title="Abbrechen" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#10006;</button>';
-    echo '</div>';
-}
-
-/** Editier-Zelle einer Schicht: ersetzt im Editiermodus alle Anzeige-Zellen der Zeile. */
-function _ZeigeSchichtEditZelle(array $zeile): void
-{
-    $id = (int)$zeile['SchichtID'];
-    [$dh, $dm] = DauerZerlegen($zeile['Dauer'] ?? null);
-    $n    = "edit_schicht[{$id}]";
-    $key  = ' onkeydown="return enterSpeichern(event,this)"';
-    $calc = "berechneEnde('es_von_{$id}','es_dh_{$id}','es_dm_{$id}','es_bis_{$id}','es_auto_{$id}')";
-
-    echo "<td class='edit' colspan='5' style='display:none' onclick='event.stopPropagation()'>";
-    echo "Von <input type='datetime-local' id='es_von_{$id}' name='{$n}[von]' style='width:auto' value='"
-       . htmlspecialchars($zeile['VonInput']) . "' onchange=\"{$calc}\"{$key}> ";
-    echo "Dauer <input type='number' id='es_dh_{$id}' name='{$n}[dauer_h]' min='0' max='99' style='width:4.5em' value='{$dh}' onchange=\"{$calc}\"{$key}> Std. ";
-    echo "<input type='number' id='es_dm_{$id}' name='{$n}[dauer_m]' min='0' max='59' style='width:4.5em' value='{$dm}' onchange=\"{$calc}\"{$key}> Min. ";
-    echo "Bis <input type='datetime-local' id='es_bis_{$id}' name='{$n}[bis]' style='width:auto' value='"
-       . htmlspecialchars($zeile['BisInput']) . "'{$key}> ";
-    echo "<label><input type='checkbox' id='es_auto_{$id}' style='width:unset' checked> Ende aus Dauer</label> ";
-    echo "Soll <input type='number' name='{$n}[soll]' min='1' style='width:4.5em' value='" . (int)$zeile['Soll'] . "'{$key}> ";
-    echo "<button type='submit' title='Speichern' name='SpeicherSchicht' value='{$id}' data-save>&#128190;</button> ";
-    echo "<button type='button' title='Abbrechen' onclick='toggleEditSchicht({$id})'>&#10006;</button>";
-    echo "</td>";
+    $e = _AdminEditDaten($db_link);
+    $d = $e['dienste'][(int)$DienstID] ?? null;
+    if (!$d) { return ''; }
+    $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES);
+    $leiter = $d['Leiter'] ? ((int)$d['Leiter'] . ' - ' . ($e['helfer'][(int)$d['Leiter']] ?? '?')) : '';
+    $eltern = $d['ElternDienstID']
+        ? ((int)$d['ElternDienstID'] . ' - ' . ($e['dienste'][(int)$d['ElternDienstID']]['Was'] ?? '?')) : '';
+    return " data-was='" . $h($d['Was']) . "' data-wo='" . $h($d['Wo']) . "' data-info='" . $h($d['Info'])
+         . "' data-leiter='" . $h($leiter) . "' data-eltern='" . $h($eltern)
+         . "' data-level='" . (int)$d['HelferLevel'] . "'";
 }

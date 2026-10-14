@@ -71,7 +71,8 @@ if (isset($_POST['SpeicherDienst'])) {
 if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
     $delID = (int)$_POST['DeleteSchichtID'];
     // Dienst merken (die Schicht ist danach weg), damit er aufgeklappt bleibt
-    $_SESSION['DienstIdAktiv'] = GetDienstIDVonSchicht($db_link, $delID);
+    $_SESSION['DienstIdAktiv']       = GetDienstIDVonSchicht($db_link, $delID);
+    $_SESSION['DienstLoeschenAktiv'] = true;   // weitere Schichten desselben Dienstes direkt löschbar lassen
     if (!DeleteSchicht($db_link, $delID, false)) {
         $message .= "Schicht {$delID} konnte nicht gelöscht werden (noch Helfer eingetragen?)<br>";
     } else {

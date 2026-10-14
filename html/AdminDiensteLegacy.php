@@ -177,15 +177,7 @@ echo PageHeader($pagename);
              placeholder="Dienst suchen…"
              value="<?= $DienstID ? (int)$DienstID . ' - ' . htmlspecialchars($AlleDienstNamen[$DienstID] ?? '?') : '' ?>"
              onchange="submit()">
-      <datalist id="dienst-search-datalist">
-<?php
-$db_erg = GetDienste($db_link);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    echo "<option value='" . (int)$zeile['DienstID'] . " - " . htmlspecialchars($zeile['Was']) . "'>";
-}
-mysqli_free_result($db_erg);
-?>
-      </datalist>
+<?php AusgabeDienstDatalist($db_link, 'dienst-search-datalist'); ?>
     </th></tr>
   </table>
 
@@ -220,14 +212,7 @@ mysqli_free_result($db_erg);
       <input type="text" name="Dienst-Gruppe" list="dienste-datalist"
              placeholder="ID oder Name eingeben, leer = Top-Level"
              value="<?= $Gruppe ? (int)$Gruppe . ' - ' . htmlspecialchars($AlleDienstNamen[$Gruppe] ?? '?') : '' ?>">
-      <datalist id="dienste-datalist">
-<?php
-$db_erg = GetDiensteAuswahlbar($db_link, $DienstID);
-while ($zeile = mysqli_fetch_array($db_erg, MYSQLI_ASSOC)) {
-    echo "<option value='" . (int)$zeile['DienstID'] . " - " . htmlspecialchars($zeile['Was']) . "'>";
-}
-?>
-      </datalist>
+<?php AusgabeDienstDatalist($db_link, 'dienste-datalist', true, $DienstID); ?>
     </td></tr>
     <tr><td>HelferLevel</td></tr>
     <tr><td>
