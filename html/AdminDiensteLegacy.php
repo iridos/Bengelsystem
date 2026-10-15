@@ -132,6 +132,11 @@ if (isset($_GET['SchichtID'])) { $SchichtID = (int)$_GET['SchichtID']; }
 $_SESSION['DienstID']  = $DienstID;
 $_SESSION['SchichtID'] = $SchichtID;
 
+// Zurück-Ziel: gemerkte Übersichts-URL, der zuletzt gezeigte Dienst wird dort aufgeklappt
+// (Die URL stammt aus der Session, die AdminDienste.php selbst gesetzt hat.)
+$zurueckZiel = UrlMitParametern($_SESSION['AdminDiensteUrl'] ?? 'AdminDienste.php',
+                                $DienstID ? ['aktiv' => (int)$DienstID] : [], ['loeschen']);
+
 // ============================================================================
 // Aktuellen Dienst laden
 // ============================================================================
@@ -162,7 +167,7 @@ echo PageHeader($pagename);
 ?>
 <div style="width:100%">
 
-<button class="back" onclick="window.location.href='AdminDienste.php';"><b>&larrhk;</b></button>
+<a href="<?= htmlspecialchars($zurueckZiel) ?>"><button type="button" class="back"><b>&larrhk;</b></button></a>
 <?php if ($message) { echo '<div class="error">' . $message . '</div>'; } ?>
 
 <!-- ======================================================
@@ -326,7 +331,7 @@ unset($_SESSION['Schicht-AnschlussVon']);
 
 <hr>
 
-<button class="back" onclick="window.location.href='AdminDienste.php';"><b>&larrhk;</b></button>
+<a href="<?= htmlspecialchars($zurueckZiel) ?>"><button type="button" class="back"><b>&larrhk;</b></button></a>
 </div>
 </body>
 </html>

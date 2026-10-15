@@ -1502,3 +1502,13 @@ function GetDienstIDVonSchicht($db_link, $SchichtID)
     $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
     return $row ? (int)$row['DienstID'] : null;
 }
+
+/** Eine Schicht (SchichtID, DienstID, Von, Bis, Soll, Dauer) oder null. */
+function GetSchichtEinzeln($db_link, $SchichtID)
+{
+    $sql = "SELECT SchichtID, DienstID, Von, Bis, Soll, Dauer FROM Schicht WHERE SchichtID = ?";
+    $stmt = stmt_prepare_and_execute($db_link, $sql, "i", $SchichtID);
+    if (!$stmt) { return null; }
+    $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    return $row ?: null;
+}

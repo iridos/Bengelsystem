@@ -41,15 +41,10 @@ if (isset($_POST['SpeicherSchicht'])) {
     $log("SpeicherSchicht id={$id}, Felder " . (is_array($f) ? json_encode($f) : 'FEHLEN'));
     if ($id > 0 && is_array($f)) {
         $aktiverDienst = GetDienstIDVonSchicht($db_link, $id);   // Dienst bleibt aufgeklappt (auch bei Fehlermeldung)
-        $von   = str_replace('T', ' ', trim($f['von'] ?? ''));
-        $bis   = str_replace('T', ' ', trim($f['bis'] ?? ''));
-        $soll  = (int)($f['soll'] ?? 0);
-        $dauer = DauerAusFormular($f['dauer_h'] ?? 0, $f['dauer_m'] ?? 0);
-        if ($von === '' || $bis === '' || strtotime($bis) <= strtotime($von)) {
-            $message .= "Schicht {$id}: Das Ende muss nach dem Beginn liegen.<br>";
-        } elseif ($soll < 1) {
-            $message .= "Schicht {$id}: Die Anzahl (Soll) muss mindestens 1 sein.<br>";
-        } elseif (ChangeSchicht($db_link, $id, $von, $bis, $soll, $dauer) === false) {
+        $d = SchichtFormularLesen($f);
+        if ($d['fehler']) {
+            $message .= "Schicht {$id}: {$d['fehler']}<br>";
+        } elseif (ChangeSchicht($db_link, $id, $d['von'], $d['bis'], $d['soll'], $d['dauer']) === false) {
             $message .= "Schicht {$id} konnte nicht gespeichert werden.<br>";
         } else {
             $log("Schicht {$id} gespeichert, Redirect mit aktiv={$aktiverDienst}");
@@ -58,6 +53,53 @@ if (isset($_POST['SpeicherSchicht'])) {
         }
     } else {
         $message .= "Schicht {$id}: Die Formulardaten sind nicht beim Server angekommen, nichts gespeichert.<br>";
+    }
+}
+
+// Nachfolgeschicht (Plus im Editiermodus einer Schicht): neue Schicht direkt im Anschluss an die
+// gespeicherte Schicht, gleiche Dauer und Anzahl -- wie "Anschlussschicht vorbereiten" im Formular.
+// Die Werte kommen aus der DB, nicht aus den (evtl. gerade geänderten, ungespeicherten) Feldern.
+if (isset($_POST['NachfolgeSchicht'])) {
+    $id = (int)$_POST['NachfolgeSchicht'];
+    $s  = $id > 0 ? GetSchichtEinzeln($db_link, $id) : null;
+    $log("NachfolgeSchicht von {$id}: " . ($s ? json_encode($s) : 'nicht gefunden'));
+    if (!$s) {
+        $message .= "Schicht {$id} gibt es nicht.<br>";
+    } else {
+        $aktiverDienst = (int)$s['DienstID'];
+        $w = NachfolgeSchichtWerte($s['Von'], $s['Bis'], $s['Dauer'], $s['Soll']);
+        if (strtotime($w['bis']) <= strtotime($w['von'])) {
+            $message .= "Nachfolgeschicht von {$id}: Dauer ist 0 und lässt sich nicht aus Beginn/Ende ableiten.<br>";
+        } elseif (NewSchicht($db_link, $aktiverDienst, $w['von'], $w['bis'], $w['soll'], $w['dauer'], $HelferName) === false) {
+            $message .= "Die Nachfolgeschicht konnte nicht angelegt werden.<br>";
+        } else {
+            header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], ['aktiv' => $aktiverDienst], ['loeschen']));
+            exit;
+        }
+    }
+}
+
+// Neue Schicht (leere Zeile am Ende der Schichten eines Dienstes)
+if (isset($_POST['NeueSchicht'])) {
+    $dienst = (int)$_POST['NeueSchicht'];
+    $f      = $_POST['neue_schicht'][$dienst] ?? null;
+    $log("NeueSchicht Dienst={$dienst}, Felder " . (is_array($f) ? json_encode($f) : 'FEHLEN'));
+    if ($dienst > 0 && is_array($f)) {
+        $aktiverDienst = $dienst;   // Dienst bleibt aufgeklappt (auch bei Fehlermeldung)
+        $d = SchichtFormularLesen($f);
+        if (!GetEinzelDienst($db_link, $dienst)) {
+            $message .= "Dienst {$dienst} gibt es nicht.<br>";
+        } elseif ($d['fehler']) {
+            $message .= "Neue Schicht: {$d['fehler']}<br>";
+        } elseif (NewSchicht($db_link, $dienst, $d['von'], $d['bis'], $d['soll'], $d['dauer'], $HelferName) === false) {
+            $message .= "Die neue Schicht konnte nicht angelegt werden.<br>";
+        } else {
+            $log("Schicht für Dienst {$dienst} angelegt");
+            header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], ['aktiv' => $dienst], ['loeschen']));
+            exit;
+        }
+    } else {
+        $message .= "Neue Schicht: Die Formulardaten sind nicht beim Server angekommen, nichts gespeichert.<br>";
     }
 }
 
@@ -106,6 +148,12 @@ if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
 // Tabelle -- die Funktion leitet bei jedem POST um, in dem es vorkommt, und hätte so jedes Speichern
 // abgefangen, bevor ein Handler es sieht.
 HelferLevelAnzeigeCheckPOST($db_link, $HelferID, $AdminStatus, $AdminID);
+
+// Übersichts-URL (Suche, Zeitbereich, ...) für den Zurück-Pfeil der Formularseite merken. Kommt vom
+// Server selbst, nicht vom Client -- die Formularseite braucht dadurch keinen Parameter und keine Prüfung.
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $_SESSION['AdminDiensteUrl'] = UrlMitParametern($_SERVER['REQUEST_URI'], [], ['aktiv', 'loeschen']);
+}
 
 // Suchfilter aus GET/POST
 $suchfilter = trim($_GET['suche'] ?? $_POST['suche'] ?? '');

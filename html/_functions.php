@@ -414,6 +414,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
 
     $OldWas = '';
     $dienstNamen = [];   // fuer die Vorschlagsliste im Suchfeld
+    $letzteZeile = null; // letzte Schicht des aktuellen Dienstes (Vorgaben für die "Neue Schicht"-Zeile)
     foreach ($zeilen as $zeile) {
         $Was = $zeile['Was'];
         $dienstNamen[$Was] = true;
@@ -421,6 +422,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
             continue;
         }
         if ($Was !== $OldWas) {
+            if ($o['modus'] === 'admin_edit' && $letzteZeile !== null) { _ZeigeNeueSchichtZeile($letzteZeile); }
             $DienstID = $zeile['DienstID'];
             $praefix = '';
             //if ($o['modus'] === 'admin_edit') {
@@ -438,7 +440,9 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
             $OldWas = $Was;
         }
         _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel, true, $loeschenDienst);
+        $letzteZeile = $zeile;
     }
+    if ($o['modus'] === 'admin_edit' && $letzteZeile !== null) { _ZeigeNeueSchichtZeile($letzteZeile); }
     echo '</table>';
     echo '</form>';
 
@@ -552,11 +556,14 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     if (!empty($LeiterHandy)) { echo ', ' . htmlspecialchars($LeiterHandy); }
     if (!empty($LeiterEmail)) { echo ', ' . htmlspecialchars($LeiterEmail); }
     if ($modus === 'admin_edit') {
-        echo '<br><button type="button" title="Dienst bearbeiten" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998;</button>';
-        echo '&nbsp;&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">Formularseite</a>';
-        echo '<div align="right"><label title="Schaltet die Mülleimer-Buttons der Schichten dieses Dienstes frei">'
-           . 'Schichten löschen:<input type="checkbox" style="width:unset" onclick="schichtenLoeschenUmschalten(' . (int)$DienstID . ', this.checked)"'
-           . ($loeschen ? ' checked' : '') . '> </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>';
+        echo '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">';
+        echo '<span><button type="button" title="Dienst bearbeiten" onclick="toggleEditDienst(' . (int)$DienstID . ')">&#9998;</button>'
+           . '&nbsp;<a href="AdminDiensteLegacy.php?DienstID=' . (int)$DienstID . '">'
+           . '<button type="button" title="Formularseite: Dienst und Schichten im Formular bearbeiten, Schichten in Serie anlegen">&#128203;</button></a></span>';
+        echo '<label title="Schaltet die Mülleimer-Buttons der Schichten dieses Dienstes frei">'
+           . 'Schichten löschen: <input type="checkbox" class="chk-loeschen" style="width:unset" onclick="schichtenLoeschenUmschalten(' . (int)$DienstID . ', this.checked)"'
+           . ($loeschen ? ' checked' : '') . '>&nbsp;&nbsp;&nbsp;</label>';
+        echo '</div>';
         echo '</div>';
     }
     echo "</td></tr>\n";
@@ -599,9 +606,11 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
                 . " data-bis='" . htmlspecialchars($zeile['BisInput'], ENT_QUOTES) . "'"
                 . " data-dh='{$dh}' data-dm='{$dm}' data-soll='" . (int)$zeile['Soll'] . "'";
     }
-    echo "<tr class='{$rowClass}'{$rowId} $rowstyle"
-       . 'onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID='
-       . (int)$SchichtID . '#Info\';">';
+    // Im Admin-Modus liegen Buttons in der Zeile: Klick auf die ganze Zeile würde dort leicht aus
+    // Versehen auf die Detailseite führen, dafür gibt es dort den Auge-Button.
+    $zeilenKlick = ($modus === 'admin_edit') ? ''
+        : ' onclick="window.location.href=\'DetailsSchichten.php?InfoAlleSchichtID=' . (int)$SchichtID . '#Info\';"';
+    echo "<tr class='{$rowClass}'{$rowId} {$rowstyle}{$zeilenKlick}>";
     echo "<td{$vc}>" . htmlspecialchars($zeile['Tag']) . '</td>';
     // Von - Bis (Dauer) in einer Zelle über zwei Spalten
     $dauerText = isset($zeile['Dauer']) ? ' (' . DauerKurz($zeile['Dauer']) . ')' : '';
@@ -614,16 +623,17 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
         echo "&nbsp;&nbsp;<button name='minusschicht' value='" . (int)$SchichtID . "'>&ndash;</button>";
         echo $regtext;
     } elseif ($modus === 'admin_edit') {
+        echo '<a class="details-link" href="DetailsSchichten.php?InfoAlleSchichtID=' . (int)$SchichtID . '#Info">'
+           . '<button type="button" title="Details und eingetragene Helfer">&#128065;</button></a>&nbsp;';
         if ($inline) {
             echo '<button type="button" title="Schicht bearbeiten" onclick="toggleEditSchicht(' . (int)$SchichtID . ')">&#9998;</button>';
         } else {
             echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
                . '<button type="button">&#9998;</button></a>';
         }
-        // Mülleimer ist ausgegraut, bis beim Dienst "Schichten löschen" angehakt wird (statt Pop-up)
         // Mülleimer ist ausgegraut ("gesperrt"), bis beim Dienst "Schichten löschen" angehakt wird.
         // Bewusst kein disabled-Attribut: ein deaktivierter Button löst keinen Klick aus, wir wollen
-        // beim Klick auf den ausgegrauten Mülleimer aber einen Hinweis zeigen.
+        // beim Klick auf den ausgegrauten Mülleimer aber den Haken setzen (siehe loescheSchicht() in helferdb.js).
         echo '&nbsp;<button type="button" class="btn-loeschen' . ($loeschErlaubt ? '' : ' gesperrt') . '"'
            . ($loeschErlaubt ? '' : ' style="opacity:0.4"')
            . ' title="Schicht löschen" onclick="loescheSchicht(' . (int)$SchichtID . ', this)">&#128465;</button>';
@@ -913,4 +923,63 @@ function UrlMitParametern(string $uri, array $setzen = [], array $entfernen = []
     foreach ($entfernen as $k) { unset($q[$k]); }
     foreach ($setzen as $k => $v) { $q[$k] = $v; }
     return ($teile['path'] ?? '') . ($q ? '?' . http_build_query($q) : '');
+}
+
+/**
+ * Liest und prüft die Felder einer Inline-Schicht (edit_schicht[ID] bzw. neue_schicht[DienstID] aus $_POST).
+ * Gibt von/bis ("Y-m-d H:i"), soll, dauer ("HH:MM:00") und ggf. eine Fehlermeldung zurück.
+ */
+function SchichtFormularLesen(array $f): array
+{
+    $von   = str_replace('T', ' ', trim($f['von'] ?? ''));
+    $bis   = str_replace('T', ' ', trim($f['bis'] ?? ''));
+    $soll  = (int)($f['soll'] ?? 0);
+    $dauer = DauerAusFormular($f['dauer_h'] ?? 0, $f['dauer_m'] ?? 0);
+    $fehler = null;
+    if ($von === '' || $bis === '' || strtotime($bis) <= strtotime($von)) {
+        $fehler = 'Das Ende muss nach dem Beginn liegen.';
+    } elseif ($soll < 1) {
+        $fehler = 'Die Anzahl (Soll) muss mindestens 1 sein.';
+    }
+    return compact('von', 'bis', 'soll', 'dauer', 'fehler');
+}
+
+/**
+ * admin_edit: leere Zeile am Ende der Schichten eines Dienstes, Bleistift öffnet die Inline-Eingabe für eine
+ * neue Schicht. Vorgaben aus der letzten angezeigten Schicht: Beginn = deren Ende (Anschlussschicht),
+ * gleiche Dauer und Anzahl; "Ende aus Dauer" ist vorgewählt. Für Serien: speichern, Bleistift, speichern, ...
+ */
+/**
+ * Werte einer Anschlussschicht: Beginn = Ende der gegebenen Schicht, gleiche Dauer und Anzahl.
+ * Ist die gespeicherte Dauer 0/leer (Altdaten), wird sie aus Von/Bis der Schicht abgeleitet.
+ * Rückgabe: von, bis ("Y-m-d H:i:s"), dauer ("HH:MM:00"), soll.
+ */
+function NachfolgeSchichtWerte(string $von, string $bis, $dauer, $soll): array
+{
+    [$h, $m] = DauerZerlegen($dauer, 0, 0);
+    if ($h === 0 && $m === 0) {
+        $min = max(0, (int)round((strtotime($bis) - strtotime($von)) / 60));
+        $h = intdiv($min, 60);
+        $m = $min % 60;
+    }
+    $dauerNeu = DauerAusFormular($h, $m);
+    $vonNeu   = (new DateTime($bis))->format('Y-m-d H:i:s');
+    return ['von' => $vonNeu, 'bis' => DauerEndzeit($vonNeu, $dauerNeu), 'dauer' => $dauerNeu, 'soll' => max(1, (int)$soll)];
+}
+
+function _ZeigeNeueSchichtZeile(array $letzte): void
+{
+    if (!isset($letzte['VonInput'], $letzte['BisInput'])) { return; }   // ohne Rohwerte kein Inline-Editieren
+    $dienst = (int)$letzte['DienstID'];
+    // Vorbelegung: Anschluss an die letzte Schicht des Dienstes
+    $w = NachfolgeSchichtWerte($letzte['VonInput'], $letzte['BisInput'], $letzte['Dauer'] ?? null, $letzte['Soll']);
+    [$dh, $dm] = DauerZerlegen($w['dauer'], 0, 0);
+    echo "<tr class='collapsible-content' id='SN{$dienst}' data-neu='1' data-dienst='{$dienst}'"
+       . " data-von='" . substr(str_replace(' ', 'T', $w['von']), 0, 16) . "'"
+       . " data-bis='" . substr(str_replace(' ', 'T', $w['bis']), 0, 16) . "'"
+       . " data-dh='{$dh}' data-dm='{$dm}' data-soll='" . (int)$w['soll'] . "'>";
+    echo "<td class='view' colspan='4'><i>Neue Schicht anlegen</i></td>";
+    echo "<td class='view' style='width:10%;white-space:nowrap' onclick='event.stopPropagation()'>"
+       . "<button type='button' title='Neue Schicht anlegen' onclick=\"toggleEditSchicht('N{$dienst}')\">&#9998;</button></td>";
+    echo "</tr>\n";
 }

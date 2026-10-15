@@ -60,7 +60,10 @@ function toggleEditSchicht(id)
     var edit = zeile.find('td.edit');
     if (edit.length) { edit.remove(); zeile.find('.view').show(); return; }   // Abbrechen
 
-    var n = 'edit_schicht[' + id + ']';
+    // Zeile "Neue Schicht" (id = "N<DienstID>") schickt neue_schicht[DienstID], bestehende edit_schicht[SchichtID]
+    var neu = zeile.attr('data-neu') === '1';
+    var dienst = zeile.attr('data-dienst');
+    var n = neu ? 'neue_schicht[' + dienst + ']' : 'edit_schicht[' + id + ']';
     var rechne = function () {
         berechneEnde('es_von_' + id, 'es_dh_' + id, 'es_dm_' + id, 'es_bis_' + id, 'es_auto_' + id);
     };
@@ -80,11 +83,18 @@ function toggleEditSchicht(id)
         $('<input type="checkbox" checked>').attr('id', 'es_auto_' + id).css('width', 'unset'), ' Ende aus Dauer'));
     td.append(' Soll ',
         _feld('number', {name: n + '[soll]', min: 1, value: zeile.attr('data-soll') || 1}).css('width', '4em'), ' ');
-    td.append($('<button type="submit" title="Speichern" data-save>&#128190;</button>').attr({name: 'SpeicherSchicht', value: id}),
+    td.append($('<button type="submit" title="Speichern" data-save>&#128190;</button>')
+            .attr({name: neu ? 'NeueSchicht' : 'SpeicherSchicht', value: neu ? dienst : id}),
         ' ',
         $('<button type="button" title="Abbrechen">&#10006;</button>').on('click', function () { toggleEditSchicht(id); }));
+    if (!neu) {
+        // Nachfolgeschicht: direkt im Anschluss an diese (gespeicherte) Schicht, gleiche Dauer und Anzahl
+        td.append(' ', $('<button type="submit" title="Nachfolgeschicht anlegen (direkt im Anschluss, gleiche Dauer und Anzahl)">&#10133;</button>')
+            .attr({name: 'NachfolgeSchicht', value: id}));
+    }
     zeile.find('.view').hide();
     zeile.append(td);
+    if (neu) { rechne(); }   // Ende aus Beginn + Dauer vorbelegen
 }
 
 function toggleEditDienst(id)
@@ -135,7 +145,12 @@ function schichtenLoeschenUmschalten(dienstId, an)
 function loescheSchicht(id, btn)
 {
     if ($(btn).hasClass('gesperrt')) {
-        alert('Löschen ist gesperrt.\n\nZum Freischalten beim Dienst den Haken "Schichten löschen" setzen.');
+        // Klick auf den ausgegrauten Mülleimer: den Haken "Schichten löschen" des Dienstes kurz gelb hervorheben.
+        // Bewusst nicht selbst freischalten -- sonst klickt man den Mülleimer ein zweites Mal, um das "rückgängig"
+        // zu machen, und löscht damit.
+        var dienst = $(btn).closest('tr').prevAll('tr.header').first().attr('data-dienst');
+        var label = $('#DD' + dienst + ' input.chk-loeschen').closest('label').css('background', 'yellow');
+        setTimeout(function () { label.css('background', ''); }, 1500);
         return;
     }
     $('#deleteSchichtID').val(id);
@@ -199,8 +214,9 @@ function collapse_table_rows()
             }
 
             // Klick auf eine Schicht-Zeile (-> Detailseite): Dienst merken
-            $('table.collapsible').on('click', 'tr[onclick*="DetailsSchichten"]', function () {
-                var h = $(this).prevAll('tr.header').first();
+            // (ganze Zeile klickbar, oder im Admin-Modus der Auge-Button a.details-link)
+            $('table.collapsible').on('click', 'tr[onclick*="DetailsSchichten"], a.details-link', function () {
+                var h = $(this).closest('tr').prevAll('tr.header').first();
                 try {
                     sessionStorage.setItem('dienstAufgeklappt', JSON.stringify({
                         pfad: location.pathname + location.search, dienst: h.attr('data-dienst'), zeit: Date.now()
