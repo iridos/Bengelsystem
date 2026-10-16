@@ -558,19 +558,21 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $iueberBelegteSchichtenCount = $Belegung['ueberbelegt'];
     $ueberBelegteSchichten       = ($iueberBelegteSchichtenCount > 0) ? "[+{$iueberBelegteSchichtenCount}]" : '';
 
-    $padding = (20 * $tiefe) . 'px';
-    #$padding = 0;
-    $padchars="";
-    if($tiefe>0){
-        $padchars = "┗" . str_repeat("━",$tiefe*2-1) . ">";
-    }
-    $icon    = $foldable ? "<span>+</span> " : '';
+    // Einrückung nach Hierarchie-Tiefe. Reines Padding fällt bei Text in der ersten Spalte kaum auf, daher
+    // zusätzlich pro Ebene ein dunkler Führungsbalken im Einrückungsbereich -- als Hintergrundbild der Zelle,
+    // die Tabellenstruktur (gleiche Spalten für alle Zeilen, Auf-/Zuklappen per Geschwisterzeilen) bleibt unverändert.
+    $einrueckung = 20 * (int)$tiefe;
+    $padding     = ($tiefe > 0 ? $einrueckung + 6 : 0) . 'px';
+    $fuehrung    = ($tiefe > 0)
+        ? "background-image:repeating-linear-gradient(to right,rgba(0,0,0,.35) 0,rgba(0,0,0,.35) 18px,transparent 2px,transparent 20px);"
+          . "background-size:{$einrueckung}px 100%;background-repeat:no-repeat;"
+        : '';
+    $icon    = $foldable ? '<span>+</span> ' : '';
 
     // data-dienst: für JS (Löschen-Haken, Rückkehr von der Detailseite)
     // data-aktiv: gerade bearbeitet -> aufklappen + anspringen; data-aufklappen: nur aufklappen (z.B. wenige Suchtreffer)
     $headerId = " data-dienst='" . (int)$DienstID . "'" . ($aktiv ? " data-aktiv='1'" : '') . ($aufklappen ? " data-aufklappen='1'" : '');
-    echo "<tr class='header'{$headerId}>";
-    echo "<th colspan='5' style='width:100%; padding-left:0.{$padding}'>{$padchars}{$icon}";
+    echo "<tr class='header'{$headerId}><th colspan='5' style='width:100%; padding-left:{$padding};{$fuehrung}'>{$icon}";
     if ($modus === 'admin_edit') {   // Markierung für den Massen-Edit (Klick soll nicht auf-/zuklappen)
         echo '<input type="checkbox" class="chk-massen" name="massen[]" value="' . (int)$DienstID . '" style="width:unset"'
            . ' title="Für Massen-Edit markieren" onclick="event.stopPropagation()"> ';
@@ -582,7 +584,7 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
 
     $contentClass = $foldable ? "class='collapsible-content'" : '';
     $editAttr = ($modus === 'admin_edit') ? _DienstEditAttribute($db_link, $DienstID) : '';
-    echo "<tr {$contentClass}><td id='DD{$DienstID}'{$editAttr} colspan=5 style='background:lightblue; padding-left:{$padding}'>";
+    echo "<tr {$contentClass}><td id='DD{$DienstID}'{$editAttr} colspan=5 style='background:lightblue; padding-left:{$padding};{$fuehrung}'>";
     echo ($modus === 'admin_edit') ? '<div class="view">' : '';
     echo '<b>Beschreibung:</b> ' . htmlspecialchars($Info ?? '') . '<br><br>';
     echo '<b>Ort:</b> ' . htmlspecialchars($Wo ?? '') . '<br>';
@@ -1077,6 +1079,6 @@ function _ZeigeMassenEditLeiste(): void
        . '<option value="eltern">Elterndienst</option><option value="leiter">Ansprechpartner</option>'
        . '<option value="wo">Ort</option><option value="level">HelferLevel</option></select> ';
     echo '<span id="massen-wert"></span> ';
-    echo '<button type="submit" id="massen-anwenden" name="MassenEdit" value="1" title="Auf alle markierten Dienste anwenden" onclick="return massenPruefen()">Anwenden</button>';
+    echo '<button type="submit" id="massen-anwenden" name="MassenEdit" value="1" title="Auf alle markierten Dienste anwenden" onclick="return massenPruefen()">&#10004;</button>';
     echo '</td></tr></table>';
 }
