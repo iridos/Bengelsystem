@@ -23,6 +23,9 @@ if (isset($_POST['login'])) {
 
     if (empty($messages)) {
         HelferLogin($db_link, $HelferEmail, $HelferPasswort, 0);
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+
     } else {
         // Fehlermeldungen ausgeben:
         echo '<div class="error"><ul>';

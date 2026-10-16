@@ -276,6 +276,8 @@ function ZeigeHelferLevelTabelle($db_link, $HelferLevel, $HelferLevelAnzeige, $D
 //                                 die Funktion liest $_GET['suche'] selbst (Default: '')
 //   'aktiverDienst'       int     (admin_edit) Dienst, der aufgeklappt und angesprungen wird (Default: null)
 //   'loeschenAktiv'       bool    (admin_edit) Mülleimer des aktiven Dienstes freigeschaltet (Default: false)
+//   'alleDienste'         bool    (admin_edit) auch Dienste ohne Schicht im Zeitbereich zeigen, in Baum-Reihenfolge
+//                                 (Eltern vor Kindern, eingerückt) statt alphabetisch (Default: false)
 //   'HelferLevelAnzeige'  int     Angezeigtes HelferLevel (Default: aus Session)
 //   'HelferLevel'         int     HelferLevel des eingeloggten Helfers (Default: aus Session)
 //   'AdminStatus'         int     (Default: aus Session)
@@ -300,6 +302,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
         'suchfilter'           => '',
         'aktiverDienst'        => null,
         'loeschenAktiv'        => false,
+        'alleDienste'          => false,
         'HelferLevelAnzeige'   => $_SESSION['HelferLevelAnzeige'] ?? ($_SESSION['HelferLevel'] ?? 1),
         'HelferLevel'          => $_SESSION['HelferLevel'] ?? 1,
         'AdminStatus'          => $_SESSION['AdminStatus'] ?? 0,
@@ -382,7 +385,7 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
 
     // --- Hierarchie-Index aufbauen (optional) -------------------------------
     $hierarchieIndex = [];
-    if ($o['zeigeHierarchie']) {
+    if ($o['zeigeHierarchie'] || (($o['modus'] === 'admin_edit') && !empty($o['alleDienste']))) {
         $hierarchieIndex = _BaueHierarchieIndex($db_link);
     }
 
@@ -394,11 +397,18 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     $aktiverDienst = ($o['modus'] === 'admin_edit') ? $o['aktiverDienst'] : null;
 
     // --- Haupttabelle -------------------------------------------------------
+    if ($o['modus'] === 'admin_edit') {
+        _ZeigeMassenEditLeiste();
+    }
     echo '<table class="commontable collapsible">';
 
     // Alle Zeilen einlesen, damit die Suchtreffer vorab gezählt werden können
     $zeilen = mysqli_fetch_all($db_erg, MYSQLI_ASSOC);
     mysqli_free_result($db_erg);
+    $alleDienste = ($o['modus'] === 'admin_edit') && !empty($o['alleDienste']);
+    if ($alleDienste) {
+        $zeilen = _MitLeerenDiensten($db_link, $zeilen, $HelferLevelAnzeige);
+    }
     $treffer = [];
     if ($suchfilter !== '') {
         foreach ($zeilen as $z) {
@@ -412,7 +422,8 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
     $loeschenAktiv = ($o['modus'] === 'admin_edit') && !empty($o['loeschenAktiv']);
     $loeschenDienst = false;
 
-    $OldWas = '';
+    $edit = $alleDienste ? _AdminEditDaten($db_link) : null;
+    $OldGruppe = '';
     $dienstNamen = [];   // fuer die Vorschlagsliste im Suchfeld
     $letzteZeile = null; // letzte Schicht des aktuellen Dienstes (Vorgaben für die "Neue Schicht"-Zeile)
     foreach ($zeilen as $zeile) {
@@ -421,25 +432,38 @@ function ZeigeDiensteUndSchichten($db_link, $HelferID, array $opts = []): void
         if ($suchfilter !== '' && stripos($Was, $suchfilter) === false) {
             continue;
         }
-        if ($Was !== $OldWas) {
+        // Gruppiert wird nach Dienstname (alt) bzw. nach DienstID (alleDienste: gleichnamige Dienste bleiben getrennt)
+        $gruppe = $alleDienste ? 'D' . (int)$zeile['DienstID'] : $Was;
+        $leer   = !empty($zeile['leer']);   // Dienst ohne Schicht im Zeitbereich (nur alleDienste)
+        if ($gruppe !== $OldGruppe) {
             if ($o['modus'] === 'admin_edit' && $letzteZeile !== null) { _ZeigeNeueSchichtZeile($letzteZeile); }
             $DienstID = $zeile['DienstID'];
-            $praefix = '';
-            //if ($o['modus'] === 'admin_edit') {
-                $praefix .= "ID:$DienstID ";
-            //}
-            if ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
+            $praefix = "ID:$DienstID ";
+            $tiefe = 0;
+            if ($alleDienste) {
+                $tiefe = (int)($hierarchieIndex[$DienstID]['tiefe'] ?? 0);   // Einrückung statt "[n]"
+            } elseif ($o['zeigeHierarchie'] && isset($hierarchieIndex[$DienstID])) {
                 $praefix .= "[".$hierarchieIndex[$DienstID]['tiefe']."]  ";
             }
-            SchichtInfo($zeile['SchichtID'], $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+            if ($leer) {
+                $d = $edit['dienste'][(int)$DienstID] ?? [];
+                $InfoWo = $d['Wo'] ?? '';
+                $Info   = $d['Info'] ?? '';
+                $Leiter = !empty($d['Leiter']) ? ($edit['helfer'][(int)$d['Leiter']] ?? '') : '';
+                $LeiterHandy = $LeiterEmail = null;
+            } else {
+                SchichtInfo($zeile['SchichtID'], $InfoWas, $InfoWo, $InfoDauer, $Leiter, $LeiterHandy, $LeiterEmail, $Info);
+            }
             $dienstAktiv    = ($aktiverDienst !== null && (int)$aktiverDienst === (int)$DienstID);
             $loeschenDienst = $dienstAktiv && $loeschenAktiv;
             _ZeigeDienstHeader($db_link, $DienstID, $Was, $InfoWo, $Info, $Leiter, 
                        $LeiterHandy, $LeiterEmail,$HelferLevel, $HelferLevelAnzeige, $o['modus'], $praefix,
-                       0, true, $dienstAktiv, $suchAufklappen, $loeschenDienst);
-            $OldWas = $Was;
+                       $tiefe, true, $dienstAktiv, $suchAufklappen, $loeschenDienst);
+            $OldGruppe = $gruppe;
         }
-        _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel, true, $loeschenDienst);
+        if (!$leer) {
+            _ZeigeSchichtZeile($zeile, $o['modus'], $MeineDienste, $HelferLevel, true, $loeschenDienst);
+        }
         $letzteZeile = $zeile;
     }
     if ($o['modus'] === 'admin_edit' && $letzteZeile !== null) { _ZeigeNeueSchichtZeile($letzteZeile); }
@@ -535,12 +559,22 @@ function _ZeigeDienstHeader($db_link, $DienstID, $Was, $Wo, $Info, $Leiter, $Lei
     $ueberBelegteSchichten       = ($iueberBelegteSchichtenCount > 0) ? "[+{$iueberBelegteSchichtenCount}]" : '';
 
     $padding = (20 * $tiefe) . 'px';
-    $icon    = $foldable ? '<span>+</span> ' : '';
+    #$padding = 0;
+    $padchars="";
+    if($tiefe>0){
+        $padchars = "┗" . str_repeat("━",$tiefe*2-1) . ">";
+    }
+    $icon    = $foldable ? "<span>+</span> " : '';
 
     // data-dienst: für JS (Löschen-Haken, Rückkehr von der Detailseite)
     // data-aktiv: gerade bearbeitet -> aufklappen + anspringen; data-aufklappen: nur aufklappen (z.B. wenige Suchtreffer)
     $headerId = " data-dienst='" . (int)$DienstID . "'" . ($aktiv ? " data-aktiv='1'" : '') . ($aufklappen ? " data-aufklappen='1'" : '');
-    echo "<tr class='header'{$headerId}><th colspan='5' style='width:100%; padding-left:{$padding}'>{$icon}";
+    echo "<tr class='header'{$headerId}>";
+    echo "<th colspan='5' style='width:100%; padding-left:0.{$padding}'>{$padchars}{$icon}";
+    if ($modus === 'admin_edit') {   // Markierung für den Massen-Edit (Klick soll nicht auf-/zuklappen)
+        echo '<input type="checkbox" class="chk-massen" name="massen[]" value="' . (int)$DienstID . '" style="width:unset"'
+           . ' title="Für Massen-Edit markieren" onclick="event.stopPropagation()"> ';
+    }
     echo $praefix . htmlspecialchars($Was);
     echo " ({$iBelegteSchichtenCount}/{$iAlleSchichtenCount}) {$ueberBelegteSchichten}";
     echo " <!-- Abfrage {$HelferLevel}, {$DienstID} -->";
@@ -627,6 +661,9 @@ function _ZeigeSchichtZeile(array $zeile, string $modus, array $MeineDienste, $H
            . '<button type="button" title="Details und eingetragene Helfer">&#128065;</button></a>&nbsp;';
         if ($inline) {
             echo '<button type="button" title="Schicht bearbeiten" onclick="toggleEditSchicht(' . (int)$SchichtID . ')">&#9998;</button>';
+            // Nachfolgeschicht: direkt im Anschluss an diese (gespeicherte) Schicht, gleiche Dauer und Anzahl
+            echo '&nbsp;<button type="submit" name="NachfolgeSchicht" value="' . (int)$SchichtID . '"'
+               . ' title="Nachfolgeschicht anlegen (direkt im Anschluss, gleiche Dauer und Anzahl)">&#10133;</button>';
         } else {
             echo '<a href="AdminDiensteLegacy.php?SchichtID=' . (int)$SchichtID . '">'
                . '<button type="button">&#9998;</button></a>';
@@ -969,17 +1006,77 @@ function NachfolgeSchichtWerte(string $von, string $bis, $dauer, $soll): array
 
 function _ZeigeNeueSchichtZeile(array $letzte): void
 {
-    if (!isset($letzte['VonInput'], $letzte['BisInput'])) { return; }   // ohne Rohwerte kein Inline-Editieren
     $dienst = (int)$letzte['DienstID'];
-    // Vorbelegung: Anschluss an die letzte Schicht des Dienstes
-    $w = NachfolgeSchichtWerte($letzte['VonInput'], $letzte['BisInput'], $letzte['Dauer'] ?? null, $letzte['Soll']);
-    [$dh, $dm] = DauerZerlegen($w['dauer'], 0, 0);
+    if (!empty($letzte['leer'])) {
+        // Dienst ohne Schicht: nichts, woran man anschließen könnte -> Beginn leer, 1 h, 1 Person
+        $vonV = '';
+        $bisV = '';
+        $dh = 1; $dm = 0; $soll = 1;
+    } else {
+        if (!isset($letzte['VonInput'], $letzte['BisInput'])) { return; }   // ohne Rohwerte kein Inline-Editieren
+        // Vorbelegung: Anschluss an die letzte Schicht des Dienstes
+        $w = NachfolgeSchichtWerte($letzte['VonInput'], $letzte['BisInput'], $letzte['Dauer'] ?? null, $letzte['Soll']);
+        [$dh, $dm] = DauerZerlegen($w['dauer'], 0, 0);
+        $vonV = substr(str_replace(' ', 'T', $w['von']), 0, 16);
+        $bisV = substr(str_replace(' ', 'T', $w['bis']), 0, 16);
+        $soll = (int)$w['soll'];
+    }
     echo "<tr class='collapsible-content' id='SN{$dienst}' data-neu='1' data-dienst='{$dienst}'"
-       . " data-von='" . substr(str_replace(' ', 'T', $w['von']), 0, 16) . "'"
-       . " data-bis='" . substr(str_replace(' ', 'T', $w['bis']), 0, 16) . "'"
-       . " data-dh='{$dh}' data-dm='{$dm}' data-soll='" . (int)$w['soll'] . "'>";
+       . " data-von='{$vonV}' data-bis='{$bisV}'"
+       . " data-dh='{$dh}' data-dm='{$dm}' data-soll='{$soll}'>";
     echo "<td class='view' colspan='4'><i>Neue Schicht anlegen</i></td>";
     echo "<td class='view' style='width:10%;white-space:nowrap' onclick='event.stopPropagation()'>"
        . "<button type='button' title='Neue Schicht anlegen' onclick=\"toggleEditSchicht('N{$dienst}')\">&#9998;</button></td>";
     echo "</tr>\n";
+}
+
+/**
+ * Admin-Übersicht mit allen Diensten: ergänzt Dienste ohne Schicht im Zeitbereich (als Zeile mit 'leer' => true)
+ * und sortiert hierarchisch (Eltern direkt vor ihren Kindern, nach Namen), danach nach Beginn.
+ * Beachtet das angezeigte HelferLevel wie die Schicht-Abfrage.
+ */
+function _MitLeerenDiensten($db_link, array $zeilen, $HelferLevelAnzeige): array
+{
+    $e = _AdminEditDaten($db_link);
+    $vorhanden = [];
+    foreach ($zeilen as $z) { $vorhanden[(int)$z['DienstID']] = true; }
+    foreach ($e['dienste'] as $id => $d) {
+        if (isset($vorhanden[$id])) { continue; }
+        if ($HelferLevelAnzeige != -1 && (int)$d['HelferLevel'] !== (int)$HelferLevelAnzeige) { continue; }
+        $zeilen[] = ['SchichtID' => null, 'DienstID' => $id, 'Was' => $d['Was'], 'leer' => true];
+    }
+    // Sortierschlüssel: Namen von der Wurzel bis zum Dienst. Das Trennzeichen \x01 sortiert vor allen
+    // druckbaren Zeichen, Kinder stehen so direkt hinter ihrem Elterndienst.
+    $cache = [];
+    $schluessel = function (int $id) use ($e, &$cache) {
+        if (isset($cache[$id])) { return $cache[$id]; }
+        $namen = [];
+        $cur = $id;
+        for ($n = 0; $cur > 0 && isset($e['dienste'][$cur]) && $n < 12; $n++) {   // 12 = Schutz vor Zyklen
+            array_unshift($namen, $e['dienste'][$cur]['Was']);
+            $cur = (int)$e['dienste'][$cur]['ElternDienstID'];
+        }
+        return $cache[$id] = implode("\x01", $namen);
+    };
+    usort($zeilen, function ($a, $b) use ($schluessel) {
+        $c = strcasecmp($schluessel((int)$a['DienstID']), $schluessel((int)$b['DienstID']));
+        if ($c !== 0) { return $c; }
+        if ((int)$a['DienstID'] !== (int)$b['DienstID']) { return (int)$a['DienstID'] <=> (int)$b['DienstID']; }
+        return strcmp($a['VonInput'] ?? '', $b['VonInput'] ?? '');
+    });
+    return $zeilen;
+}
+
+/** Leiste für den Massen-Edit: ein Feld für alle markierten Dienste setzen (Logik in helferdb.js / AdminDienste.php). */
+function _ZeigeMassenEditLeiste(): void
+{
+    echo '<table class="commontable"><tr><td style="white-space:nowrap">';
+    echo '<label title="Alle angezeigten Dienste markieren"><input type="checkbox" style="width:unset" onclick="massenAlleUmschalten(this.checked)"> alle</label> ';
+    echo '<span id="massen-zaehler">0 markiert</span> &nbsp; Für die markierten Dienste setzen: ';
+    echo '<select id="massen-feld" name="massen_feld" style="width:auto" onchange="massenFeldWechsel()">'
+       . '<option value="eltern">Elterndienst</option><option value="leiter">Ansprechpartner</option>'
+       . '<option value="wo">Ort</option><option value="level">HelferLevel</option></select> ';
+    echo '<span id="massen-wert"></span> ';
+    echo '<button type="submit" id="massen-anwenden" name="MassenEdit" value="1" title="Auf alle markierten Dienste anwenden" onclick="return massenPruefen()">Anwenden</button>';
+    echo '</td></tr></table>';
 }

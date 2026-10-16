@@ -16,6 +16,9 @@ if ($AdminStatus != 1) {
 DatenbankAufDeutsch($db_link);
 
 $message = "";
+// Einmalige Rückmeldung nach einer Aktion mit Weiterleitung (Massen-Edit)
+$flash = $_SESSION['AdminFlash'] ?? null;
+unset($_SESSION['AdminFlash']);
 
 // ============================================================================
 // POST-Verarbeitung (nur was zur Übersichtstabelle selbst gehört -- Dienst-/
@@ -56,7 +59,7 @@ if (isset($_POST['SpeicherSchicht'])) {
     }
 }
 
-// Nachfolgeschicht (Plus im Editiermodus einer Schicht): neue Schicht direkt im Anschluss an die
+// Nachfolgeschicht (Plus-Button in der Schicht-Zeile): neue Schicht direkt im Anschluss an die
 // gespeicherte Schicht, gleiche Dauer und Anzahl -- wie "Anschlussschicht vorbereiten" im Formular.
 // Die Werte kommen aus der DB, nicht aus den (evtl. gerade geänderten, ungespeicherten) Feldern.
 if (isset($_POST['NachfolgeSchicht'])) {
@@ -143,6 +146,52 @@ if (isset($_POST['DeleteSchichtID']) && (int)$_POST['DeleteSchichtID'] > 0) {
     }
 }
 
+// Massen-Edit: ein Feld für alle markierten Dienste setzen (Elterndienst, Ansprechpartner, Ort, HelferLevel)
+if (isset($_POST['MassenEdit'])) {
+    $ids  = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['massen'] ?? [])), fn($i) => $i > 0)));
+    $feld = (string)($_POST['massen_feld'] ?? '');
+    $wert = trim((string)($_POST['massen_wert'] ?? ''));
+    $wertId = (int)$wert;   // "12 - Küche" -> 12
+    $log("MassenEdit feld={$feld} wert=" . $wert . " ids=" . implode(',', $ids));
+    if (!$ids) {
+        $message .= "Keine Dienste markiert.<br>";
+    } elseif (!in_array($feld, ['eltern', 'leiter', 'wo', 'level'], true)) {
+        $message .= "Unbekanntes Feld.<br>";
+    } elseif (in_array($feld, ['eltern', 'leiter'], true) && $wert !== '' && $wertId <= 0) {
+        // Freitext ohne Zahl würde sonst stillschweigend als "leer" (Top-Level/kein Ansprechpartner) gelten
+        $message .= "Bitte den Wert aus der Vorschlagsliste wählen (Format: ID - Name).<br>";
+    } elseif ($feld === 'eltern' && $wertId > 0 && !GetEinzelDienst($db_link, $wertId)) {
+        $message .= "Elterndienst {$wertId} gibt es nicht.<br>";
+    } else {
+        $ok = 0;
+        $fehler = [];
+        foreach ($ids as $id) {
+            $d = GetEinzelDienst($db_link, $id);
+            if (!$d) { $fehler[] = "ID {$id} (nicht gefunden)"; continue; }
+            $wo = $d['Wo']; $leiter = $d['Leiter']; $eltern = $d['ElternDienstID']; $level = $d['HelferLevel'];
+            switch ($feld) {
+                case 'eltern': $eltern = $wertId > 0 ? $wertId : null; break;
+                case 'leiter': $leiter = $wertId > 0 ? $wertId : null; break;
+                case 'wo':     $wo     = $wert; break;
+                case 'level':  $level  = (int)$wert; break;
+            }
+            // ChangeDienst bringt den Zyklus-Schutz mit (false = nicht geändert)
+            if (ChangeDienst($db_link, $id, $d['Was'], $wo, $d['Info'], $leiter, $eltern, $level) === false) {
+                $fehler[] = $d['Was'] . " (ID {$id})";
+            } else {
+                $ok++;
+            }
+        }
+        $text = "{$ok} Dienst(e) geändert.";
+        if ($fehler) {
+            $text .= " Nicht geändert: " . implode(', ', $fehler) . ($feld === 'eltern' ? " (Zyklus? Ein Dienst kann nicht unter sich selbst oder seinen Unterdiensten hängen.)" : '');
+        }
+        $_SESSION['AdminFlash'] = ['text' => $text, 'fehler' => (bool)$fehler];
+        header("Location: " . UrlMitParametern($_SERVER['REQUEST_URI'], [], ['aktiv', 'loeschen']));
+        exit;
+    }
+}
+
 // HelferLevel-Umschaltung: MUSS NACH den Speichern/Löschen-Handlern stehen. Das HelferLevel-Dropdown
 // liegt im selben <form> wie die Tabelle, "helfer-level-anzeige" steckt also in jedem POST aus dieser
 // Tabelle -- die Funktion leitet bei jedem POST um, in dem es vorkommt, und hätte so jedes Speichern
@@ -171,6 +220,10 @@ echo PageHeader($pagename);
   Formulare (Dienst/Schicht anlegen, mehrere Schichten in Serie)
 </button>
 <?php if ($message) { echo '<div class="error">' . $message . '</div>'; } ?>
+<?php if ($flash) {
+    echo $flash['fehler'] ? '<div class="error">' . htmlspecialchars($flash['text']) . '</div>'
+                          : '<div style="background:#dfd;border:1px solid #6c6;padding:4px">' . htmlspecialchars($flash['text']) . '</div>';
+} ?>
 <?php if ($debug) {
     echo '<pre style="background:#ffd;border:1px solid #cc0;padding:4px;font-size:smaller">DEBUG '
        . htmlspecialchars($_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']
@@ -197,6 +250,7 @@ ZeigeDiensteUndSchichten($db_link, $HelferID, [
     'suchfilter'          => $suchfilter,
     'aktiverDienst'       => $aktiverDienst,
     'loeschenAktiv'       => $loeschenAktiv,
+    'alleDienste'         => true,
     'HelferLevel'         => $HelferLevel,
     'AdminStatus'         => $AdminStatus,
     'AdminID'             => $AdminID,

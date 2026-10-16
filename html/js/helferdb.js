@@ -1,5 +1,12 @@
 $(document).ready(function() {
     console.log("jQuery is ready!");
+    // Massen-Edit (AdminDienste.php)
+    if ($('#massen-feld').length) {
+        massenFeldWechsel();
+        $(document).on('change', '.chk-massen', massenZaehlen);
+        // Enter auf einem fokussierten Haken würde sonst den ersten Submit-Button des Formulars auslösen ("Anwenden")
+        $(document).on('keydown', 'input[type=checkbox]', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); } });
+    }
 });
 
 function showPassword(id)
@@ -87,11 +94,6 @@ function toggleEditSchicht(id)
             .attr({name: neu ? 'NeueSchicht' : 'SpeicherSchicht', value: neu ? dienst : id}),
         ' ',
         $('<button type="button" title="Abbrechen">&#10006;</button>').on('click', function () { toggleEditSchicht(id); }));
-    if (!neu) {
-        // Nachfolgeschicht: direkt im Anschluss an diese (gespeicherte) Schicht, gleiche Dauer und Anzahl
-        td.append(' ', $('<button type="submit" title="Nachfolgeschicht anlegen (direkt im Anschluss, gleiche Dauer und Anzahl)">&#10133;</button>')
-            .attr({name: 'NachfolgeSchicht', value: id}));
-    }
     zeile.find('.view').hide();
     zeile.append(td);
     if (neu) { rechne(); }   // Ende aus Beginn + Dauer vorbelegen
@@ -155,6 +157,49 @@ function loescheSchicht(id, btn)
     }
     $('#deleteSchichtID').val(id);
     $('#deleteSchichtForm').submit();
+}
+
+// ---- Massen-Edit (AdminDienste.php) ------------------------------------------
+
+function massenZaehlen()
+{
+    $('#massen-zaehler').text($('.chk-massen:checked').length + ' markiert');
+}
+
+function massenAlleUmschalten(an)
+{
+    $('.chk-massen').prop('checked', an);
+    massenZaehlen();
+}
+
+// Eingabefeld passend zum gewählten Feld (Elterndienst/Ansprechpartner: Datalist mit "ID - Name")
+function massenFeldWechsel()
+{
+    var feld = $('#massen-feld').val();
+    var wert = $('#massen-wert').empty();
+    if (feld === 'level') {
+        var sel = $('<select name="massen_wert" style="width:auto"></select>');
+        $.each(DIENST_EDIT_LEVEL, function (lvl, beschr) { sel.append($('<option></option>').val(lvl).text(beschr)); });
+        wert.append(sel);
+        return;
+    }
+    var attrs = {name: 'massen_wert', style: 'width:25em'};
+    if (feld === 'eltern') { attrs.list = 'dl-eltern-dienste'; attrs.placeholder = 'Elterndienst wählen (ID - Name); leer = Top-Level'; }
+    if (feld === 'leiter') { attrs.list = 'dl-helfer'; attrs.placeholder = 'Ansprechpartner wählen (ID - Name); leer = keiner'; }
+    if (feld === 'wo')     { attrs.placeholder = 'Ort'; }
+    wert.append($('<input type="text">').attr(attrs).on('keydown', function (ev) {
+        if (ev.key === 'Enter') { ev.preventDefault(); $('#massen-anwenden').click(); }   // nicht den ersten Submit-Button des Formulars auslösen
+    }));
+}
+
+function massenPruefen()
+{
+    var n = $('.chk-massen:checked').length;
+    if (n === 0) { alert('Bitte zuerst Dienste markieren (Haken vor dem Dienstnamen).'); return false; }
+    if ($('#massen-feld').val() === 'eltern' && $('[name=massen_wert]').val() === '') {
+        return confirm(n + ' Dienst(e) auf Top-Level setzen (Elterndienst entfernen)?');
+    }
+    return true;
 }
 
 //// https://www.w3schools.com/howto/howto_js_collapsible.asp
